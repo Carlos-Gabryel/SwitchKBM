@@ -1,0 +1,73 @@
+<title>Ponte DualSense–Switch 2</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: single column bench-notebook — status strip, wiring diagram, phase log, next steps */
+:root {
+  --bg: #f3f5f6; --surface: #ffffff; --fg: #17212b; --muted: #5b6874; --line: #d5dce1;
+  --accent: #c2410c; --ok: #15803d; --wip: #b45309; --todo: #64748b;
+  --display: "Barlow", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #11171c; --surface: #18212a; --fg: #e4e9ed; --muted: #94a3af; --line: #2b3742;
+  --accent: #fb923c; --ok: #4ade80; --wip: #fbbf24; --todo: #94a3b8; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #11171c; --surface: #18212a; --fg: #e4e9ed; --muted: #94a3af; --line: #2b3742;
+  --accent: #fb923c; --ok: #4ade80; --wip: #fbbf24; --todo: #94a3b8; color-scheme: dark }
+body { background: var(--bg); color: var(--fg); font: 16px/1.55 var(--display); padding-inline: 16px; padding-block: 32px 48px; }
+main { max-width: 760px; margin: 0 auto; display: grid; gap: 36px; }
+h1 { font-size: 2rem; line-height: 1.15; margin: 0; text-wrap: balance; }
+h2 { font-size: 1.15rem; margin: 0 0 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+p { margin: 0; max-width: 65ch; }
+.eyebrow { font: 600 .8rem var(--mono); color: var(--accent); letter-spacing: .05em; }
+header { display: grid; gap: 10px; }
+.diagram { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 16px; }
+.diagram pre { margin: 0; font: .85rem/1.6 var(--mono); white-space: pre; }
+.phases { display: grid; gap: 0; border-top: 1px solid var(--line); }
+.phase { display: grid; grid-template-columns: 2.5rem 1fr auto; gap: 12px; align-items: baseline; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.phase > div { min-width: 0; }
+.num { font: 600 1rem var(--mono); color: var(--muted); }
+.phase b { display: block; }
+.phase span.d { color: var(--muted); font-size: .92rem; }
+.pill { font: 600 .72rem var(--mono); text-transform: uppercase; letter-spacing: .06em; padding: 2px 8px; border-radius: 99px; border: 1px solid currentColor; white-space: nowrap; }
+.ok { color: var(--ok); } .wip { color: var(--wip); } .todo { color: var(--todo); }
+ul { margin: 0; padding-left: 1.2rem; display: grid; gap: 6px; max-width: 65ch; }
+code { font: .88em var(--mono); }
+footer { color: var(--muted); font-size: .85rem; }
+</style>
+<main>
+  <header>
+    <div class="eyebrow">ATUALIZADO 2026-10-10</div>
+    <h1>Ponte DualSense–Switch 2</h1>
+    <p>Um controle de PS5 jogando no Switch 2 como se fosse um Pro Controller, com gyro e vibração, usando duas ESP32 clássicas.</p>
+  </header>
+
+  <section>
+    <h2>Arquitetura</h2>
+    <div class="diagram"><pre>DualSense ))) BT ))) [ESP32 #1 ds5-side]  ── UART2 921600 ──  [ESP32 #2 switch-side] ))) BT ))) Switch 2
+                     Bluepad32 (BTstack)   GPIO17 TX → GPIO16 RX   Pro Controller 057E:2009
+                                           GPIO16 RX ← GPIO17 TX   BTstack HID
+                                           GND ─────── GND
+frame: AA 55 | type | len | payload | crc8      type 0x01 STATE  ·  type 0x02 RUMBLE</pre></div>
+  </section>
+
+  <section>
+    <h2>Fases</h2>
+    <div class="phases">
+      <div class="phase"><span class="num">0</span><div><b>Switch 2 aceita a ESP32</b><span class="d">Bluedroid nunca recebeu conexão do console. Com BTstack (firmware de referência do JereDev) pareou e conectou.</span></div><span class="pill ok">ok</span></div>
+      <div class="phase"><span class="num">1</span><div><b>Ler o DualSense</b><span class="d">Bluepad32 + protocolo serial. Código parcial na branch <code>wip/fase1-ds5</code>, ainda sem build.</span></div><span class="pill wip">em andamento</span></div>
+      <div class="phase"><span class="num">2</span><div><b>Pro Controller completo em BTstack</b><span class="d">Relatório 0x30 com IMU real, HD Rumble de volta para o DualSense.</span></div><span class="pill todo">pendente</span></div>
+      <div class="phase"><span class="num">3</span><div><b>Integração e ajuste</b><span class="d">Latência, calibração do gyro, reconexão automática.</span></div><span class="pill todo">pendente</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Próximos passos</h2>
+    <ul>
+      <li>Terminar o <code>ds5-side</code>, gravar na placa e parear o DualSense (PS + Create).</li>
+      <li>Reescrever o <code>switch-side</code> em BTstack a partir do projeto do JereDev, sem PC control e NFC, com entrada pela serial.</li>
+    </ul>
+  </section>
+
+  <footer>Repositório local <code>C:\Gabry\switch-ds5-bridge</code> · ESP-IDF 5.4.4 · placa na COM5</footer>
+</main>
