@@ -5,3 +5,4 @@ managed_components/
 *.bin
 __pycache__/
 phase0-log.txt
+jd-log.txt

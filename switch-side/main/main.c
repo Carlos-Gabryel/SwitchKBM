@@ -237,9 +237,79 @@ static void report_task(void *arg)
 
 /* ---------- Bluetooth callbacks ---------- */
 
+/*
+ * Controller-initiated pairing. The Switch 2 never pages us while sitting in
+ * Change Grip/Order (verified: no ACL link ever came up), so, like a real
+ * controller after pressing SYNC, we inquire for the console ourselves and
+ * open the HID connection to it. Every device found is logged so we can see
+ * how the console advertises itself.
+ */
+#define ACTIVE_CONSOLE_SEARCH 0
+static bool s_connect_pending;
+
+static void start_discovery(void)
+{
+    /* Disabled: the Switch 2 never answered inquiries, and inquiring hides us. */
+    if (ACTIVE_CONSOLE_SEARCH && !s_connected && !s_connect_pending) {
+        esp_bt_gap_start_discovery(ESP_BT_INQ_MODE_GENERAL_INQUIRY, 5, 0); /* 5 x 1.28 s */
+    }
+}
+
+static void on_disc_result(esp_bt_gap_cb_param_t *param)
+{
+    char name[ESP_BT_GAP_MAX_BDNAME_LEN + 1] = "";
+    uint32_t cod = 0;
+    int8_t rssi = 0;
+
+    for (int i = 0; i < param->disc_res.num_prop; i++) {
+        esp_bt_gap_dev_prop_t *p = &param->disc_res.prop[i];
+        if (p->type == ESP_BT_GAP_DEV_PROP_COD) {
+            cod = *(uint32_t *)p->val;
+        } else if (p->type == ESP_BT_GAP_DEV_PROP_RSSI) {
+            rssi = *(int8_t *)p->val;
+        } else if (p->type == ESP_BT_GAP_DEV_PROP_BDNAME) {
+            int n = p->len < ESP_BT_GAP_MAX_BDNAME_LEN ? p->len : ESP_BT_GAP_MAX_BDNAME_LEN;
+            memcpy(name, p->val, n);
+            name[n] = '\0';
+        } else if (p->type == ESP_BT_GAP_DEV_PROP_EIR && name[0] == '\0') {
+            uint8_t len = 0;
+            uint8_t *d = esp_bt_gap_resolve_eir_data(p->val, ESP_BT_EIR_TYPE_CMPL_LOCAL_NAME, &len);
+            if (!d) {
+                d = esp_bt_gap_resolve_eir_data(p->val, ESP_BT_EIR_TYPE_SHORT_LOCAL_NAME, &len);
+            }
+            if (d) {
+                if (len > ESP_BT_GAP_MAX_BDNAME_LEN) {
+                    len = ESP_BT_GAP_MAX_BDNAME_LEN;
+                }
+                memcpy(name, d, len);
+                name[len] = '\0';
+            }
+        }
+    }
+
+    char a[18];
+    fmt_addr(param->disc_res.bda, a);
+    ESP_LOGI(TAG, "found %s cod:0x%06" PRIx32 " rssi:%d name:'%s'", a, cod, rssi, name);
+
+    if (!s_connect_pending && strstr(name, "Nintendo") != NULL) {
+        ESP_LOGI(TAG, "console found, connecting to %s", a);
+        s_connect_pending = true;
+        esp_bt_gap_cancel_discovery();
+        esp_bt_hid_device_connect(param->disc_res.bda);
+    }
+}
+
 static void gap_cb(esp_bt_gap_cb_event_t event, esp_bt_gap_cb_param_t *param)
 {
     switch (event) {
+    case ESP_BT_GAP_DISC_RES_EVT:
+        on_disc_result(param);
+        break;
+    case ESP_BT_GAP_DISC_STATE_CHANGED_EVT:
+        if (param->disc_st_chg.state == ESP_BT_GAP_DISCOVERY_STOPPED) {
+            start_discovery(); /* keep looking until the console shows up */
+        }
+        break;
     case ESP_BT_GAP_AUTH_CMPL_EVT:
         if (param->auth_cmpl.stat == ESP_BT_STATUS_SUCCESS) {
             char a[18];
@@ -262,8 +332,21 @@ static void gap_cb(esp_bt_gap_cb_event_t event, esp_bt_gap_cb_param_t *param)
     case ESP_BT_GAP_MODE_CHG_EVT:
         ESP_LOGI(TAG, "ACL power mode changed: %d", param->mode_chg.mode);
         break;
+    case ESP_BT_GAP_ACL_CONN_CMPL_STAT_EVT: {
+        char a[18];
+        fmt_addr(param->acl_conn_cmpl_stat.bda, a);
+        ESP_LOGI(TAG, "ACL link up from %s, status:%d handle:0x%x", a,
+                 param->acl_conn_cmpl_stat.stat, param->acl_conn_cmpl_stat.handle);
+        break;
+    }
+    case ESP_BT_GAP_ACL_DISCONN_CMPL_STAT_EVT: {
+        char a[18];
+        fmt_addr(param->acl_disconn_cmpl_stat.bda, a);
+        ESP_LOGI(TAG, "ACL link down %s, reason:0x%x", a, param->acl_disconn_cmpl_stat.reason);
+        break;
+    }
     default:
-        ESP_LOGD(TAG, "gap event %d", event);
+        ESP_LOGI(TAG, "gap event %d", event);
         break;
     }
 }
@@ -291,14 +374,15 @@ static void hidd_cb(esp_hidd_cb_event_t event, esp_hidd_cb_param_t *param)
     case ESP_HIDD_REGISTER_APP_EVT:
         if (param->register_app.status == ESP_HIDD_SUCCESS) {
             ESP_LOGI(TAG, "HID app registered; connectable + discoverable");
-            esp_bt_gap_set_scan_mode(ESP_BT_CONNECTABLE, ESP_BT_GENERAL_DISCOVERABLE);
+            esp_bt_gap_set_scan_mode(ESP_BT_CONNECTABLE, ESP_BT_LIMITED_DISCOVERABLE);
             if (s_have_host) {
                 char a[18];
                 fmt_addr(s_host, a);
                 ESP_LOGI(TAG, "reconnecting to stored host %s", a);
                 esp_bt_hid_device_connect(s_host);
             } else {
-                ESP_LOGI(TAG, "no stored host: waiting for pairing (Controllers > Change Grip/Order)");
+                ESP_LOGI(TAG, "no stored host: searching for the console (Controllers > Change Grip/Order)");
+                start_discovery();
             }
         } else {
             ESP_LOGE(TAG, "HID app register failed");
@@ -307,12 +391,16 @@ static void hidd_cb(esp_hidd_cb_event_t event, esp_hidd_cb_param_t *param)
     case ESP_HIDD_OPEN_EVT:
         if (param->open.status != ESP_HIDD_SUCCESS) {
             ESP_LOGE(TAG, "connection open failed (status %d)", param->open.status);
+            s_connect_pending = false;
+            start_discovery();
         } else if (param->open.conn_status == ESP_HIDD_CONN_STATE_CONNECTING) {
             ESP_LOGI(TAG, "connection state: connecting");
         } else if (param->open.conn_status == ESP_HIDD_CONN_STATE_CONNECTED) {
             char a[18];
             fmt_addr(param->open.bd_addr, a);
             ESP_LOGI(TAG, "connection state: CONNECTED to %s", a);
+            s_connect_pending = false;
+            esp_bt_gap_cancel_discovery();
             if (!s_have_host || memcmp(s_host, param->open.bd_addr, 6) != 0) {
                 memcpy(s_host, param->open.bd_addr, 6);
                 s_have_host = true;
@@ -335,10 +423,14 @@ static void hidd_cb(esp_hidd_cb_event_t event, esp_hidd_cb_param_t *param)
         } else {
             ESP_LOGI(TAG, "connection state: DISCONNECTED (status %d)", param->close.status);
             s_connected = false;
+            s_connect_pending = false;
+            if (!s_have_host) {
+                start_discovery();
+            }
             xSemaphoreTake(s_lock, portMAX_DELAY);
             s_state.input_mode = 0;
             xSemaphoreGive(s_lock);
-            esp_bt_gap_set_scan_mode(ESP_BT_CONNECTABLE, ESP_BT_GENERAL_DISCOVERABLE);
+            esp_bt_gap_set_scan_mode(ESP_BT_CONNECTABLE, ESP_BT_LIMITED_DISCOVERABLE);
         }
         break;
     case ESP_HIDD_SEND_REPORT_EVT:
@@ -365,7 +457,7 @@ static void hidd_cb(esp_hidd_cb_event_t event, esp_hidd_cb_param_t *param)
     case ESP_HIDD_VC_UNPLUG_EVT:
         ESP_LOGI(TAG, "virtual cable unplug (Switch forgot us)");
         s_connected = false;
-        esp_bt_gap_set_scan_mode(ESP_BT_CONNECTABLE, ESP_BT_GENERAL_DISCOVERABLE);
+        esp_bt_gap_set_scan_mode(ESP_BT_CONNECTABLE, ESP_BT_LIMITED_DISCOVERABLE);
         break;
     default:
         break;
@@ -424,7 +516,9 @@ void app_main(void)
     esp_bt_cod_t cod = {0};
     cod.major = ESP_BT_COD_MAJOR_DEV_PERIPHERAL;
     cod.minor = ESP_BT_COD_MINOR_PERIPHERAL_GAMEPAD;
-    esp_bt_gap_set_cod(cod, ESP_BT_SET_COD_MAJOR_MINOR);
+    /* Limited Discoverable bit: controllers in SYNC mode answer limited inquiries (LIAC). */
+    cod.service = ESP_BT_COD_SRVC_LMTD_DISCOVER;
+    esp_bt_gap_set_cod(cod, ESP_BT_SET_COD_ALL);
 
     esp_bt_sp_param_t sp_type = ESP_BT_SP_IOCAP_MODE;
     esp_bt_io_cap_t iocap = ESP_BT_IO_CAP_NONE; /* NoInputNoOutput */
