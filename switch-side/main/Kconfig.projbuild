@@ -1,0 +1,8 @@
+menu "Pro Controller Bridge"
+    config AUTOPRESS_TEST
+        bool "Auto-press buttons for pairing test (Phase 0)"
+        default y
+        help
+            3 s after input mode 0x30 is set: press L+R for 200 ms (registers the
+            controller in "Change Grip/Order"), then press A for 100 ms every 2 s.
+endmenu
