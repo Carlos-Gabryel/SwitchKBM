@@ -194,11 +194,16 @@ static void my_platform_on_init_complete(void) {
 
 static uni_error_t my_platform_on_device_discovered(bd_addr_t addr, const char *name, uint16_t cod, uint8_t rssi) {
     ARG_UNUSED(addr);
-    ARG_UNUSED(name);
     ARG_UNUSED(rssi);
     // So gamepads/joysticks.
     uint16_t minor = cod & UNI_BT_COD_MINOR_MASK;
     if ((minor & (UNI_BT_COD_MINOR_GAMEPAD | UNI_BT_COD_MINOR_JOYSTICK)) == 0) {
+        return UNI_ERROR_IGNORE_DEVICE;
+    }
+    // So DualSense: o switch-side (e Pro Controllers reais) tambem anunciam COD de gamepad
+    // e ocupariam a unica vaga. Sem nome no inquiry, deixa passar.
+    if (name != NULL && name[0] != '\0' && strstr(name, "DualSense") == NULL) {
+        ESP_LOGI(TAG, "Ignorando \"%s\" (nao e DualSense)", name);
         return UNI_ERROR_IGNORE_DEVICE;
     }
     return UNI_ERROR_SUCCESS;
