@@ -1,4 +1,5 @@
 #include "btstack_hid.h"
+#include "esp_timer.h"
 
 #if CONFIG_SWITCH_CONTROLLER_BTSTACK
 
@@ -41,9 +42,15 @@ static uint8_t last_subcmd;
 static bool stalled_logged;
 
 static btstack_timer_source_t input_timer;
+/* diagnostico: reports de entrada enviados ao Switch por segundo e maior intervalo */
+static int64_t tx_win_us, tx_last_us;
+static uint32_t tx_count, tx_gap_max_ms;
 static btstack_packet_callback_registration_t hci_callback;
 
 #define SWITCH_INPUT_INTERVAL_MS 24
+/* Depois do handshake (modo 0x30 ativo) envia mais rapido, como um Pro Controller real (~15 ms). */
+#define SWITCH_INPUT_INTERVAL_FAST_MS 15
+#define FAST_AFTER_REPORTS 200
 
 uint8_t g_esp32_mac[6];
 
@@ -130,6 +137,20 @@ static void send_next_report(void)
                      (unsigned long)input_report_count);
         }
         input_report_count++;
+        {
+            int64_t t_us = esp_timer_get_time();
+            if (tx_last_us != 0 && (uint32_t)((t_us - tx_last_us) / 1000) > tx_gap_max_ms) {
+                tx_gap_max_ms = (uint32_t)((t_us - tx_last_us) / 1000);
+            }
+            tx_last_us = t_us;
+            tx_count++;
+            if (t_us - tx_win_us >= 1000000) {
+                ESP_LOGI(TAG, "HID tx/s=%u gap_max=%ums", (unsigned)tx_count, (unsigned)tx_gap_max_ms);
+                tx_win_us = t_us;
+                tx_count = 0;
+                tx_gap_max_ms = 0;
+            }
+        }
 
     }
 }
@@ -154,7 +175,8 @@ static void input_timer_handler(btstack_timer_source_t *ts)
      * changes its cooldown to 24000 us. Match that cadence instead of
      * sending at 15 ms, which can race the early subcommand replies.
      */
-    btstack_run_loop_set_timer(ts, SWITCH_INPUT_INTERVAL_MS);
+    btstack_run_loop_set_timer(ts, (switch_proto_stream_enabled() && input_report_count >= FAST_AFTER_REPORTS)
+                                       ? SWITCH_INPUT_INTERVAL_FAST_MS : SWITCH_INPUT_INTERVAL_MS);
     btstack_run_loop_add_timer(ts);
 }
 
@@ -217,6 +239,13 @@ static void packet_handler(uint8_t packet_type, uint16_t channel,
     case HCI_EVENT_CONNECTION_COMPLETE:
         ESP_LOGI(TAG, "Conexion ACL recibida, estado=%u",
                  hci_event_connection_complete_get_status(packet));
+        return;
+    case HCI_EVENT_MODE_CHANGE:
+        /* 0 = active, 2 = sniff; intervalo em slots de 0,625 ms */
+        ESP_LOGI(TAG, "Modo do link: %u intervalo=%u slots (%.1f ms)",
+                 hci_event_mode_change_get_mode(packet),
+                 hci_event_mode_change_get_interval(packet),
+                 hci_event_mode_change_get_interval(packet) * 0.625);
         return;
     case HCI_EVENT_PIN_CODE_REQUEST:
         ESP_LOGI(TAG, "Solicitud PIN recibida");

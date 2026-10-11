@@ -230,6 +230,8 @@ static void rx_task(void *arg)
     uint8_t buf[128];
     int64_t last_log = esp_timer_get_time();
     uint32_t last_ok = 0;
+    int64_t last_frame_us = 0;
+    uint32_t gap_max_ms = 0;
 
     for (;;) {
         int n = uart_read_bytes(BRIDGE_UART, buf, sizeof(buf), pdMS_TO_TICKS(20));
@@ -241,6 +243,10 @@ static void rx_task(void *arg)
             imu_sample_t imu;
             convert_imu(&s, &imu);
             int64_t t = esp_timer_get_time();
+            if (last_frame_us != 0 && (uint32_t)((t - last_frame_us) / 1000) > gap_max_ms) {
+                gap_max_ms = (uint32_t)((t - last_frame_us) / 1000);
+            }
+            last_frame_us = t;
             portENTER_CRITICAL(&s_lock);
             s_state = s;
             s_state_us = t;
@@ -262,11 +268,12 @@ static void rx_task(void *arg)
             s = s_state;
             have = s_have_state;
             portEXIT_CRITICAL(&s_lock);
-            ESP_LOGI(TAG, "ok/s=%u crc_err=%u conn=%d btn=%08lx L=%d,%d R=%d,%d rumble_tx=%u",
+            ESP_LOGI(TAG, "ok/s=%u crc_err=%u conn=%d btn=%08lx L=%d,%d R=%d,%d rumble_tx=%u gap_max=%ums",
                      (unsigned)(parser.frames_ok - last_ok), (unsigned)parser.crc_errors,
                      (have && (s.flags & BRIDGE_FLAG_CONNECTED)) ? 1 : 0,
                      (unsigned long)s.buttons, s.lx, s.ly, s.rx, s.ry,
-                     (unsigned)s_rumble_sent);
+                     (unsigned)s_rumble_sent, (unsigned)gap_max_ms);
+            gap_max_ms = 0;
             last_ok = parser.frames_ok;
             last_log = now;
         }

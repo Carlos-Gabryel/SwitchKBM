@@ -23,3 +23,11 @@ Gravar (ambiente ESP-IDF ativado por `tools\idf-env.ps1`):
 ```
 
 Mapeamento de botoes por posicao: cruz -> B, bolinha -> A, quadrado -> Y, triangulo -> X, Create -> -, Options -> +, PS -> Home, Mute -> Capture. L1/R1 -> L/R, L2/R2 -> ZL/ZR, L3/R3 -> cliques dos sticks, direcional -> direcional. Giroscopio/acelerometro e rumble tambem sao repassados.
+
+## Teclado e mouse (PC)
+
+Da para jogar usando teclado e mouse do PC (mouse vira giroscopio) pela serial da Placa-MicroB. Veja `tools/kbm/README.md`.
+
+## Modos de gatilho
+
+O combo PS+R2 no DualSense alterna normal -> stick -> pwm. A lightbar indica o modo: azul (normal), verde (stick), vermelha (pwm). O PS sozinho continua funcionando como Home (enviado ao soltar; segurar 0,5 s = Home longo).

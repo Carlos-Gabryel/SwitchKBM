@@ -82,9 +82,16 @@ static const uint8_t spi_stick_cal_left[9] = {
     0x00, 0x07, 0x70,
 };
 
+/* Atencao: no stick DIREITO a ordem e' outra (dekuNukem spi_flash_notes):
+ * centro, depois min (abaixo do centro), depois max (acima do centro).
+ * Com a ordem do esquerdo o Switch lia centro=0x700 e o stick parado em 0x800
+ * aparecia ~14% para cima/direita (mira subindo sozinha). */
 static const uint8_t spi_stick_cal_right[9] = {
-    0x00, 0x07, 0x70,
+    /* CenterX=0x800, CenterY=0x800 */
     0x00, 0x08, 0x80,
+    /* MinX=0x700, MinY=0x700 */
+    0x00, 0x07, 0x70,
+    /* MaxX=0x700, MaxY=0x700 */
     0x00, 0x07, 0x70,
 };
 

@@ -20,6 +20,7 @@ extern "C" {
 
 #define BRIDGE_TYPE_STATE 0x01  /* ds5 -> switch */
 #define BRIDGE_TYPE_RUMBLE 0x02 /* switch -> ds5 */
+#define BRIDGE_TYPE_STATUS 0x03 /* ds5-side -> PC (UART0) */
 
 // bridge_state_t.flags
 #define BRIDGE_FLAG_CONNECTED (1u << 0)
@@ -77,6 +78,13 @@ typedef struct __attribute__((packed)) {
     uint16_t duration_ms;
 } bridge_rumble_t;
 
+// STATUS (ds5-side -> PC pela UART0): modo de gatilho atual e se o DualSense esta conectado.
+typedef struct __attribute__((packed)) {
+    uint8_t trig_mode; // 0 normal, 1 stick, 2 pwm
+    uint8_t ds5_connected;
+} bridge_status_t;
+
+_Static_assert(sizeof(bridge_status_t) == 2, "bridge_status_t size");
 _Static_assert(sizeof(bridge_state_t) == 33, "bridge_state_t size");
 _Static_assert(sizeof(bridge_rumble_t) == 4, "bridge_rumble_t size");
 _Static_assert(sizeof(bridge_state_t) <= BRIDGE_MAX_PAYLOAD, "payload max");

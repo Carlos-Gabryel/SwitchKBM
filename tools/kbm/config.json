@@ -1,0 +1,19 @@
+{
+  "deg_per_count": 0.05,
+  "gyro_sensitivity": 1.0,
+  "invert_yaw": true,
+  "invert_pitch": true,
+  "aim_mode": "gyro",
+  "stick_gain": 0.6,
+  "stick_deadzone_comp": 60,
+  "walk_scale": 0.5,
+  "wheel_pulse_ms": 80,
+  "binds": {
+    "space": "A", "lctrl": "B", "c": "B", "r": "X", "e": "X", "f": "X",
+    "q": "L1", "g": "R1", "lshift": "L3", "v": "R3", "tab": "SELECT",
+    "esc": "START", "home": "SYSTEM", "p": "CAPTURE",
+    "1": "DPAD_UP", "2": "DPAD_RIGHT", "3": "DPAD_DOWN", "4": "DPAD_LEFT",
+    "lmb": "R2", "rmb": "L2", "mmb": "R3", "x1": "DPAD_LEFT", "x2": "DPAD_RIGHT",
+    "wheel_up": "Y", "wheel_down": "Y"
+  }
+}
