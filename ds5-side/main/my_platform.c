@@ -172,8 +172,8 @@ static void bridge_uart_start(void) {
     ESP_ERROR_CHECK(uart_param_config(BRIDGE_UART, &cfg));
     ESP_ERROR_CHECK(uart_set_pin(BRIDGE_UART, BRIDGE_UART_TX, BRIDGE_UART_RX, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
     s_tx_mutex = xSemaphoreCreateMutex();
-    xTaskCreate(rumble_rx_task, "rumble_rx", 3072, NULL, 5, NULL);
-    xTaskCreate(status_task, "status", 3072, NULL, 3, NULL);
+    xTaskCreate(rumble_rx_task, "rumble_rx", 4096, NULL, 5, NULL);
+    xTaskCreate(status_task, "status", 6144, NULL, 3, NULL);
     ESP_LOGI(TAG, "UART%d pronta: TX=%d RX=%d %d 8N1", BRIDGE_UART, BRIDGE_UART_TX, BRIDGE_UART_RX,
              BRIDGE_UART_BAUD);
 }

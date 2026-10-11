@@ -287,6 +287,6 @@ void bridge_rx_init(void)
     ESP_ERROR_CHECK(uart_param_config(BRIDGE_UART, &cfg));
     ESP_ERROR_CHECK(uart_set_pin(BRIDGE_UART, BRIDGE_TX_PIN, BRIDGE_RX_PIN,
                                  UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
-    xTaskCreate(rx_task, "bridge_rx", 3072, NULL, 5, NULL);
+    xTaskCreate(rx_task, "bridge_rx", 6144, NULL, 5, NULL);
     ESP_LOGI(TAG, "UART2 pronta (TX=%d RX=%d %d baud)", BRIDGE_TX_PIN, BRIDGE_RX_PIN, BRIDGE_BAUD);
 }
