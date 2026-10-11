@@ -1,4 +1,5 @@
-// Plataforma custom do Bluepad32: DualSense -> frames STATE na UART2; RUMBLE da UART2 -> DualSense.
+// Plataforma custom do Bluepad32: DualSense (+ estado do PC pela UART0) -> frames STATE na UART2;
+// RUMBLE da UART2 -> DualSense.
 #include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
@@ -13,6 +14,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
 #include "freertos/task.h"
+#include "input_modes.h"
 
 static const char *TAG = "DS5";
 
@@ -21,8 +23,11 @@ static const char *TAG = "DS5";
 #define BRIDGE_UART_RX 16
 #define BRIDGE_UART_BAUD 921600
 
-#define MIN_STATE_INTERVAL_US 1000 // limite de 1 kHz
-#define HEARTBEAT_MS 50
+#define PC_UART UART_NUM_0
+#define PC_TIMEOUT_MS 100
+#define TX_PERIOD_MS 2
+#define IDLE_PERIOD_MS 50
+#define STATUS_PERIOD_MS 500
 #define SELFTEST_HOLD_MS 1000
 
 // ---- estado compartilhado ------------------------------------------------
@@ -33,10 +38,14 @@ static volatile uint32_t s_rumble_rx;
 static volatile bool s_connected;
 static portMUX_TYPE s_mux = portMUX_INITIALIZER_UNLOCKED;
 static bridge_state_t s_last_state; // para o log de 1 Hz (protegido por s_mux)
+static bridge_state_t s_ds5_state;  // ultimo estado do DualSense (protegido por s_mux)
+static bridge_state_t s_pc_state;   // ultimo estado vindo do PC (protegido por s_mux)
+static int64_t s_pc_rx_ms;          // quando o PC enviou por ultimo (protegido por s_mux)
+static volatile bool s_pc_present;  // PC capturado (para o log)
+static volatile trig_mode_t s_mode; // modo atual (escrito so na tx_task)
 
 // So acessados na BT thread (callbacks do Bluepad32 / main thread do BTstack)
 static uni_hid_device_t *s_dev;
-static int64_t s_last_tx_us;
 static int64_t s_l1r1_since_ms;
 static bool s_selftest_fired;
 
@@ -126,33 +135,171 @@ static void rumble_rx_task(void *arg) {
     }
 }
 
-// ---- heartbeat + log de 1 Hz ----------------------------------------------------
+// ---- lightbar do modo: marshalling para a BT thread -----------------------------------
+static bool s_light_pending;
+static btstack_context_callback_registration_t s_light_reg;
+
+static void mode_color(trig_mode_t mode, uint8_t *r, uint8_t *g, uint8_t *b) {
+    *r = 0;
+    *g = 0;
+    *b = 0;
+    switch (mode) {
+    case TRIG_MODE_STICK:
+        *g = 255;
+        break;
+    case TRIG_MODE_PWM:
+        *r = 255;
+        break;
+    default:
+        *b = 255;
+        break;
+    }
+}
+
+static const char *mode_name(trig_mode_t mode) {
+    switch (mode) {
+    case TRIG_MODE_STICK:
+        return "STICK";
+    case TRIG_MODE_PWM:
+        return "PWM";
+    default:
+        return "NORMAL";
+    }
+}
+
+// Deve rodar na BT thread.
+static void set_mode_color(uni_hid_device_t *d) {
+    if (d == NULL || d->report_parser.set_lightbar_color == NULL) {
+        return;
+    }
+    uint8_t r, g, b;
+    mode_color(s_mode, &r, &g, &b);
+    d->report_parser.set_lightbar_color(d, r, g, b);
+}
+
+static void light_on_bt_thread(void *ctx) {
+    (void)ctx;
+    portENTER_CRITICAL(&s_mux);
+    s_light_pending = false;
+    portEXIT_CRITICAL(&s_mux);
+    set_mode_color(s_dev);
+}
+
+static void request_mode_color(void) {
+    bool schedule = false;
+    portENTER_CRITICAL(&s_mux);
+    if (!s_light_pending) {
+        s_light_pending = true;
+        schedule = true;
+    }
+    portEXIT_CRITICAL(&s_mux);
+    if (schedule) {
+        s_light_reg.callback = light_on_bt_thread;
+        s_light_reg.context = NULL;
+        btstack_run_loop_execute_on_main_thread(&s_light_reg);
+    }
+}
+
+// ---- estado vindo do PC (UART0) -----------------------------------------------------------
+static void pc_rx_task(void *arg) {
+    (void)arg;
+    bridge_parser_t parser;
+    bridge_parser_init(&parser);
+    uint8_t buf[64];
+    for (;;) {
+        int n = uart_read_bytes(PC_UART, buf, sizeof(buf), pdMS_TO_TICKS(20));
+        for (int i = 0; i < n; i++) {
+            if (!bridge_parser_feed(&parser, buf[i])) {
+                continue;
+            }
+            if (parser.type != BRIDGE_TYPE_STATE || parser.len != sizeof(bridge_state_t)) {
+                continue;
+            }
+            bridge_state_t st;
+            memcpy(&st, parser.payload, sizeof(st));
+            int64_t now_ms = esp_timer_get_time() / 1000;
+            portENTER_CRITICAL(&s_mux);
+            s_pc_state = st;
+            s_pc_rx_ms = now_ms;
+            portEXIT_CRITICAL(&s_mux);
+        }
+    }
+}
+
+static void send_status(trig_mode_t mode, bool ds5_connected) {
+    bridge_status_t status = {.trig_mode = (uint8_t)mode, .ds5_connected = ds5_connected ? 1 : 0};
+    uint8_t buf[BRIDGE_MAX_PAYLOAD + BRIDGE_FRAME_OVERHEAD];
+    size_t n = bridge_encode(BRIDGE_TYPE_STATUS, &status, sizeof(status), buf, sizeof(buf));
+    if (n > 0) {
+        uart_write_bytes(PC_UART, buf, n);
+    }
+}
+
+// ---- tx: mescla DualSense + PC, aplica modos e envia ao switch-side a cada 2 ms ---------------
+static void tx_task(void *arg) {
+    (void)arg;
+    input_modes_t modes;
+    input_modes_init(&modes);
+    TickType_t last_wake = xTaskGetTickCount();
+    uint32_t last_idle_ms = 0;
+    uint32_t last_status_ms = 0;
+    bool first_status = true;
+    for (;;) {
+        vTaskDelayUntil(&last_wake, pdMS_TO_TICKS(TX_PERIOD_MS));
+        int64_t now64 = esp_timer_get_time() / 1000;
+        uint32_t now_ms = (uint32_t)now64;
+
+        bool ds5_ok = s_connected;
+        bridge_state_t ds5, pc, merged;
+        int64_t pc_rx;
+        portENTER_CRITICAL(&s_mux);
+        ds5 = s_ds5_state;
+        pc = s_pc_state;
+        pc_rx = s_pc_rx_ms;
+        portEXIT_CRITICAL(&s_mux);
+        bool pc_ok = (pc_rx != 0) && (now64 - pc_rx < PC_TIMEOUT_MS) && (pc.flags & BRIDGE_FLAG_CONNECTED);
+        s_pc_present = pc_ok;
+
+        input_merge(ds5_ok ? &ds5 : NULL, pc_ok ? &pc : NULL, &merged);
+        bool mode_changed = input_modes_process(&modes, &merged, now_ms);
+        merged.timestamp_ms = (uint16_t)now_ms;
+        s_mode = input_modes_get(&modes);
+        if (mode_changed) {
+            ESP_LOGI(TAG, "Modo de gatilho: %s", mode_name(s_mode));
+            request_mode_color();
+        }
+
+        if (ds5_ok || pc_ok) {
+            send_state(&merged);
+        } else if ((uint32_t)(now_ms - last_idle_ms) >= IDLE_PERIOD_MS) {
+            last_idle_ms = now_ms;
+            send_state(&merged);
+        }
+
+        if (mode_changed || first_status || (uint32_t)(now_ms - last_status_ms) >= STATUS_PERIOD_MS) {
+            first_status = false;
+            last_status_ms = now_ms;
+            send_status(s_mode, ds5_ok);
+        }
+    }
+}
+
+// ---- log de 1 Hz ----------------------------------------------------
 static void status_task(void *arg) {
     (void)arg;
     uint32_t last_sent = 0;
-    int ms_since_log = 0;
     for (;;) {
-        vTaskDelay(pdMS_TO_TICKS(HEARTBEAT_MS));
-        if (!s_connected) {
-            bridge_state_t hb;
-            memset(&hb, 0, sizeof(hb));
-            hb.timestamp_ms = (uint16_t)(esp_timer_get_time() / 1000);
-            send_state(&hb);
-        }
-        ms_since_log += HEARTBEAT_MS;
-        if (ms_since_log < 1000) {
-            continue;
-        }
-        ms_since_log = 0;
+        vTaskDelay(pdMS_TO_TICKS(1000));
         bridge_state_t s;
         portENTER_CRITICAL(&s_mux);
         s = s_last_state;
         portEXIT_CRITICAL(&s_mux);
         uint32_t sent = s_frames_sent;
         ESP_LOGI(TAG,
-                 "%s btn=%05" PRIx32 " L(%d,%d) R(%d,%d) L2=%u R2=%u gyro(%d,%d,%d) accel(%d,%d,%d) tx=%" PRIu32
+                 "%s mode=%s pc=%d btn=%05" PRIx32 " L(%d,%d) R(%d,%d) L2=%u R2=%u gyro(%d,%d,%d) accel(%d,%d,%d) tx=%" PRIu32
                  "/s rumble_rx=%" PRIu32,
-                 (s.flags & BRIDGE_FLAG_CONNECTED) ? "CONN" : "idle", s.buttons, s.lx, s.ly, s.rx, s.ry, s.l2, s.r2,
+                 (s.flags & BRIDGE_FLAG_CONNECTED) ? "CONN" : "idle", mode_name(s_mode), s_pc_present ? 1 : 0,
+                 s.buttons, s.lx, s.ly, s.rx, s.ry, s.l2, s.r2,
                  s.gyro[0], s.gyro[1], s.gyro[2], s.accel[0], s.accel[1], s.accel[2], sent - last_sent,
                  s_rumble_rx);
         last_sent = sent;
@@ -172,7 +319,11 @@ static void bridge_uart_start(void) {
     ESP_ERROR_CHECK(uart_param_config(BRIDGE_UART, &cfg));
     ESP_ERROR_CHECK(uart_set_pin(BRIDGE_UART, BRIDGE_UART_TX, BRIDGE_UART_RX, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
     s_tx_mutex = xSemaphoreCreateMutex();
+    // UART0 (console USB): mantem o baud do console (115200); so instala o driver para ler frames do PC.
+    ESP_ERROR_CHECK(uart_driver_install(PC_UART, 1024, 0, 0, NULL, 0));
     xTaskCreate(rumble_rx_task, "rumble_rx", 4096, NULL, 5, NULL);
+    xTaskCreate(pc_rx_task, "pc_rx", 4096, NULL, 5, NULL);
+    xTaskCreate(tx_task, "tx", 4096, NULL, 6, NULL);
     xTaskCreate(status_task, "status", 6144, NULL, 3, NULL);
     ESP_LOGI(TAG, "UART%d pronta: TX=%d RX=%d %d 8N1", BRIDGE_UART, BRIDGE_UART_TX, BRIDGE_UART_RX,
              BRIDGE_UART_BAUD);
@@ -231,9 +382,7 @@ static uni_error_t my_platform_on_device_ready(uni_hid_device_t *d) {
     s_connected = true;
     ESP_LOGI(TAG, "Controle pronto: \"%s\" tipo=%d vid=%04x pid=%04x bateria=%u", d->name, (int)d->controller_type,
              d->vendor_id, d->product_id, d->controller.battery);
-    if (d->report_parser.set_lightbar_color != NULL) {
-        d->report_parser.set_lightbar_color(d, 0, 0, 255);
-    }
+    set_mode_color(d);
     return UNI_ERROR_SUCCESS;
 }
 
@@ -306,16 +455,14 @@ static void my_platform_on_controller_data(uni_hid_device_t *d, uni_controller_t
         st.gyro[i] = sat16(gp->gyro[i] >> 6); // 1/1024 deg/s -> 1/16 deg/s
         st.accel[i] = sat16(gp->accel[i]);    // 1/8192 G
     }
-    int64_t now_us = esp_timer_get_time();
-    st.timestamp_ms = (uint16_t)(now_us / 1000);
+    st.timestamp_ms = (uint16_t)(esp_timer_get_time() / 1000);
 
     selftest(st.buttons);
 
-    if (now_us - s_last_tx_us < MIN_STATE_INTERVAL_US) {
-        return;
-    }
-    s_last_tx_us = now_us;
-    send_state(&st);
+    // A tx_task mescla com o estado do PC e envia ao switch-side.
+    portENTER_CRITICAL(&s_mux);
+    s_ds5_state = st;
+    portEXIT_CRITICAL(&s_mux);
 }
 
 static const uni_property_t *my_platform_get_property(uni_property_idx_t idx) {
