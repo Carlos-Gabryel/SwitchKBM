@@ -6,3 +6,4 @@ managed_components/
 __pycache__/
 phase0-log.txt
 jd-log.txt
+third_party/jeredev/
