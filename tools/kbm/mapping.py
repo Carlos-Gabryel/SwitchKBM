@@ -21,10 +21,18 @@ def _build_key_names():
         t[chr(ord("a") + i)] = 0x41 + i
     for i in range(10):
         t[str(i)] = 0x30 + i
-    for i in range(1, 13):
+    for i in range(1, 25):
         t["f%d" % i] = 0x70 + i - 1
+    for i in range(10):
+        t["num%d" % i] = 0x60 + i
     t.update({
-        "space": 0x20, "tab": 0x09, "esc": 0x1B, "enter": 0x0D,
+        "num_mul": 0x6A, "num_add": 0x6B, "num_sub": 0x6D, "num_dec": 0x6E, "num_div": 0x6F,
+        "minus": 0xBD, "equals": 0xBB, "lbracket": 0xDB, "rbracket": 0xDD,
+        "backslash": 0xDC, "semicolon": 0xBA, "quote": 0xDE, "comma": 0xBC,
+        "period": 0xBE, "slash": 0xBF, "backquote": 0xC0,
+        "abnt_backslash": 0xE2, "abnt_slash": 0xC1,
+        "space": 0x20, "tab": 0x09, "esc": 0x1B, "enter": 0x0D, "backspace": 0x08,
+        "capslock": 0x14,
         "lshift": 0xA0, "rshift": 0xA1, "lctrl": 0xA2, "rctrl": 0xA3,
         "alt": 0x12, "home": 0x24, "end": 0x23, "insert": 0x2D, "delete": 0x2E,
         "pgup": 0x21, "pgdn": 0x22,
@@ -34,6 +42,44 @@ def _build_key_names():
 
 
 KEY_NAMES = _build_key_names()
+VK_TO_NAME = {v: k for k, v in KEY_NAMES.items()}
+RESERVED_NAMES = ("f7", "f8", "f10", "f11", "f12")
+
+_DISPLAY = {
+    "space": "Espaço", "tab": "Tab", "esc": "Esc", "enter": "Enter", "backspace": "Backspace",
+    "capslock": "Caps Lock", "lshift": "Shift Esq.", "rshift": "Shift Dir.",
+    "lctrl": "Ctrl Esq.", "rctrl": "Ctrl Dir.", "alt": "Alt", "home": "Home", "end": "End",
+    "insert": "Insert", "delete": "Delete", "pgup": "Page Up", "pgdn": "Page Down",
+    "up": "Seta ↑", "down": "Seta ↓", "left": "Seta ←", "right": "Seta →",
+    "num_mul": "Num *", "num_add": "Num +", "num_sub": "Num −", "num_dec": "Num .",
+    "num_div": "Num /",
+    "minus": "-", "equals": "=", "lbracket": "[", "rbracket": "]", "backslash": "\\",
+    "semicolon": ";", "quote": "'", "comma": ",", "period": ".", "slash": "/",
+    "backquote": "`", "abnt_backslash": "\ (ABNT)", "abnt_slash": "/ (ABNT)",
+    "lmb": "Botão Esq. Mouse", "rmb": "Botão Dir. Mouse", "mmb": "Botão Meio Mouse",
+    "x1": "Botão Lateral 1 Mouse", "x2": "Botão Lateral 2 Mouse",
+    "wheel_up": "Roda ↑", "wheel_down": "Roda ↓",
+}
+
+
+def vk_to_name(vk):
+    """Nome da tecla para um VK (None se desconhecido). Alt esq./dir. viram 'alt'."""
+    return VK_TO_NAME.get(Mapper.norm_vk(vk))
+
+
+def display_name(name):
+    if not name:
+        return ""
+    if name in _DISPLAY:
+        return _DISPLAY[name]
+    if name.startswith("num") and name[3:].isdigit():
+        return "Num " + name[3:]
+    return name.upper()
+
+
+def is_reserved(name):
+    return name in RESERVED_NAMES
+
 
 DEFAULT_BINDS = {
     "space": "A", "lctrl": "B", "c": "B", "r": "X", "e": "X", "f": "X",
@@ -43,6 +89,9 @@ DEFAULT_BINDS = {
     "lmb": "R2", "rmb": "L2", "mmb": "R3", "x1": "DPAD_LEFT", "x2": "DPAD_RIGHT",
     "wheel_up": "Y", "wheel_down": "Y",
 }
+
+
+DEFAULT_MOVE = {"up": "w", "down": "s", "left": "a", "right": "d", "walk": "alt"}
 
 
 @dataclass
@@ -56,6 +105,7 @@ class Config:
     stick_deadzone_comp: float = 60.0
     walk_scale: float = 0.5
     wheel_pulse_ms: float = 80.0
+    move: dict = field(default_factory=lambda: dict(DEFAULT_MOVE))
     binds: dict = field(default_factory=lambda: dict(DEFAULT_BINDS))
 
     @classmethod
@@ -67,6 +117,9 @@ class Config:
             for k, v in data.items():
                 if k in cls.__dataclass_fields__:
                     setattr(cfg, k, v)
+            m = dict(DEFAULT_MOVE)
+            m.update(cfg.move or {})
+            cfg.move = m
         return cfg
 
 
@@ -89,6 +142,16 @@ class Mapper:
         self.warnings = []
         self._key_binds = {}        # vk -> botao
         self._mouse_binds = {}      # nome -> botao
+        self._move_vk = {}
+        for d, dflt in DEFAULT_MOVE.items():
+            n = str((self.cfg.move or {}).get(d, dflt)).lower()
+            if n == "":
+                self._move_vk[d] = -1       # sem tecla
+                continue
+            if n not in KEY_NAMES:
+                self.warnings.append("tecla de movimento desconhecida: %s" % n)
+                n = dflt
+            self._move_vk[d] = KEY_NAMES[n]
         for name, btn in self.cfg.binds.items():
             n = name.lower()
             if btn not in BTN and btn not in ("L2", "R2"):
@@ -126,9 +189,11 @@ class Mapper:
             if vk == VK_F8:
                 self.sens *= 1.1
                 self.notify("Sensibilidade giro: %.3f" % self.sens)
+                self.notify("SENS deg_per_count=%.4f" % (self.cfg.deg_per_count * self.sens))
                 return "sens_up"
             self.sens /= 1.1
             self.notify("Sensibilidade giro: %.3f" % self.sens)
+            self.notify("SENS deg_per_count=%.4f" % (self.cfg.deg_per_count * self.sens))
             return "sens_down"
         self.pressed.add(vk)
         return None
@@ -216,11 +281,12 @@ class Mapper:
 
         # stick esquerdo (Y positivo = baixo)
         p = self.pressed
-        x = (VK_D in p) - (VK_A in p)
-        y = (VK_S in p) - (VK_W in p)
+        mv = self._move_vk
+        x = (mv["right"] in p) - (mv["left"] in p)
+        y = (mv["down"] in p) - (mv["up"] in p)
         if x or y:
             mag = 0.7071 if (x and y) else 1.0
-            if VK_ALT in p:
+            if mv["walk"] in p:
                 mag *= self.cfg.walk_scale
             st["lx"] = round((511 if x > 0 else -512) * mag) if x else 0
             st["ly"] = round((511 if y > 0 else -512) * mag) if y else 0

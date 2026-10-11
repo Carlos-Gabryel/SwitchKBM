@@ -163,25 +163,40 @@ class Bridge:
             pass
 
 
-def main():
+def _stdin_watch(br):
+    """Le comandos do app pai: 'quit' (ou EOF) encerra como Ctrl+C."""
+    try:
+        for line in sys.stdin:
+            if line.strip().lower() == "quit":
+                break
+    except Exception:
+        pass
+    br.stop.set()
+    if br.hook:
+        br.hook.quit()
+
+
+def main(argv=None):
     ap = argparse.ArgumentParser(description="Teclado e mouse do PC -> gamepad virtual (ESP32)")
     ap.add_argument("--port", help="porta COM da Placa-MicroB (ex.: COM4)")
     ap.add_argument("--config", default=os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                                      "config.json"))
     ap.add_argument("--dry-run", action="store_true", help="sem serial; imprime o estado a 5 Hz")
     ap.add_argument("--verbose", action="store_true", help="mostra linhas de log do ESP")
-    args = ap.parse_args()
+    ap.add_argument("--stdin-control", action="store_true",
+                    help="encerra ao receber 'quit' (ou EOF) no stdin")
+    args = ap.parse_args(argv)
     if not args.port and not args.dry_run:
         ap.error("--port e obrigatorio (ou use --dry-run)")
 
     cfg = Config.load(args.config if os.path.exists(args.config) else None)
     br = Bridge(args, cfg)
     for w in br.mapper.warnings:
-        print("aviso config: " + w)
-    print(BANNER)
+        print("aviso config: " + w, flush=True)
+    print(BANNER, flush=True)
     if not args.dry_run:
         br.open_serial()
-        print("Serial aberta em %s" % args.port)
+        print("Serial aberta em %s" % args.port, flush=True)
 
     import winput
     br.hook = winput.InputHook(br.on_key, br.on_mouse_button, br.on_wheel, br.on_move,
@@ -193,7 +208,9 @@ def main():
         pass
     th = threading.Thread(target=br.sender_loop, daemon=True)
     th.start()
-    print("Pronto. Pressione F12 para capturar.")
+    if args.stdin_control:
+        threading.Thread(target=_stdin_watch, args=(br,), daemon=True).start()
+    print("Pronto. Pressione F12 para capturar.", flush=True)
     try:
         br.hook.run()
     finally:
@@ -201,7 +218,7 @@ def main():
         th.join(timeout=1.0)
         br.shutdown()
         br.hook.done.set()
-        print("Encerrado.")
+        print("Encerrado.", flush=True)
 
 
 if __name__ == "__main__":

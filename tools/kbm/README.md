@@ -1,5 +1,15 @@
 # Teclado e mouse (PC) -> Switch 2
 
+## Programa (SwitchKBM.exe)
+
+Interface gráfica para remapear teclado/mouse -> botões do Switch (como o menu de controles de um jogo) e iniciar/parar o bridge.
+
+- Gerar o exe: `powershell -ExecutionPolicy Bypass -File tools\kbm\build_exe.ps1` (cria `dist\SwitchKBM.exe`; precisa de Python + pip). Sem exe: `python tools\kbm\kbm_app.py`.
+- Uso: escolha o Perfil (um por jogo) e a Porta (a CH9102 vem pré-selecionada). Clique numa célula "Tecla 1/2", pressione a tecla (ou clique/roda do mouse); Esc cancela. Clique direito na célula: botões laterais do mouse, roda, Esc, Limpar. F7/F8/F10/F11/F12 são reservadas. Se a tecla já estava em outro botão, ela é movida. Movimento (WASD/Andar devagar) também é configurável.
+- Ajuste a mira/sensibilidade no quadro "Mira e ajustes" (guardados no perfil). Clique em **Salvar** (título com `*` = alterações pendentes), depois **Iniciar**. No jogo, **F12** captura/libera. Salvar com o bridge rodando reinicia-o. F7/F8 durante o jogo mudam a sensibilidade na tela (marca como não salvo; clique Salvar para manter naquele perfil).
+- Perfis ficam em `profiles\` ao lado do exe (a partir do código: `tools\kbm\profiles\`); `settings.json` na mesma pasta guarda o último perfil e a porta. Na primeira execução é criado "Padrão" (migra `config.json`).
+- Selftest sem interação: `SwitchKBM.exe --selftest`.
+
 App para Windows que captura teclado e mouse e envia um gamepad virtual pela serial (USB) para o ESP32 da Placa-MicroB, que repassa ao emulador de Pro Controller. O movimento do mouse vira GIROSCOPIO (mira por giro) por padrao.
 
 ## Como rodar

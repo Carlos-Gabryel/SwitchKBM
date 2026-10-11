@@ -228,5 +228,129 @@ class MapperTests(unittest.TestCase):
         self.assertEqual(Mapper(d).warnings, [])
 
 
+import json  # noqa: E402
+import tempfile  # noqa: E402
+
+import bindings as bd  # noqa: E402
+import mapping  # noqa: E402
+import profiles as pf  # noqa: E402
+
+
+class MoveTests(unittest.TestCase):
+    def test_arrows_as_movement(self):
+        cfg = Config(move={"up": "up", "down": "down", "left": "left", "right": "right",
+                           "walk": "lshift"})
+        m = Mapper(cfg, notify=lambda x: None)
+        m.key_down(mapping.KEY_NAMES["up"])
+        m.key_down(mapping.KEY_NAMES["right"])
+        st = m.build_state(1.0, 0.005, True)
+        self.assertEqual((st["lx"] > 0, st["ly"] < 0), (True, True))
+        m.key_down(0xA0)
+        st2 = m.build_state(1.0, 0.005, True)
+        self.assertLess(abs(st2["lx"]), abs(st["lx"]))
+
+    def test_wasd_no_longer_moves(self):
+        m = Mapper(Config(move={"up": "i", "down": "k", "left": "j", "right": "l",
+                                "walk": "alt"}), notify=lambda x: None)
+        m.key_down(0x57)
+        self.assertEqual(m.build_state(1.0, 0.005, True)["ly"], 0)
+
+    def test_sens_line(self):
+        msgs = []
+        m = Mapper(Config(), notify=msgs.append)
+        m.key_down(mapping.VK_F8)
+        line = [x for x in msgs if x.startswith("SENS")][0]
+        v = bd.parse_sens_line(line)
+        self.assertAlmostEqual(v, 0.055, places=4)
+        self.assertIsNone(bd.parse_sens_line("Modo gatilho: stick"))
+
+
+class KeyTableTests(unittest.TestCase):
+    def test_roundtrip(self):
+        for name, vk in mapping.KEY_NAMES.items():
+            self.assertEqual(mapping.vk_to_name(vk), name)
+            self.assertTrue(mapping.display_name(name))
+
+    def test_alt_variants(self):
+        self.assertEqual(mapping.vk_to_name(0xA4), "alt")
+        self.assertEqual(mapping.display_name("lmb"), "Botão Esq. Mouse")
+        self.assertEqual(mapping.display_name("space"), "Espaço")
+        self.assertIsNone(mapping.vk_to_name(0xFF))
+
+    def test_tk_event(self):
+        self.assertEqual(bd.tk_event_to_name(16, "Shift_R"), "rshift")
+        self.assertEqual(bd.tk_event_to_name(18, "Alt_R"), "alt")
+        self.assertEqual(bd.tk_event_to_name(0x47, "g"), "g")
+
+
+class BindingTests(unittest.TestCase):
+    def rows(self):
+        return bd.profile_to_rows({"binds": {"g": "R1", "space": "A"}})
+
+    def test_reserved_rejected(self):
+        for k in ("f7", "f8", "f10", "f11", "f12"):
+            with self.assertRaises(ValueError):
+                bd.assign_key(self.rows(), "B", 0, k)
+
+    def test_move_key(self):
+        new, moved = bd.assign_key(self.rows(), "B", 0, "g")
+        self.assertEqual(moved, "R1")
+        self.assertEqual(new["B"][0], "g")
+        self.assertNotIn("g", new["R1"])
+
+    def test_same_slot_noop(self):
+        new, moved = bd.assign_key(self.rows(), "R1", 0, "g")
+        self.assertIsNone(moved)
+
+    def test_move_row_conflict(self):
+        new, moved = bd.assign_key(self.rows(), "B", 0, "w")
+        self.assertEqual(moved, "move:up")
+        self.assertEqual(new["move:up"][0], "")
+
+    def test_profile_roundtrip(self):
+        path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
+        with open(path, encoding="utf-8") as f:
+            rows = bd.profile_to_rows(json.load(f))
+        data = bd.rows_to_profile(rows, {})
+        self.assertEqual(data["binds"], mapping.DEFAULT_BINDS)
+        self.assertEqual(data["move"], mapping.DEFAULT_MOVE)
+        cfg = Config(**{k: v for k, v in data.items() if k in Config.__dataclass_fields__})
+        self.assertEqual(Mapper(cfg, notify=lambda x: None).warnings, [])
+
+
+class ProfileTests(unittest.TestCase):
+    def test_default_created(self):
+        with tempfile.TemporaryDirectory() as d:
+            s = pf.ProfileStore(base=d)
+            self.assertEqual(s.names(), [pf.DEFAULT_NAME])
+            self.assertEqual(s.load(pf.DEFAULT_NAME)["move"], mapping.DEFAULT_MOVE)
+
+    def test_migrate_legacy(self):
+        with tempfile.TemporaryDirectory() as d:
+            legacy = os.path.join(d, "config.json")
+            with open(legacy, "w", encoding="utf-8") as f:
+                json.dump({"deg_per_count": 0.09, "binds": {"x": "A"}}, f)
+            s = pf.ProfileStore(base=d)
+            p = s.load(pf.DEFAULT_NAME)
+            self.assertEqual(p["deg_per_count"], 0.09)
+            self.assertEqual(p["binds"], {"x": "A"})
+            self.assertIn("move", p)
+
+    def test_crud_and_settings(self):
+        with tempfile.TemporaryDirectory() as d:
+            s = pf.ProfileStore(base=d)
+            s.create("Jogo X")
+            s.duplicate("Jogo X", "Jogo Y")
+            self.assertEqual(s.rename("Jogo Y", "Jogo Z"), "Jogo Z")
+            with self.assertRaises(ValueError):
+                s.create("Jogo X")
+            s.delete("Jogo Z")
+            self.assertEqual(s.names(), ["Jogo X", pf.DEFAULT_NAME])
+            s.save_settings(port="COM4", last_profile="Jogo X")
+            self.assertEqual(s.load_settings()["port"], "COM4")
+            # sensibilidade fica no perfil, nao nos settings
+            self.assertNotIn("deg_per_count", s.load_settings())
+
+
 if __name__ == "__main__":
     unittest.main()
