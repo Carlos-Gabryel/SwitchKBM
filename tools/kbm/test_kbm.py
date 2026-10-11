@@ -57,9 +57,9 @@ class ProtoTests(unittest.TestCase):
         self.assertEqual(v[-4:-1], (0, 8192, 0))
 
 
-def grav(theta):
+def grav(theta, tilt=False):
     import math
-    r = math.radians(theta)
+    r = math.radians(theta) if tilt else 0.0
     return (0, round(8192 * math.cos(r)), round(-8192 * math.sin(r)))
 
 
@@ -175,7 +175,7 @@ class MapperTests(unittest.TestCase):
         self.assertLessEqual(abs(g[2]), 20)  # theta = -0.5 grau: yaw quase todo em y
 
     def test_virtual_pitch_clamps_and_tilts_gravity(self):
-        m = mk()
+        m = Mapper(Config(virtual_tilt=True), notify=lambda x: None)
         for _ in range(400):  # bem mais que 80 graus para cima
             m.mouse_move(0, -100)
             st = m.build_state(0, 0.005, True)
@@ -183,7 +183,7 @@ class MapperTests(unittest.TestCase):
         self.assertEqual(st["gyro"][0], 0)  # no limite nao gira mais
         m.mouse_move(100, 0)  # yaw em torno da vertical do mundo
         st = m.build_state(0, 0.005, True)
-        g, a = st["gyro"], grav(m.theta)
+        g, a = st["gyro"], grav(m.theta, True)
         self.assertEqual(g[0], 0)
         # gyro paralelo a gravidade no referencial do controle
         self.assertAlmostEqual(g[1] * a[2] - g[2] * a[1], 0, delta=abs(g[1]) * 8192 * 0.01)

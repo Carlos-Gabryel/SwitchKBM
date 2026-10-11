@@ -104,6 +104,7 @@ class Config:
     invert_pitch: bool = True
     aim_mode: str = "gyro"
     max_pitch_deg: float = 80.0
+    virtual_tilt: bool = False  # inclina a gravidade com o pitch (experimental)
     stick_gain: float = 0.6
     stick_deadzone_comp: float = 60.0
     walk_scale: float = 0.5
@@ -317,11 +318,13 @@ class Mapper:
             # eixo x) e manda a gravidade inclinada no accel; o yaw gira em torno da vertical do
             # mundo. Sem isso o Switch funde gyro x accel conflitantes -> drift e, inclinado,
             # o yaw vira rolagem (mira so sobe/desce).
-            lim = self.cfg.max_pitch_deg
+            # sem virtual_tilt: controle sempre deitado (theta so acumula, sem limite)
+            lim = self.cfg.max_pitch_deg if self.cfg.virtual_tilt else float("inf")
             new_theta = max(-lim, min(lim, self.theta + pitch / 16.0 * dt))
             pitch = round((new_theta - self.theta) / dt * 16) if dt > 0 else 0
             self.theta = new_theta
-            c, sn = math.cos(math.radians(self.theta)), math.sin(math.radians(self.theta))
+            tilt = math.radians(self.theta) if self.cfg.virtual_tilt else 0.0
+            c, sn = math.cos(tilt), math.sin(tilt)
             st["gyro"] = (pitch, round(yaw * c), round(-yaw * sn))
             ax, ay, az = 0.0, 8192 * c, -8192 * sn
             n = int(self.cfg.accel_noise)
