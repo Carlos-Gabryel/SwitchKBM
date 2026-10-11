@@ -57,6 +57,10 @@ Chaves ausentes usam o padrao. `binds`, se presente, substitui todo o mapa padra
 
 ## Ajuste de sensibilidade
 
+**Importante:** no jogo, use o espaco do giroscopio **Local** (Fortnite: "Espaco do giroscopio" = Local).
+No espaco "Jogador"/"Mundo" o jogo usa a gravidade estimada pelo Switch; com o controle virtual
+ela se perde com o tempo e a mira para de girar na horizontal.
+
 Dois botoes de ajuste: a sensibilidade de giro dentro do jogo (Fortnite/CoD) e o `deg_per_count` daqui (ou F7/F8 em tempo real). Comece com a sensibilidade de giro do jogo no padrao, ajuste F7/F8 ate a mira ficar boa e depois grave o valor final em `deg_per_count` (multiplique `deg_per_count` pelo fator impresso). Se o giro sair invertido, mude `invert_yaw` / `invert_pitch`. Se o jogo precisar de giro muito alto, o app limita a +-32000 unidades e carrega o resto para os proximos quadros.
 
 ## Seguranca
