@@ -1,8 +1,36 @@
-menu "Pro Controller Bridge"
-    config AUTOPRESS_TEST
-        bool "Auto-press buttons for pairing test (Phase 0)"
-        default y
-        help
-            3 s after input mode 0x30 is set: press L+R for 200 ms (registers the
-            controller in "Change Grip/Order"), then press A for 100 ms every 2 s.
+menu "Switch Controller"
+
+config SWITCH_CONTROLLER_BLE_HID
+    bool "Use BLE HID transport"
+    default y
+    help
+        Select the BLE HID transport instead of the Bluetooth Classic HIDP
+        transport. This is the experimental transport for Nintendo Switch 2.
+
+config SWITCH_CONTROLLER_BTSTACK
+    bool "Use vendored BTstack Classic HID"
+    default n
+    depends on BT_ENABLED
+    depends on IDF_TARGET_ESP32
+    help
+        Use the vendored BTstack Classic HID device implementation. The
+        original Bluedroid HIDP implementation remains available when this
+        option is disabled.
+
+config BTSTACK_INTERNAL_BT
+    bool
+    default y if SWITCH_CONTROLLER_BTSTACK
+
+config BTSTACK_EXTERNAL_UART_BT
+    bool
+    default n
+
+config BTSTACK_AUDIO
+    bool
+    default n
+
+config BTSTACK_HCI_DUMP_STDOUT
+    bool
+    default n
+
 endmenu
