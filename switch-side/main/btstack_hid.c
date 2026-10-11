@@ -48,6 +48,9 @@ static uint32_t tx_count, tx_gap_max_ms;
 static btstack_packet_callback_registration_t hci_callback;
 
 #define SWITCH_INPUT_INTERVAL_MS 24
+/* Depois do handshake (modo 0x30 ativo) envia mais rapido, como um Pro Controller real (~15 ms). */
+#define SWITCH_INPUT_INTERVAL_FAST_MS 15
+#define FAST_AFTER_REPORTS 200
 
 uint8_t g_esp32_mac[6];
 
@@ -172,7 +175,8 @@ static void input_timer_handler(btstack_timer_source_t *ts)
      * changes its cooldown to 24000 us. Match that cadence instead of
      * sending at 15 ms, which can race the early subcommand replies.
      */
-    btstack_run_loop_set_timer(ts, SWITCH_INPUT_INTERVAL_MS);
+    btstack_run_loop_set_timer(ts, (switch_proto_stream_enabled() && input_report_count >= FAST_AFTER_REPORTS)
+                                       ? SWITCH_INPUT_INTERVAL_FAST_MS : SWITCH_INPUT_INTERVAL_MS);
     btstack_run_loop_add_timer(ts);
 }
 
@@ -235,6 +239,13 @@ static void packet_handler(uint8_t packet_type, uint16_t channel,
     case HCI_EVENT_CONNECTION_COMPLETE:
         ESP_LOGI(TAG, "Conexion ACL recibida, estado=%u",
                  hci_event_connection_complete_get_status(packet));
+        return;
+    case HCI_EVENT_MODE_CHANGE:
+        /* 0 = active, 2 = sniff; intervalo em slots de 0,625 ms */
+        ESP_LOGI(TAG, "Modo do link: %u intervalo=%u slots (%.1f ms)",
+                 hci_event_mode_change_get_mode(packet),
+                 hci_event_mode_change_get_interval(packet),
+                 hci_event_mode_change_get_interval(packet) * 0.625);
         return;
     case HCI_EVENT_PIN_CODE_REQUEST:
         ESP_LOGI(TAG, "Solicitud PIN recibida");
