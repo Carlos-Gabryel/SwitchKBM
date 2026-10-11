@@ -57,6 +57,12 @@ class ProtoTests(unittest.TestCase):
         self.assertEqual(v[-4:-1], (0, 8192, 0))
 
 
+def grav(theta):
+    import math
+    r = math.radians(theta)
+    return (0, round(8192 * math.cos(r)), round(-8192 * math.sin(r)))
+
+
 class MapperTests(unittest.TestCase):
     def test_accel_noise_only_when_moving(self):
         m = mk()
@@ -64,16 +70,17 @@ class MapperTests(unittest.TestCase):
         self.assertEqual(st["accel"], (0, 8192, 0))
         seen = set()
         for _ in range(200):
-            m.mouse_move(5, 5)
+            m.mouse_move(5, -5 if _ % 2 else 5)  # pitch oscila perto de 0
             a = m.build_state(0, 0.005, True)["accel"]
-            self.assertTrue(abs(a[0]) <= 40 and abs(a[1] - 8192) <= 40 and abs(a[2]) <= 40)
+            g = grav(m.theta)
+            self.assertTrue(all(abs(a[i] - g[i]) <= 41 for i in range(3)))
             seen.add(a)
         self.assertGreater(len(seen), 10)
 
     def test_accel_noise_disabled_and_deadband(self):
         m = Mapper(Config(accel_noise=0), notify=lambda x: None)
         m.mouse_move(5, 5)
-        self.assertEqual(m.build_state(0, 0.005, True)["accel"], (0, 8192, 0))
+        self.assertEqual(m.build_state(0, 0.005, True)["accel"], grav(m.theta))
         m = Mapper(Config(gyro_deadband_units=100000), notify=lambda x: None)
         m.mouse_move(5, 5)
         st = m.build_state(0, 0.005, True)
@@ -164,7 +171,24 @@ class MapperTests(unittest.TestCase):
         m = Mapper(cfg, notify=lambda x: None)
         m.mouse_move(10, -10)
         g = m.build_state(0, 0.005, True)["gyro"]
-        self.assertEqual(g, (-1600, 1600, 0))
+        self.assertEqual(g[:2], (-1600, 1600))
+        self.assertLessEqual(abs(g[2]), 20)  # theta = -0.5 grau: yaw quase todo em y
+
+    def test_virtual_pitch_clamps_and_tilts_gravity(self):
+        m = mk()
+        for _ in range(400):  # bem mais que 80 graus para cima
+            m.mouse_move(0, -100)
+            st = m.build_state(0, 0.005, True)
+        self.assertAlmostEqual(m.theta, 80.0)
+        self.assertEqual(st["gyro"][0], 0)  # no limite nao gira mais
+        m.mouse_move(100, 0)  # yaw em torno da vertical do mundo
+        st = m.build_state(0, 0.005, True)
+        g, a = st["gyro"], grav(m.theta)
+        self.assertEqual(g[0], 0)
+        # gyro paralelo a gravidade no referencial do controle
+        self.assertAlmostEqual(g[1] * a[2] - g[2] * a[1], 0, delta=abs(g[1]) * 8192 * 0.01)
+        m.release_all()
+        self.assertEqual(m.theta, 0.0)
 
     def test_gyro_clamp_residual(self):
         m = mk()

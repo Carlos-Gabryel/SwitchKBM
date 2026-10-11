@@ -1,5 +1,6 @@
 """Logica pura de mapeamento teclado+mouse -> estado de gamepad (sem Win32)."""
 import json
+import math
 import random
 from dataclasses import dataclass, field
 
@@ -102,6 +103,7 @@ class Config:
     invert_yaw: bool = True
     invert_pitch: bool = True
     aim_mode: str = "gyro"
+    max_pitch_deg: float = 80.0
     stick_gain: float = 0.6
     stick_deadzone_comp: float = 60.0
     walk_scale: float = 0.5
@@ -140,6 +142,7 @@ class Mapper:
         self.mouse = set()          # "lmb", ...
         self.wheel_until = {}       # "wheel_up" -> instante de expiracao
         self.acc_dx = 0.0
+        self.theta = 0.0  # pitch do controle virtual (graus)
         self.acc_dy = 0.0
         self.combo_start = None
         self.warnings = []
@@ -220,6 +223,7 @@ class Mapper:
         self.mouse.clear()
         self.wheel_until.clear()
         self.acc_dx = self.acc_dy = 0.0
+        self.theta = 0.0
         self.combo_start = None
 
     # ---- saida ----
@@ -309,12 +313,24 @@ class Mapper:
                 pitch = 0
             if db and abs(yaw) < db:
                 yaw = 0
-            st["gyro"] = (pitch, yaw, 0)
+            # Controle virtual fisicamente coerente: integra o pitch (angulo theta em torno do
+            # eixo x) e manda a gravidade inclinada no accel; o yaw gira em torno da vertical do
+            # mundo. Sem isso o Switch funde gyro x accel conflitantes -> drift e, inclinado,
+            # o yaw vira rolagem (mira so sobe/desce).
+            lim = self.cfg.max_pitch_deg
+            new_theta = max(-lim, min(lim, self.theta + pitch / 16.0 * dt))
+            pitch = round((new_theta - self.theta) / dt * 16) if dt > 0 else 0
+            self.theta = new_theta
+            c, sn = math.cos(math.radians(self.theta)), math.sin(math.radians(self.theta))
+            st["gyro"] = (pitch, round(yaw * c), round(-yaw * sn))
+            ax, ay, az = 0.0, 8192 * c, -8192 * sn
             n = int(self.cfg.accel_noise)
             if n > 0 and (pitch or yaw):
                 # giro constante + accel perfeito => Switch trata como bias (drift); ruido evita
-                st["accel"] = (random.randint(-n, n), 8192 + random.randint(-n, n),
-                               random.randint(-n, n))
+                ax += random.randint(-n, n)
+                ay += random.randint(-n, n)
+                az += random.randint(-n, n)
+            st["accel"] = (round(ax), round(ay), round(az))
 
         st["buttons"] = buttons
         st["l2"] = l2
