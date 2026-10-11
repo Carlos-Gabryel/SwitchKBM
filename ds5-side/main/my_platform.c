@@ -15,6 +15,8 @@
 #include "freertos/semphr.h"
 #include "freertos/task.h"
 #include "input_modes.h"
+#include "nvs.h"
+#include "nvs_flash.h"
 
 static const char *TAG = "DS5";
 
@@ -342,10 +344,13 @@ static void bridge_uart_start(void) {
              BRIDGE_UART_BAUD);
 }
 
+static void block_load(void);
+
 // ---- callbacks da plataforma Bluepad32 -------------------------------------------
 static void my_platform_init(int argc, const char **argv) {
     ARG_UNUSED(argc);
     ARG_UNUSED(argv);
+    block_load();
     bridge_uart_start();
 }
 
@@ -356,16 +361,67 @@ static void my_platform_on_init_complete(void) {
     ESP_LOGI(TAG, "Bluepad32 pronto. Pareie o DualSense: segure PS + Create ate a luz piscar rapido.");
 }
 
+// ---- bloqueio de aparelhos que nao sao DualSense ------------------------------------
+// O inquiry as vezes vem sem nome; ai o Bluepad32 conectava no proprio switch-side
+// ("Pro Controller"), roubando banda do link com o Switch e injetando o stick dele.
+// Quem nao for DualSense e' recusado em on_device_ready e o endereco fica bloqueado (NVS).
+#define BLOCK_MAX 4
+#define SONY_VID 0x054C
+static bd_addr_t s_block[BLOCK_MAX];
+static int s_block_n;
+
+static bool is_blocked(const bd_addr_t addr) {
+    for (int i = 0; i < s_block_n; i++) {
+        if (memcmp(s_block[i], addr, sizeof(bd_addr_t)) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+static void block_load(void) {
+    nvs_flash_init();
+    nvs_handle_t h;
+    if (nvs_open("ds5bridge", NVS_READONLY, &h) != ESP_OK) {
+        return;
+    }
+    size_t len = sizeof(s_block);
+    if (nvs_get_blob(h, "block", s_block, &len) == ESP_OK) {
+        s_block_n = (int)(len / sizeof(bd_addr_t));
+    }
+    nvs_close(h);
+    ESP_LOGI(TAG, "%d endereco(s) bloqueado(s)", s_block_n);
+}
+
+static void block_add(const bd_addr_t addr) {
+    if (is_blocked(addr)) {
+        return;
+    }
+    if (s_block_n == BLOCK_MAX) { // descarta o mais antigo
+        memmove(s_block[0], s_block[1], sizeof(bd_addr_t) * (BLOCK_MAX - 1));
+        s_block_n--;
+    }
+    memcpy(s_block[s_block_n++], addr, sizeof(bd_addr_t));
+    nvs_handle_t h;
+    if (nvs_open("ds5bridge", NVS_READWRITE, &h) == ESP_OK) {
+        nvs_set_blob(h, "block", s_block, sizeof(bd_addr_t) * s_block_n);
+        nvs_commit(h);
+        nvs_close(h);
+    }
+}
+
 static uni_error_t my_platform_on_device_discovered(bd_addr_t addr, const char *name, uint16_t cod, uint8_t rssi) {
-    ARG_UNUSED(addr);
     ARG_UNUSED(rssi);
     // So gamepads/joysticks.
     uint16_t minor = cod & UNI_BT_COD_MINOR_MASK;
     if ((minor & (UNI_BT_COD_MINOR_GAMEPAD | UNI_BT_COD_MINOR_JOYSTICK)) == 0) {
         return UNI_ERROR_IGNORE_DEVICE;
     }
+    if (is_blocked(addr)) {
+        return UNI_ERROR_IGNORE_DEVICE;
+    }
     // So DualSense: o switch-side (e Pro Controllers reais) tambem anunciam COD de gamepad
-    // e ocupariam a unica vaga. Sem nome no inquiry, deixa passar.
+    // e ocupariam a unica vaga. Sem nome no inquiry, deixa passar (verificado em on_device_ready).
     if (name != NULL && name[0] != '\0' && strstr(name, "DualSense") == NULL) {
         ESP_LOGI(TAG, "Ignorando \"%s\" (nao e DualSense)", name);
         return UNI_ERROR_IGNORE_DEVICE;
@@ -388,6 +444,11 @@ static void my_platform_on_device_disconnected(uni_hid_device_t *d) {
 }
 
 static uni_error_t my_platform_on_device_ready(uni_hid_device_t *d) {
+    if (d->vendor_id != SONY_VID) {
+        ESP_LOGW(TAG, "Recusando \"%s\" vid=%04x (nao e DualSense); endereco bloqueado", d->name, d->vendor_id);
+        block_add(d->conn.btaddr);
+        return UNI_ERROR_IGNORE_DEVICE;
+    }
     if (s_dev != NULL && s_dev != d) {
         return UNI_ERROR_IGNORE_DEVICE; // apenas um controle
     }
