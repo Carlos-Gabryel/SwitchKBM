@@ -58,6 +58,28 @@ class ProtoTests(unittest.TestCase):
 
 
 class MapperTests(unittest.TestCase):
+    def test_accel_noise_only_when_moving(self):
+        m = mk()
+        st = m.build_state(0, 0.005, True)
+        self.assertEqual(st["accel"], (0, 8192, 0))
+        seen = set()
+        for _ in range(200):
+            m.mouse_move(5, 5)
+            a = m.build_state(0, 0.005, True)["accel"]
+            self.assertTrue(abs(a[0]) <= 40 and abs(a[1] - 8192) <= 40 and abs(a[2]) <= 40)
+            seen.add(a)
+        self.assertGreater(len(seen), 10)
+
+    def test_accel_noise_disabled_and_deadband(self):
+        m = Mapper(Config(accel_noise=0), notify=lambda x: None)
+        m.mouse_move(5, 5)
+        self.assertEqual(m.build_state(0, 0.005, True)["accel"], (0, 8192, 0))
+        m = Mapper(Config(gyro_deadband_units=100000), notify=lambda x: None)
+        m.mouse_move(5, 5)
+        st = m.build_state(0, 0.005, True)
+        self.assertEqual(st["gyro"], (0, 0, 0))
+        self.assertEqual(st["accel"], (0, 8192, 0))
+
     def test_not_captured_neutral(self):
         m = mk()
         m.key_down(0x57)

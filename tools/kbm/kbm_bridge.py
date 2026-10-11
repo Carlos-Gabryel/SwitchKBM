@@ -25,6 +25,23 @@ Hotkeys:
 Ctrl+C ou fechar o console tambem libera tudo."""
 
 
+def _set_priorities(thread=False):
+    """Prioridade alta do processo; com thread=True, maxima para a thread atual."""
+    try:
+        import ctypes
+        k32 = ctypes.WinDLL("kernel32")
+        k32.GetCurrentProcess.restype = ctypes.c_void_p
+        k32.GetCurrentThread.restype = ctypes.c_void_p
+        k32.SetPriorityClass.argtypes = [ctypes.c_void_p, ctypes.c_uint32]
+        k32.SetThreadPriority.argtypes = [ctypes.c_void_p, ctypes.c_int]
+        if thread:
+            k32.SetThreadPriority(k32.GetCurrentThread(), 2)    # THREAD_PRIORITY_HIGHEST
+        else:
+            k32.SetPriorityClass(k32.GetCurrentProcess(), 0x80)  # HIGH_PRIORITY_CLASS
+    except Exception:
+        pass
+
+
 class Bridge:
     def __init__(self, args, cfg):
         self.args = args
@@ -38,27 +55,48 @@ class Bridge:
         self.parser = proto.StreamParser()
         self.last_mode = None
         self.last_ds5 = None
+        # instrumentacao (so contadores)
+        self.st_write_max = 0.0
 
     def say(self, msg):
         print(msg, flush=True)
 
     # ---- callbacks da captura (thread principal) ----
     def on_key(self, vk, down):
+        act = None
         with self.lock:
             if not down:
                 self.mapper.key_up(vk)
-                return
-            act = self.mapper.key_down(vk, time.perf_counter())
-            if act == "toggle_capture":
-                self._toggle_capture()
+            else:
+                act = self.mapper.key_down(vk, time.perf_counter())
+        if act == "toggle_capture":
+            self._toggle_capture()
 
     def _toggle_capture(self):
-        self.captured = not self.captured
-        self.mapper.release_all()
-        # F12 ja esta marcado como pressionado pelo key_down; release_all limpou, entao
-        # o auto-repeat poderia religar. Reinsere para manter a borda.
-        self.mapper.pressed.add(VK_F12)
+        # janela/cursor fora do lock (SetForegroundWindow pode reentrar no wnd_proc)
+        want = not self.captured
+        if want and self.hook:
+            try:
+                self.hook.begin_capture()
+            except Exception as e:
+                self.say("erro ao capturar: %r" % (e,))
+                self.hook.end_capture()
+                return
+        elif self.hook:
+            self.hook.end_capture()
+        with self.lock:
+            self.captured = want
+            self.mapper.release_all()
+            # F12 ja esta marcado como pressionado pelo key_down; release_all limpou, entao
+            # o auto-repeat poderia religar. Reinsere para manter a borda.
+            self.mapper.pressed.add(VK_F12)
         self.say("CAPTURADO (F12 libera)" if self.captured else "LIBERADO")
+
+    def on_capture_lost(self):
+        # a janela ja foi escondida pelo hook; so zera o estado (mensagem ja impressa)
+        with self.lock:
+            self.captured = False
+            self.mapper.release_all()
 
     def on_mouse_button(self, name, down):
         with self.lock:
@@ -110,12 +148,21 @@ class Bridge:
         frame = proto.pack_state(seq=self.seq, timestamp_ms=ts, **st)
         self.seq = (self.seq + 1) & 0xFF
         if self.ser:
+            t0 = time.perf_counter()
             self.ser.write(frame)
+            dt = time.perf_counter() - t0
+            if dt > self.st_write_max:
+                self.st_write_max = dt
 
     def sender_loop(self):
         period = 1.0 / RATE_HZ
+        _set_priorities(thread=True)
         nxt = last = time.perf_counter()
         n = 0
+        st_t = last
+        st_tx = 0
+        st_gap = 0.0
+        st_mev = 0
         try:
             while not self.stop.is_set():
                 now = time.perf_counter()
@@ -123,9 +170,26 @@ class Bridge:
                 last = now
                 with self.lock:
                     st = self.mapper.build_state(now, dt, self.captured)
+                if st_tx and dt > st_gap:
+                    st_gap = dt
                 self._send(st)
+                st_tx += 1
                 if self.ser:
                     self._poll_serial()
+                if now - st_t >= 1.0:
+                    if self.captured and self.hook:
+                        mev = self.hook.mouse_ev
+                        kbm = self.hook.kb_hook_max
+                        self.hook.kb_hook_max = 0.0
+                        self.say("STATS tx/s=%d gap_max_ms=%.1f mouse_ev/s=%d "
+                                 "kb_hook_max_ms=%.2f serial_write_max_ms=%.2f" % (
+                                     st_tx, st_gap * 1000, mev - st_mev, kbm * 1000,
+                                     self.st_write_max * 1000))
+                        st_mev = mev
+                    st_t = now
+                    st_tx = 0
+                    st_gap = 0.0
+                    self.st_write_max = 0.0
                 n += 1
                 if self.args.dry_run and n % (RATE_HZ // 5) == 0:
                     self.say(self.fmt_state(st))
@@ -199,8 +263,10 @@ def main(argv=None):
         print("Serial aberta em %s" % args.port, flush=True)
 
     import winput
+    _set_priorities()
     br.hook = winput.InputHook(br.on_key, br.on_mouse_button, br.on_wheel, br.on_move,
-                               br.is_captured, always_block_vks={VK_F12}, log=br.say)
+                               br.is_captured, always_block_vks={VK_F12}, log=br.say,
+                               on_capture_lost=br.on_capture_lost)
     try:
         import ctypes
         ctypes.WinDLL("winmm").timeBeginPeriod(1)

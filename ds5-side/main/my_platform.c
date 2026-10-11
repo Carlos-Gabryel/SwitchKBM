@@ -41,6 +41,8 @@ static bridge_state_t s_last_state; // para o log de 1 Hz (protegido por s_mux)
 static bridge_state_t s_ds5_state;  // ultimo estado do DualSense (protegido por s_mux)
 static bridge_state_t s_pc_state;   // ultimo estado vindo do PC (protegido por s_mux)
 static int64_t s_pc_rx_ms;          // quando o PC enviou por ultimo (protegido por s_mux)
+static volatile uint32_t s_pc_rx_count;  // quadros do PC recebidos (diagnostico)
+static volatile uint32_t s_pc_gap_max_ms; // maior intervalo entre quadros do PC no ultimo segundo
 static volatile bool s_pc_present;  // PC capturado (para o log)
 static volatile trig_mode_t s_mode; // modo atual (escrito so na tx_task)
 
@@ -206,6 +208,7 @@ static void pc_rx_task(void *arg) {
     bridge_parser_t parser;
     bridge_parser_init(&parser);
     uint8_t buf[64];
+    int64_t last_pc_ms = 0;
     for (;;) {
         int n = uart_read_bytes(PC_UART, buf, sizeof(buf), pdMS_TO_TICKS(20));
         for (int i = 0; i < n; i++) {
@@ -218,6 +221,11 @@ static void pc_rx_task(void *arg) {
             bridge_state_t st;
             memcpy(&st, parser.payload, sizeof(st));
             int64_t now_ms = esp_timer_get_time() / 1000;
+            if (last_pc_ms != 0 && (uint32_t)(now_ms - last_pc_ms) > s_pc_gap_max_ms) {
+                s_pc_gap_max_ms = (uint32_t)(now_ms - last_pc_ms);
+            }
+            last_pc_ms = now_ms;
+            s_pc_rx_count++;
             portENTER_CRITICAL(&s_mux);
             s_pc_state = st;
             s_pc_rx_ms = now_ms;
@@ -288,6 +296,7 @@ static void tx_task(void *arg) {
 static void status_task(void *arg) {
     (void)arg;
     uint32_t last_sent = 0;
+    uint32_t last_pc_rx = 0;
     for (;;) {
         vTaskDelay(pdMS_TO_TICKS(1000));
         bridge_state_t s;
@@ -295,14 +304,18 @@ static void status_task(void *arg) {
         s = s_last_state;
         portEXIT_CRITICAL(&s_mux);
         uint32_t sent = s_frames_sent;
+        uint32_t pc_rx = s_pc_rx_count;
+        uint32_t gap_max = s_pc_gap_max_ms;
+        s_pc_gap_max_ms = 0;
         ESP_LOGI(TAG,
                  "%s mode=%s pc=%d btn=%05" PRIx32 " L(%d,%d) R(%d,%d) L2=%u R2=%u gyro(%d,%d,%d) accel(%d,%d,%d) tx=%" PRIu32
-                 "/s rumble_rx=%" PRIu32,
+                 "/s rumble_rx=%" PRIu32 " pc_rx=%" PRIu32 "/s pc_gap_max=%" PRIu32 "ms",
                  (s.flags & BRIDGE_FLAG_CONNECTED) ? "CONN" : "idle", mode_name(s_mode), s_pc_present ? 1 : 0,
                  s.buttons, s.lx, s.ly, s.rx, s.ry, s.l2, s.r2,
                  s.gyro[0], s.gyro[1], s.gyro[2], s.accel[0], s.accel[1], s.accel[2], sent - last_sent,
-                 s_rumble_rx);
+                 s_rumble_rx, pc_rx - last_pc_rx, gap_max);
         last_sent = sent;
+        last_pc_rx = pc_rx;
     }
 }
 

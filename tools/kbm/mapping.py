@@ -1,5 +1,6 @@
 """Logica pura de mapeamento teclado+mouse -> estado de gamepad (sem Win32)."""
 import json
+import random
 from dataclasses import dataclass, field
 
 try:
@@ -105,6 +106,8 @@ class Config:
     stick_deadzone_comp: float = 60.0
     walk_scale: float = 0.5
     wheel_pulse_ms: float = 80.0
+    accel_noise: int = 40           # ruido no accel (1/8192 G) quando ha giro; evita o Switch aprender drift
+    gyro_deadband_units: int = 0    # zera eixo de giro com |unidades| menor que isso
     move: dict = field(default_factory=lambda: dict(DEFAULT_MOVE))
     binds: dict = field(default_factory=lambda: dict(DEFAULT_BINDS))
 
@@ -301,7 +304,17 @@ class Mapper:
             up, self.acc_dy = self._gyro_axis(self.acc_dy, dt)
             yaw = -uy if self.cfg.invert_yaw else uy
             pitch = -up if self.cfg.invert_pitch else up
+            db = self.cfg.gyro_deadband_units
+            if db and abs(pitch) < db:
+                pitch = 0
+            if db and abs(yaw) < db:
+                yaw = 0
             st["gyro"] = (pitch, yaw, 0)
+            n = int(self.cfg.accel_noise)
+            if n > 0 and (pitch or yaw):
+                # giro constante + accel perfeito => Switch trata como bias (drift); ruido evita
+                st["accel"] = (random.randint(-n, n), 8192 + random.randint(-n, n),
+                               random.randint(-n, n))
 
         st["buttons"] = buttons
         st["l2"] = l2

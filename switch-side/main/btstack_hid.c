@@ -1,4 +1,5 @@
 #include "btstack_hid.h"
+#include "esp_timer.h"
 
 #if CONFIG_SWITCH_CONTROLLER_BTSTACK
 
@@ -41,6 +42,9 @@ static uint8_t last_subcmd;
 static bool stalled_logged;
 
 static btstack_timer_source_t input_timer;
+/* diagnostico: reports de entrada enviados ao Switch por segundo e maior intervalo */
+static int64_t tx_win_us, tx_last_us;
+static uint32_t tx_count, tx_gap_max_ms;
 static btstack_packet_callback_registration_t hci_callback;
 
 #define SWITCH_INPUT_INTERVAL_MS 24
@@ -130,6 +134,20 @@ static void send_next_report(void)
                      (unsigned long)input_report_count);
         }
         input_report_count++;
+        {
+            int64_t t_us = esp_timer_get_time();
+            if (tx_last_us != 0 && (uint32_t)((t_us - tx_last_us) / 1000) > tx_gap_max_ms) {
+                tx_gap_max_ms = (uint32_t)((t_us - tx_last_us) / 1000);
+            }
+            tx_last_us = t_us;
+            tx_count++;
+            if (t_us - tx_win_us >= 1000000) {
+                ESP_LOGI(TAG, "HID tx/s=%u gap_max=%ums", (unsigned)tx_count, (unsigned)tx_gap_max_ms);
+                tx_win_us = t_us;
+                tx_count = 0;
+                tx_gap_max_ms = 0;
+            }
+        }
 
     }
 }
