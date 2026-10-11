@@ -39,17 +39,18 @@ footer { color: var(--muted); font-size: .85rem; }
   <header>
     <div class="eyebrow">ATUALIZADO 2026-10-11</div>
     <h1>Ponte DualSense–Switch 2</h1>
-    <p>Um controle de PS5 jogando no Switch 2 como se fosse um Pro Controller, com gyro e vibração, usando duas ESP32 clássicas.</p>
+    <p>Um controle de PS5 — e agora também teclado e mouse do PC — jogando no Switch 2 como se fosse um Pro Controller, com gyro e vibração, usando duas ESP32 clássicas.</p>
   </header>
 
   <section>
     <h2>Arquitetura</h2>
-    <div class="diagram"><pre>DualSense ))) BT ))) [Placa-MicroB ds5-side] ── UART2 921600 ── [Placa-USBC switch-side] ))) BT ))) Switch 2
+    <div class="diagram"><pre>PC (SwitchKBM) ── USB 115200 ──┐
+DualSense ))) BT ))) [Placa-MicroB ds5-side] ── UART2 921600 ── [Placa-USBC switch-side] ))) BT ))) Switch 2
                      Bluepad32 (BTstack)    GPIO17 TX → GPIO16 RX   Pro Controller 057E:2009
                      COM4 · CH9102          GPIO16 RX ← GPIO17 TX   BTstack HID (base JereDev)
                                             GND ─────── GND         COM5 · CP2102
                                             5V  ─────── 5V  (opcional: um USB alimenta as duas)
-frame: AA 55 | type | len | payload | crc8      type 0x01 STATE  ·  type 0x02 RUMBLE</pre></div>
+frame: AA 55 | type | len | payload | crc8      type 0x01 STATE  ·  0x02 RUMBLE  ·  0x03 STATUS (→ PC)</pre></div>
   </section>
 
   <section>
@@ -58,17 +59,18 @@ frame: AA 55 | type | len | payload | crc8      type 0x01 STATE  ·  type 0x02 R
       <div class="phase"><span class="num">0</span><div><b>Switch 2 aceita a ESP32</b><span class="d">Bluedroid nunca recebeu conexão do console. Com BTstack (firmware de referência do JereDev) pareou e conectou.</span></div><span class="pill ok">ok</span></div>
       <div class="phase"><span class="num">1</span><div><b>Ler o DualSense</b><span class="d">Bluepad32 + protocolo serial. Botões, analógicos, gatilhos, gyro, acelerômetro e vibração validados (~340 frames/s).</span></div><span class="pill ok">ok</span></div>
       <div class="phase"><span class="num">2</span><div><b>Pro Controller completo em BTstack</b><span class="d">Relatório 0x30 com IMU real, HD Rumble de volta para o DualSense. Testado no Switch 2: botões, analógicos, gyro (Mario Odyssey) e vibração.</span></div><span class="pill ok">ok</span></div>
-      <div class="phase"><span class="num">3</span><div><b>Integração e ajuste</b><span class="d">Corrigido o travamento da Placa-MicroB (estouro de pilha). Falta investigar um congelamento único da Placa-USBC e reforçar o filtro de pareamento.</span></div><span class="pill wip">em andamento</span></div>
-      <div class="phase"><span class="num">4</span><div><b>Gatilhos "analógicos"</b><span class="d">Dois modos opcionais para jogos de corrida (The Crew Motorfest): gatilho no analógico direito e ZR/ZL pulsado.</span></div><span class="pill todo">pendente</span></div>
+      <div class="phase"><span class="num">3</span><div><b>Integração e ajuste</b><span class="d">Link com o Switch estável: ~62 relatórios/s, intervalo máx. ~20 ms, sem travadas. A Placa-MicroB só aceita aparelhos Sony (antes ela se conectava na Placa-USBC e dividia o rádio).</span></div><span class="pill ok">ok</span></div>
+      <div class="phase"><span class="num">4</span><div><b>Gatilhos "analógicos"</b><span class="d">PS + R2 alterna normal → analógico direito → ZR/ZL pulsado; a luz do DualSense mostra o modo. Falta testar no The Crew Motorfest.</span></div><span class="pill wip">implementado</span></div>
+      <div class="phase"><span class="num">5</span><div><b>Teclado e mouse</b><span class="d">Programa SwitchKBM: remapeamento estilo menu de jogo, perfis por jogo com sensibilidade própria, mouse como giroscópio. Fortnite jogável (usar espaço do giroscópio "Local").</span></div><span class="pill ok">ok</span></div>
     </div>
   </section>
 
   <section>
     <h2>Próximos passos</h2>
     <ul>
-      <li>Investigar o congelamento da Placa-USBC (aconteceu uma vez, às 03:39 de 11/10, sem log).</li>
-      <li>Filtro da Placa-MicroB: não tentar conectar na Placa-USBC quando o inquiry vem sem nome.</li>
-      <li>Modos de gatilho para o The Crew Motorfest (combinação para alternar, ex. PS + R2).</li>
+      <li>Testar os modos de gatilho no The Crew Motorfest e o DualSense junto com teclado e mouse.</li>
+      <li>CoD: ver se tem mira por giroscópio; senão usar F11 (mouse no analógico direito).</li>
+      <li>Alimentação por um USB só (5V entre as placas).</li>
     </ul>
   </section>
 
