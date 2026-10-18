@@ -37,14 +37,18 @@ footer { color: var(--muted); font-size: .85rem; }
 </style>
 <main>
   <header>
-    <div class="eyebrow">ATUALIZADO 2026-10-11</div>
+    <div class="eyebrow">ATUALIZADO 2026-10-18</div>
     <h1>Ponte DualSense–Switch 2</h1>
-    <p>Um controle de PS5 — e agora também teclado e mouse do PC — jogando no Switch 2 como se fosse um Pro Controller, com gyro e vibração, usando duas ESP32 clássicas.</p>
+    <p>Um controle de PS5 — e agora também teclado e mouse do PC — jogando no Switch 2 como se fosse um Pro Controller, com gyro e vibração, usando ESP32 clássicas. Desde 18/10 roda com uma placa só (a Placa-MicroB foi perdida): teclado e mouse vão do PC direto para a Placa-USBC; o DualSense está parado.</p>
   </header>
 
   <section>
     <h2>Arquitetura</h2>
-    <div class="diagram"><pre>PC (SwitchKBM) ── USB 115200 ──┐
+    <div class="diagram"><pre>Hoje (placa única):
+PC (SwitchKBM) ── USB 115200 (COM5) ── [Placa-USBC switch-side] ))) BT ))) Switch 2
+
+Com duas placas (DualSense):
+PC (SwitchKBM) ── USB 115200 ──┐
 DualSense ))) BT ))) [Placa-MicroB ds5-side] ── UART2 921600 ── [Placa-USBC switch-side] ))) BT ))) Switch 2
                      Bluepad32 (BTstack)    GPIO17 TX → GPIO16 RX   Pro Controller 057E:2009
                      COM4 · CH9102          GPIO16 RX ← GPIO17 TX   BTstack HID (base JereDev)
@@ -62,17 +66,17 @@ frame: AA 55 | type | len | payload | crc8      type 0x01 STATE  ·  0x02 RUMBLE
       <div class="phase"><span class="num">3</span><div><b>Integração e ajuste</b><span class="d">Link com o Switch estável: ~62 relatórios/s, intervalo máx. ~20 ms, sem travadas. A Placa-MicroB só aceita aparelhos Sony (antes ela se conectava na Placa-USBC e dividia o rádio).</span></div><span class="pill ok">ok</span></div>
       <div class="phase"><span class="num">4</span><div><b>Gatilhos "analógicos"</b><span class="d">PS + R2 alterna normal → analógico direito → ZR/ZL pulsado; a luz do DualSense mostra o modo. Falta testar no The Crew Motorfest.</span></div><span class="pill wip">implementado</span></div>
       <div class="phase"><span class="num">5</span><div><b>Teclado e mouse</b><span class="d">Programa SwitchKBM: remapeamento estilo menu de jogo, perfis por jogo com sensibilidade própria, mouse como giroscópio. Fortnite jogável (usar espaço do giroscópio "Local").</span></div><span class="pill ok">ok</span></div>
+      <div class="phase"><span class="num">6</span><div><b>Placa única</b><span class="d">A Placa-USBC lê o app do PC pela própria USB, faz a mescla e os modos de gatilho que a Placa-MicroB fazia e devolve o status ao app. Teclado e mouse testados no Switch 2.</span></div><span class="pill ok">ok</span></div>
     </div>
   </section>
 
   <section>
     <h2>Próximos passos</h2>
     <ul>
-      <li>Testar os modos de gatilho no The Crew Motorfest e o DualSense junto com teclado e mouse.</li>
+      <li>DualSense parado por decisão do usuário. Para voltar: comprar outra ESP32 clássica (não S2/S3/C3) ou fazer o PC ler o DualSense.</li>
       <li>CoD: ver se tem mira por giroscópio; senão usar F11 (mouse no analógico direito).</li>
-      <li>Alimentação por um USB só (5V entre as placas).</li>
-    </ul>
+          </ul>
   </section>
 
-  <footer>Repositório local <code>C:\Gabry\Projects\switch-ds5-bridge</code> · ESP-IDF 5.4.4 · Placa-MicroB COM4 · Placa-USBC COM5</footer>
+  <footer>GitHub (privado) <code>Carlos-Gabryel/switch-ds5-bridge</code> · ESP-IDF 5.4.4 · Placa-USBC COM5</footer>
 </main>
