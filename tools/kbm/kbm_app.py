@@ -34,9 +34,10 @@ def list_ports():
 
 
 def pick_default_port(ports):
-    for dev, label in ports:
-        if "ch9102" in label.lower():
-            return dev
+    for key in ("cp210", "ch9102"):
+        for dev, label in ports:
+            if key in label.lower():
+                return dev
     return ports[0][0] if ports else ""
 
 
@@ -588,7 +589,7 @@ class App(tk.Tk):
     def _start(self):
         port = self._cur_port()
         if not port:
-            messagebox.showwarning(APP_TITLE, "Selecione a porta COM da Placa-MicroB.")
+            messagebox.showwarning(APP_TITLE, "Selecione a porta COM da placa (Placa-USBC ou Placa-MicroB).")
             return
         if self.dirty and not self.save(restart=False):
             return

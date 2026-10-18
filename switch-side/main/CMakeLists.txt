@@ -16,6 +16,7 @@ idf_component_register(
         bt
         btstack
         bridge_proto
+        input_modes
         esp_driver_uart
         esp_timer
         nvs_flash

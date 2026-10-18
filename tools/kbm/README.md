@@ -14,6 +14,9 @@ App para Windows que captura teclado e mouse e envia um gamepad virtual pela ser
 
 ## Como rodar
 
+Modo placa unica: o app tambem pode ser ligado direto na Placa-USBC (COM5, CP2102): PC -> USB -> Placa-USBC -> Bluetooth -> Switch.
+Nesse modo o DualSense nao e usado.
+
 Requer Python 3 com `pyserial`. A porta COM e a da Placa-MicroB (CH9102, normalmente COM4).
 
 ```

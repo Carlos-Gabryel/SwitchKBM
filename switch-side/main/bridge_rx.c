@@ -1,6 +1,7 @@
 /*
- * bridge_rx: recebe bridge_state_t do ds5-side pela UART2 e entrega ao codigo JereDev
- * (controller_state_t + IMU) e devolve o rumble do Switch como bridge_rumble_t.
+ * bridge_rx: recebe bridge_state_t do ds5-side (UART2) e/ou do PC (UART0, console USB),
+ * mescla as duas fontes, aplica os modos de gatilho e entrega ao codigo JereDev
+ * (controller_state_t + IMU). Devolve o rumble do Switch como bridge_rumble_t (UART2).
  */
 #include "bridge_rx.h"
 
@@ -12,6 +13,7 @@
 #include "esp_timer.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "input_modes.h"
 
 static const char *TAG = "BRIDGE";
 
@@ -19,6 +21,11 @@ static const char *TAG = "BRIDGE";
 #define BRIDGE_TX_PIN 17
 #define BRIDGE_RX_PIN 16
 #define BRIDGE_BAUD 921600
+
+#define PC_UART UART_NUM_0 /* console USB: frames do app do PC (115200) */
+#define PC_TIMEOUT_US 100000
+#define MERGE_PERIOD_MS 2
+#define STATUS_PERIOD_MS 500
 
 #define STALE_US 200000
 #define STICK_DEADZONE 24
@@ -46,6 +53,12 @@ static bool s_have_state;
 static imu_sample_t s_imu[3]; /* ring, mais antigo em s_imu_head */
 static uint8_t s_imu_head;
 static uint8_t s_imu_count;
+
+/* Ultimos frames crus de cada fonte (antes do merge) */
+static bridge_state_t s_ds5_state, s_pc_state;
+static int64_t s_ds5_us, s_pc_us;
+static volatile uint32_t s_pc_frames, s_pc_crc_errors, s_ds5_frames, s_ds5_crc_errors;
+static volatile uint32_t s_ds5_gap_max_ms, s_pc_gap_max_ms;
 
 static volatile uint32_t s_rumble_sent;
 static uint8_t s_last_weak, s_last_strong;
@@ -220,61 +233,145 @@ void bridge_rx_rumble_stop(void)
     bridge_rx_handle_rumble(neutral);
 }
 
-/* ---- RX task ---- */
+/* ---- RX tasks ---- */
 
-static void rx_task(void *arg)
+/* Grava o estado ja mesclado e empilha a amostra IMU */
+static void ingest_state(const bridge_state_t *s)
 {
-    (void)arg;
+    imu_sample_t imu;
+    convert_imu(s, &imu);
+    int64_t t = esp_timer_get_time();
+    portENTER_CRITICAL(&s_lock);
+    s_state = *s;
+    s_state_us = t;
+    s_have_state = true;
+    s_imu[(s_imu_head + s_imu_count) % 3] = imu;
+    if (s_imu_count < 3) {
+        s_imu_count++;
+    } else {
+        s_imu_head = (s_imu_head + 1) % 3;
+    }
+    portEXIT_CRITICAL(&s_lock);
+}
+
+static const char *mode_name(trig_mode_t m)
+{
+    switch (m) {
+    case TRIG_MODE_STICK: return "STICK";
+    case TRIG_MODE_PWM: return "PWM";
+    default: return "NORMAL";
+    }
+}
+
+/* Le frames de uma UART; guarda o ultimo STATE cru em dst/dst_us */
+static void rx_common(uart_port_t uart, bridge_state_t *dst, int64_t *dst_us,
+                      volatile uint32_t *frames, volatile uint32_t *crc_errors,
+                      volatile uint32_t *gap_max_ms)
+{
     bridge_parser_t parser;
     bridge_parser_init(&parser);
     uint8_t buf[128];
-    int64_t last_log = esp_timer_get_time();
-    uint32_t last_ok = 0;
     int64_t last_frame_us = 0;
-    uint32_t gap_max_ms = 0;
 
     for (;;) {
-        int n = uart_read_bytes(BRIDGE_UART, buf, sizeof(buf), pdMS_TO_TICKS(20));
+        int n = uart_read_bytes(uart, buf, sizeof(buf), pdMS_TO_TICKS(20));
         for (int i = 0; i < n; i++) {
             if (!bridge_parser_feed(&parser, buf[i])) continue;
             if (parser.type != BRIDGE_TYPE_STATE || parser.len != sizeof(bridge_state_t)) continue;
             bridge_state_t s;
             memcpy(&s, parser.payload, sizeof(s));
-            imu_sample_t imu;
-            convert_imu(&s, &imu);
             int64_t t = esp_timer_get_time();
-            if (last_frame_us != 0 && (uint32_t)((t - last_frame_us) / 1000) > gap_max_ms) {
-                gap_max_ms = (uint32_t)((t - last_frame_us) / 1000);
+            if (last_frame_us != 0 && (uint32_t)((t - last_frame_us) / 1000) > *gap_max_ms) {
+                *gap_max_ms = (uint32_t)((t - last_frame_us) / 1000);
             }
             last_frame_us = t;
             portENTER_CRITICAL(&s_lock);
-            s_state = s;
-            s_state_us = t;
-            s_have_state = true;
-            s_imu[(s_imu_head + s_imu_count) % 3] = imu;
-            if (s_imu_count < 3) {
-                s_imu_count++;
-            } else {
-                s_imu_head = (s_imu_head + 1) % 3;
-            }
+            *dst = s;
+            *dst_us = t;
             portEXIT_CRITICAL(&s_lock);
         }
+        *frames = parser.frames_ok;
+        *crc_errors = parser.crc_errors;
+    }
+}
+
+static void rx_task(void *arg)
+{
+    (void)arg;
+    rx_common(BRIDGE_UART, &s_ds5_state, &s_ds5_us, &s_ds5_frames, &s_ds5_crc_errors,
+              &s_ds5_gap_max_ms);
+}
+
+static void pc_rx_task(void *arg)
+{
+    (void)arg;
+    rx_common(PC_UART, &s_pc_state, &s_pc_us, &s_pc_frames, &s_pc_crc_errors, &s_pc_gap_max_ms);
+}
+
+/* Mescla ds5 + PC, aplica modos de gatilho e alimenta o estado final */
+static void merge_task(void *arg)
+{
+    (void)arg;
+    input_modes_t modes;
+    input_modes_init(&modes);
+    TickType_t last_wake = xTaskGetTickCount();
+    int64_t last_log = esp_timer_get_time();
+    int64_t last_status = 0;
+    bool first_status = true;
+    uint32_t last_ds5 = 0, last_pc = 0;
+
+    for (;;) {
+        vTaskDelayUntil(&last_wake, pdMS_TO_TICKS(MERGE_PERIOD_MS));
+
+        bridge_state_t ds5, pc, merged;
+        int64_t ds5_us, pc_us;
+        portENTER_CRITICAL(&s_lock);
+        ds5 = s_ds5_state;
+        ds5_us = s_ds5_us;
+        pc = s_pc_state;
+        pc_us = s_pc_us;
+        portEXIT_CRITICAL(&s_lock);
 
         int64_t now = esp_timer_get_time();
+        bool ds5_ok = ds5_us != 0 && (now - ds5_us) < STALE_US && (ds5.flags & BRIDGE_FLAG_CONNECTED);
+        bool pc_ok = pc_us != 0 && (now - pc_us) < PC_TIMEOUT_US && (pc.flags & BRIDGE_FLAG_CONNECTED);
+
+        input_merge(ds5_ok ? &ds5 : NULL, pc_ok ? &pc : NULL, &merged);
+        bool mode_changed = input_modes_process(&modes, &merged, (uint32_t)(now / 1000));
+        trig_mode_t mode = input_modes_get(&modes);
+        if (mode_changed) {
+            ESP_LOGI(TAG, "Modo de gatilho: %s", mode_name(mode));
+        }
+
+        /* Sem fonte valida: nao atualiza, o estado envelhece e vira neutro */
+        if (ds5_ok || pc_ok) {
+            ingest_state(&merged);
+        }
+
+        if (mode_changed || first_status || (now - last_status) >= STATUS_PERIOD_MS * 1000) {
+            bridge_status_t st = { .trig_mode = (uint8_t)mode, .ds5_connected = ds5_ok ? 1 : 0 };
+            uint8_t frame[BRIDGE_FRAME_OVERHEAD + sizeof(st)];
+            size_t n = bridge_encode(BRIDGE_TYPE_STATUS, &st, sizeof(st), frame, sizeof(frame));
+            if (n) uart_write_bytes(PC_UART, frame, n);
+            first_status = false;
+            last_status = now;
+        }
+
         if (now - last_log >= 1000000) {
-            bridge_state_t s;
-            bool have;
-            portENTER_CRITICAL(&s_lock);
-            s = s_state;
-            have = s_have_state;
-            portEXIT_CRITICAL(&s_lock);
-            ESP_LOGI(TAG, "ok/s=%u crc_err=%u conn=%d btn=%08lx L=%d,%d R=%d,%d rumble_tx=%u gap_max=%ums",
-                     (unsigned)(parser.frames_ok - last_ok), (unsigned)parser.crc_errors,
-                     (have && (s.flags & BRIDGE_FLAG_CONNECTED)) ? 1 : 0,
-                     (unsigned long)s.buttons, s.lx, s.ly, s.rx, s.ry,
-                     (unsigned)s_rumble_sent, (unsigned)gap_max_ms);
-            gap_max_ms = 0;
-            last_ok = parser.frames_ok;
+            uint32_t ds5_f = s_ds5_frames, pc_f = s_pc_frames;
+            ESP_LOGI(TAG,
+                     "ds5/s=%u pc/s=%u crc_err=%u/%u conn=%d btn=%08lx L=%d,%d R=%d,%d mode=%s "
+                     "rumble_tx=%u gap_max=%u/%ums",
+                     (unsigned)(ds5_f - last_ds5), (unsigned)(pc_f - last_pc),
+                     (unsigned)s_ds5_crc_errors, (unsigned)s_pc_crc_errors,
+                     (ds5_ok || pc_ok) ? 1 : 0, (unsigned long)merged.buttons,
+                     merged.lx, merged.ly, merged.rx, merged.ry, mode_name(mode),
+                     (unsigned)s_rumble_sent, (unsigned)s_ds5_gap_max_ms,
+                     (unsigned)s_pc_gap_max_ms);
+            s_ds5_gap_max_ms = 0;
+            s_pc_gap_max_ms = 0;
+            last_ds5 = ds5_f;
+            last_pc = pc_f;
             last_log = now;
         }
     }
@@ -294,6 +391,10 @@ void bridge_rx_init(void)
     ESP_ERROR_CHECK(uart_param_config(BRIDGE_UART, &cfg));
     ESP_ERROR_CHECK(uart_set_pin(BRIDGE_UART, BRIDGE_TX_PIN, BRIDGE_RX_PIN,
                                  UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
+    ESP_ERROR_CHECK(uart_driver_install(PC_UART, 1024, 0, 0, NULL, 0));
     xTaskCreate(rx_task, "bridge_rx", 6144, NULL, 5, NULL);
+    xTaskCreate(pc_rx_task, "pc_rx", 4096, NULL, 5, NULL);
+    xTaskCreate(merge_task, "merge", 4096, NULL, 6, NULL);
     ESP_LOGI(TAG, "UART2 pronta (TX=%d RX=%d %d baud)", BRIDGE_TX_PIN, BRIDGE_RX_PIN, BRIDGE_BAUD);
+    ESP_LOGI(TAG, "UART0 (PC) pronta");
 }
