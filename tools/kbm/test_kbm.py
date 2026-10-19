@@ -398,5 +398,73 @@ class ProfileTests(unittest.TestCase):
             self.assertNotIn("deg_per_count", s.load_settings())
 
 
+class ArrowAimTests(unittest.TestCase):
+    L, U, R, D = 0x25, 0x26, 0x27, 0x28
+
+    @staticmethod
+    def mp(**kw):
+        return Mapper(Config(**kw), notify=lambda x: None)
+
+    def test_gyro_mode_arrows_stick(self):
+        m = self.mp()
+        m.key_down(self.U)
+        m.key_down(self.R)
+        st = m.build_state(1.0, 0.005, True)
+        self.assertEqual(st["rx"], round(511 * 0.7071))
+        self.assertEqual(st["ry"], round(-512 * 0.7071))
+        self.assertEqual(st["gyro"], (0, 0, 0))
+
+    def test_gyro_mode_left(self):
+        m = self.mp()
+        m.key_down(self.L)
+        st = m.build_state(1.0, 0.005, True)
+        self.assertEqual((st["rx"], st["ry"]), (-512, 0))
+
+    def _ref_gyro(self, dx, dy):
+        m = self.mp()
+        m.mouse_move(dx, dy)
+        return m.build_state(1.0, 0.005, True)["gyro"]
+
+    def test_stick_mode_right_arrow_gyro(self):
+        m = self.mp(aim_mode="stick")
+        m.key_down(self.R)
+        st = m.build_state(1.0, 0.005, True)
+        self.assertEqual((st["rx"], st["ry"]), (0, 0))
+        ref = self._ref_gyro(50, 0)
+        self.assertNotEqual(st["gyro"][1], 0)
+        self.assertEqual(st["gyro"][1] > 0, ref[1] > 0)
+        self.assertEqual(st["gyro"][1], -1440)
+
+    def test_stick_mode_up_arrow_pitch_sign(self):
+        m = self.mp(aim_mode="stick")
+        m.key_down(self.U)
+        st = m.build_state(1.0, 0.005, True)
+        ref = self._ref_gyro(0, -50)
+        self.assertNotEqual(st["gyro"][0], 0)
+        self.assertEqual(st["gyro"][0] > 0, ref[0] > 0)
+
+    def test_arrow_as_move_keeps_function(self):
+        mv = {"up": "up", "down": "down", "left": "left", "right": "right", "walk": "alt"}
+        m = self.mp(move=mv)
+        m.key_down(self.U)
+        st = m.build_state(1.0, 0.005, True)
+        self.assertEqual((st["ly"], st["rx"], st["ry"]), (-512, 0, 0))
+
+    def test_arrow_as_button_keeps_function(self):
+        m = self.mp(binds={"up": "A"})
+        m.key_down(self.U)
+        st = m.build_state(1.0, 0.005, True)
+        self.assertTrue(st["buttons"] & (1 << B["A"]))
+        self.assertEqual(st["ry"], 0)
+
+    def test_mouse_and_arrows_together_in_stick_mode(self):
+        m = self.mp(aim_mode="stick")
+        m.key_down(self.U)
+        m.mouse_move(100, 0)
+        st = m.build_state(1.0, 0.005, True)
+        self.assertGreater(st["rx"], 0)
+        self.assertNotEqual(st["gyro"][0], 0)
+
+
 if __name__ == "__main__":
     unittest.main()

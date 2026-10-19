@@ -216,7 +216,8 @@ class App(tk.Tk):
         for rid, label in bd.MOVE_ROWS:
             self._make_row(r, rid, label, 1)
             r += 1
-        ttk.Label(f, text="Mira: mouse (giroscópio) — não remapeável aqui.",
+        ttk.Label(f, text="Mira: mouse + setas (o modo de mira define quem controla o giroscópio e quem controla o analógico direito).",
+                  wraplength=460, justify="left",
                   foreground="#555").grid(row=r, column=0, columnspan=5, sticky="w", padx=4,
                                           pady=(8, 4))
 
