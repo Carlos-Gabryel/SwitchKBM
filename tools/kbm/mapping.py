@@ -13,6 +13,7 @@ VK_F7, VK_F8, VK_F10, VK_F11, VK_F12 = 0x76, 0x77, 0x79, 0x7A, 0x7B
 VK_ALT = 0x12
 HOTKEY_VKS = {VK_F7, VK_F8, VK_F10, VK_F11, VK_F12}
 VK_W, VK_A, VK_S, VK_D = 0x57, 0x41, 0x53, 0x44
+ARROW_VKS = {"left": 0x25, "up": 0x26, "right": 0x27, "down": 0x28}
 
 MOUSE_NAMES = ("lmb", "rmb", "mmb", "x1", "x2", "wheel_up", "wheel_down")
 
@@ -111,6 +112,8 @@ class Config:
     wheel_pulse_ms: float = 80.0
     accel_noise: int = 40           # ruido no accel (1/8192 G) quando ha giro; evita o Switch aprender drift
     gyro_deadband_units: int = 0    # zera eixo de giro com |unidades| menor que isso
+    arrow_gyro_dps: float = 90.0    # setas no modo analogico: velocidade do giro (graus/s)
+    arrow_stick_scale: float = 1.0  # setas no modo giro: deflexao do analogico direito (0..1)
     move: dict = field(default_factory=lambda: dict(DEFAULT_MOVE))
     binds: dict = field(default_factory=lambda: dict(DEFAULT_BINDS))
 
@@ -170,6 +173,9 @@ class Mapper:
                 self._key_binds[KEY_NAMES[n]] = btn
             else:
                 self.warnings.append("tecla desconhecida: %s" % name)
+        # setas so miram se nao forem usadas como botao nem como movimento
+        self._aim_vk = {d: vk for d, vk in ARROW_VKS.items()
+                        if vk not in self._key_binds and vk not in self._move_vk.values()}
 
     # ---- entradas ----
     @staticmethod
@@ -246,6 +252,11 @@ class Mapper:
             v += _sgn(v) * self.cfg.stick_deadzone_comp
         return int(max(-512, min(511, round(v))))
 
+    def _arrow_dir(self):
+        """Direcao das setas livres: (x, y), Y positivo = baixo."""
+        v = {d: (vk in self.pressed) for d, vk in self._aim_vk.items()}
+        return v.get("right", 0) - v.get("left", 0), v.get("down", 0) - v.get("up", 0)
+
     def build_state(self, now_s, dt_s, captured):
         st = {"flags": 0, "battery": 200, "buttons": 0, "lx": 0, "ly": 0, "rx": 0, "ry": 0,
               "l2": 0, "r2": 0, "gyro": (0, 0, 0), "accel": (0, 8192, 0)}
@@ -299,41 +310,56 @@ class Mapper:
             st["lx"] = round((511 if x > 0 else -512) * mag) if x else 0
             st["ly"] = round((511 if y > 0 else -512) * mag) if y else 0
 
-        # mira
-        if self.aim_mode == "stick":
+        # mira: mouse e setas dividem giro e analogico direito conforme aim_mode
+        adx, ady = self._arrow_dir()
+        stick_mode = self.aim_mode == "stick"
+        if stick_mode:
             st["rx"] = self._stick_axis(self.acc_dx, dt)
             st["ry"] = self._stick_axis(self.acc_dy, dt)
             self.acc_dx = self.acc_dy = 0.0
+            uy = up = 0
         else:
+            if adx or ady:
+                mag = (0.7071 if (adx and ady) else 1.0) * self.cfg.arrow_stick_scale
+                st["rx"] = round((511 if adx > 0 else -512) * mag) if adx else 0
+                st["ry"] = round((511 if ady > 0 else -512) * mag) if ady else 0
             uy, self.acc_dx = self._gyro_axis(self.acc_dx, dt)
             up, self.acc_dy = self._gyro_axis(self.acc_dy, dt)
-            yaw = -uy if self.cfg.invert_yaw else uy
-            pitch = -up if self.cfg.invert_pitch else up
-            db = self.cfg.gyro_deadband_units
-            if db and abs(pitch) < db:
-                pitch = 0
-            if db and abs(yaw) < db:
-                yaw = 0
-            # Controle virtual fisicamente coerente: integra o pitch (angulo theta em torno do
-            # eixo x) e manda a gravidade inclinada no accel; o yaw gira em torno da vertical do
-            # mundo. Sem isso o Switch funde gyro x accel conflitantes -> drift e, inclinado,
-            # o yaw vira rolagem (mira so sobe/desce).
-            # sem virtual_tilt: controle sempre deitado (theta so acumula, sem limite)
-            lim = self.cfg.max_pitch_deg if self.cfg.virtual_tilt else float("inf")
-            new_theta = max(-lim, min(lim, self.theta + pitch / 16.0 * dt))
-            pitch = round((new_theta - self.theta) / dt * 16) if dt > 0 else 0
-            self.theta = new_theta
-            tilt = math.radians(self.theta) if self.cfg.virtual_tilt else 0.0
-            c, sn = math.cos(tilt), math.sin(tilt)
-            st["gyro"] = (pitch, round(yaw * c), round(-yaw * sn))
-            ax, ay, az = 0.0, 8192 * c, -8192 * sn
-            n = int(self.cfg.accel_noise)
-            if n > 0 and (pitch or yaw):
-                # giro constante + accel perfeito => Switch trata como bias (drift); ruido evita
-                ax += random.randint(-n, n)
-                ay += random.randint(-n, n)
-                az += random.randint(-n, n)
-            st["accel"] = (round(ax), round(ay), round(az))
+        if stick_mode and (adx or ady):
+            # mesma convencao do mouse: direita = dx positivo, cima = dy negativo
+            r = self.cfg.arrow_gyro_dps * 16
+            f = 0.7071 if (adx and ady) else 1.0
+            uy += round(adx * r * f)
+            up += round(ady * r * f)
+        uy = max(-32000, min(32000, uy))
+        up = max(-32000, min(32000, up))
+        yaw = -uy if self.cfg.invert_yaw else uy
+        pitch = -up if self.cfg.invert_pitch else up
+        db = self.cfg.gyro_deadband_units
+        if db and abs(pitch) < db:
+            pitch = 0
+        if db and abs(yaw) < db:
+            yaw = 0
+        # Controle virtual fisicamente coerente: integra o pitch (angulo theta em torno do
+        # eixo x) e manda a gravidade inclinada no accel; o yaw gira em torno da vertical do
+        # mundo. Sem isso o Switch funde gyro x accel conflitantes -> drift e, inclinado,
+        # o yaw vira rolagem (mira so sobe/desce).
+        # sem virtual_tilt: controle sempre deitado (theta so acumula, sem limite)
+        lim = self.cfg.max_pitch_deg if self.cfg.virtual_tilt else float("inf")
+        new_theta = max(-lim, min(lim, self.theta + pitch / 16.0 * dt))
+        pitch = round((new_theta - self.theta) / dt * 16) if dt > 0 else 0
+        self.theta = new_theta
+        tilt = math.radians(self.theta) if self.cfg.virtual_tilt else 0.0
+        c, sn = math.cos(tilt), math.sin(tilt)
+        st["gyro"] = (pitch, round(yaw * c), round(-yaw * sn))
+        gx, gy, gz = 0.0, 8192 * c, -8192 * sn
+        n = int(self.cfg.accel_noise)
+        if n > 0 and (pitch or yaw):
+            # giro constante + accel perfeito => Switch trata como bias (drift); ruido evita
+            gx += random.randint(-n, n)
+            gy += random.randint(-n, n)
+            gz += random.randint(-n, n)
+        st["accel"] = (round(gx), round(gy), round(gz))
 
         st["buttons"] = buttons
         st["l2"] = l2

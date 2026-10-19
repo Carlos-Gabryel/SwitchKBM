@@ -39,6 +39,10 @@ A serial e aberta com DTR/RTS desligados para nao resetar o ESP32. Envio a 200 H
 
 Hotkeys nunca viram botao do gamepad. Enquanto capturado, todo teclado e mouse ficam bloqueados para o Windows (o cursor nao se mexe).
 
+## Setas
+
+As setas mirando com o que o mouse nao controla: no modo giroscopio o mouse gira o giroscopio e as setas movem o analogico direito; no modo analogico o mouse move o analogico direito e as setas giram o giroscopio a taxa constante (`arrow_gyro_dps`). Seta usada como botao ou como movimento no perfil mantem essa funcao.
+
 ## Mapeamento padrao
 
 - Movimento: W/A/S/D (stick esquerdo; diagonal normalizada; Alt = andar, 50%).
@@ -50,6 +54,8 @@ Hotkeys nunca viram botao do gamepad. Enquanto capturado, todo teclado e mouse f
 Chaves ausentes usam o padrao. `binds`, se presente, substitui todo o mapa padrao.
 
 - `deg_per_count` (0.05): graus de giro por contagem do mouse.
+- `arrow_gyro_dps` (90): velocidade do giro das setas no modo analogico (graus/s).
+- `arrow_stick_scale` (1.0): deflexao do analogico direito das setas no modo giroscopio (0..1).
 - `gyro_sensitivity` (1.0): multiplicador inicial (ajustavel em F7/F8).
 - `invert_yaw`, `invert_pitch` (true): invertem o sinal do giro.
 - `aim_mode`: `gyro` ou `stick`.
