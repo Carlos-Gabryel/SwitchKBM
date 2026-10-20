@@ -10,7 +10,7 @@ from runners import BridgeRunner, FlashRunner, list_ports, pick_default_port
 
 APP_TITLE = "Switch KBM"
 AIM_LABELS = {"gyro": "Giroscópio", "stick": "Analógico direito"}
-STATUS_PREFIXES = ("Modo gatilho", "CAPTURADO", "LIBERADO", "Modo de mira",
+STATUS_PREFIXES = ("CAPTURADO", "LIBERADO", "Modo de mira",
                    "Sensibilidade")
 CAPTURE_HINT = "Pressione a tecla (ou clique/roda do mouse). Esc cancela."
 NO_PORT_MSG = "Selecione a porta COM da placa ESP32."

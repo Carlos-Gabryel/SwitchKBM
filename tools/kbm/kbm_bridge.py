@@ -14,13 +14,11 @@ import proto  # noqa: E402
 from mapping import Config, Mapper, HOTKEY_VKS, VK_F12  # noqa: E402
 
 RATE_HZ = 200
-TRIG_MODES = {0: "normal", 1: "stick", 2: "pwm"}
 
 BANNER = """Teclado e mouse -> Switch (bridge)
 Hotkeys:
   F12  captura / libera (liberar sempre funciona)
   F11  alterna mira: giroscopio <-> analogico
-  F10  troca modo do gatilho no ESP32 (normal -> stick -> pwm)
   F8 / F7  sensibilidade do giro +10% / -10%
 Ctrl+C ou fechar o console tambem libera tudo."""
 
@@ -53,7 +51,6 @@ class Bridge:
         self.hook = None
         self.seq = 0
         self.parser = proto.StreamParser()
-        self.last_mode = None
         # instrumentacao (so contadores)
         self.st_write_max = 0.0
 
@@ -130,11 +127,7 @@ class Bridge:
         if not data:
             return
         for ftype, payload in self.parser.feed(data):
-            if ftype == proto.TYPE_STATUS and len(payload) >= 1:
-                mode = payload[0]
-                if mode != self.last_mode:
-                    self.last_mode = mode
-                    self.say("Modo gatilho: %s" % TRIG_MODES.get(mode, str(mode)))
+            pass   # STATUS do ESP32 (modo de gatilho legado) e ignorado
         for line in self.parser.pop_text():
             if self.args.verbose:
                 self.say("[esp] " + line)

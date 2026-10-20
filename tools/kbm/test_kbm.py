@@ -204,25 +204,6 @@ class MapperTests(unittest.TestCase):
         self.assertAlmostEqual(m.acc_dx, 0.0, places=3)
         self.assertEqual(m.build_state(0, 0.005, True)["gyro"][1], 0)
 
-    def test_f10_combo(self):
-        m = mk()
-        self.assertEqual(m.key_down(0x79, 5.0), "cycle_trigger")
-        self.assertEqual(m.key_down(0x79, 5.01), "repeat")   # auto-repeat ignorado
-        sysb, r2b = bit("SYSTEM"), 1 << 7
-        s = m.build_state(5.000, 0.005, True)
-        self.assertTrue(s["buttons"] & sysb)
-        self.assertFalse(s["buttons"] & r2b)
-        self.assertEqual(s["r2"], 0)
-        s = m.build_state(5.020, 0.005, True)
-        self.assertTrue(s["buttons"] & sysb)
-        self.assertTrue(s["buttons"] & r2b)
-        self.assertEqual(s["r2"], 1023)
-        s = m.build_state(5.050, 0.005, True)
-        self.assertTrue(s["buttons"] & sysb)
-        self.assertFalse(s["buttons"] & r2b)
-        s = m.build_state(5.070, 0.005, True)
-        self.assertEqual(s["buttons"], 0)
-
     def test_f11_stick_mode(self):
         m = mk()
         self.assertEqual(m.key_down(0x7A), "toggle_aim")
@@ -250,9 +231,8 @@ class MapperTests(unittest.TestCase):
 
     def test_hotkeys_not_buttons(self):
         m = mk()
-        for vk in (0x7B, 0x7A, 0x79, 0x77, 0x76):
+        for vk in (0x7B, 0x7A, 0x77, 0x76):
             self.assertIsNotNone(m.key_down(vk, 0))
-        m.combo_start = None
         st = m.build_state(100, 0.005, True)
         self.assertEqual(st["buttons"], 0)
         self.assertEqual((st["lx"], st["ly"], st["l2"], st["r2"]), (0, 0, 0, 0))
@@ -308,7 +288,7 @@ class MoveTests(unittest.TestCase):
         line = [x for x in msgs if x.startswith("SENS")][0]
         v = bd.parse_sens_line(line)
         self.assertAlmostEqual(v, 0.055, places=4)
-        self.assertIsNone(bd.parse_sens_line("Modo gatilho: stick"))
+        self.assertIsNone(bd.parse_sens_line("CAPTURADO"))
 
 
 class KeyTableTests(unittest.TestCase):
@@ -329,9 +309,13 @@ class BindingTests(unittest.TestCase):
         return bd.profile_to_rows({"binds": {"g": "R1", "space": "A"}})
 
     def test_reserved_rejected(self):
-        for k in ("f7", "f8", "f10", "f11", "f12"):
+        for k in ("f7", "f8", "f11", "f12"):
             with self.assertRaises(ValueError):
                 bd.assign_key(self.rows(), "B", 0, k)
+
+    def test_f10_assignable(self):
+        new, _ = bd.assign_key(self.rows(), "B", 0, "f10")
+        self.assertEqual(new["B"][0], "f10")
 
     def test_move_key(self):
         new, moved = bd.assign_key(self.rows(), "B", 0, "g")

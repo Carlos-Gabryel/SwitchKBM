@@ -5,7 +5,7 @@
 Interface gráfica para remapear teclado/mouse -> botões do Switch (como o menu de controles de um jogo) e iniciar/parar o bridge.
 
 - Gerar o exe: `powershell -ExecutionPolicy Bypass -File tools\kbm\build_exe.ps1` (cria `dist\SwitchKBM.exe`; precisa de Python + pip). Sem exe: `python tools\kbm\kbm_app.py`.
-- Uso: escolha o Perfil (um por jogo) e a Porta (a CH9102 vem pré-selecionada). Clique numa célula "Tecla 1/2", pressione a tecla (ou clique/roda do mouse); Esc cancela. Clique direito na célula: botões laterais do mouse, roda, Esc, Limpar. F7/F8/F10/F11/F12 são reservadas. Se a tecla já estava em outro botão, ela é movida. Movimento (WASD/Andar devagar) também é configurável.
+- Uso: escolha o Perfil (um por jogo) e a Porta (a CH9102 vem pré-selecionada). Clique numa célula "Tecla 1/2", pressione a tecla (ou clique/roda do mouse); Esc cancela. Clique direito na célula: botões laterais do mouse, roda, Esc, Limpar. F7/F8/F11/F12 são reservadas. Se a tecla já estava em outro botão, ela é movida. Movimento (WASD/Andar devagar) também é configurável.
 - Ajuste a mira/sensibilidade na aba Controles (Modo de mira e Sensibilidade) e em Ajustes (guardados no perfil). Clique em **Salvar** (título com `*` = alterações pendentes), depois **Iniciar**. Com o bridge rodando, o botão **Capturar** (ao lado de Parar) ou **F12** captura; só **F12** libera. Salvar com o bridge rodando reinicia-o. F7/F8 durante o jogo mudam a sensibilidade na tela (marca como não salvo; clique Salvar para manter naquele perfil).
 - Perfis ficam em `profiles\` ao lado do exe (a partir do código: `tools\kbm\profiles\`); `settings.json` na mesma pasta guarda o último perfil e a porta. Na primeira execução é criado "Padrão" (migra `config.json`).
 - Selftest sem interação: `SwitchKBM.exe --selftest`.
@@ -31,7 +31,6 @@ A serial e aberta com DTR/RTS desligados para nao resetar o ESP32. Envio a 200 H
 |-------|------|
 | F12 | captura / libera teclado e mouse |
 | F11 | alterna mira giroscopio <-> analogico (stick direito) |
-| F10 | troca o modo do gatilho no ESP32 (normal -> stick -> pwm) |
 | F8 / F7 | sensibilidade do giro x1.1 / /1.1 (imprime o novo valor) |
 
 Hotkeys nunca viram botao do gamepad. Enquanto capturado, todo teclado e mouse ficam bloqueados para o Windows (o cursor nao se mexe).
@@ -75,14 +74,5 @@ Dois botoes de ajuste: a sensibilidade de giro dentro do jogo (Fortnite/CoD) e o
 - Ctrl+Alt+Del sempre funciona.
 - Fechar o console ou Ctrl+C remove os hooks e envia quadros neutros ao ESP32.
 - Eventos injetados (por software) sao ignorados.
-
-## Modos de gatilho
-
-O ESP32 tem 3 modos, trocados com F10:
-- normal: R2/L2 viram ZR/ZL digitais;
-- stick: R2/L2 viram o eixo Y do stick direito;
-- pwm: ZR/ZL pulsados proporcionalmente ao quanto o gatilho e apertado.
-
-O app imprime "Modo gatilho: ..." quando o ESP32 informa a mudanca.
 
 **Firmware embutido.** O exe já contém o firmware switch-side; o botão "Preparar placa" grava na porta COM selecionada (esptool embutido). `build_exe.ps1` recompila o firmware (ESP-IDF) antes de empacotar; `-SkipFirmware` pula e usa o `switch-sideuild` existente.
