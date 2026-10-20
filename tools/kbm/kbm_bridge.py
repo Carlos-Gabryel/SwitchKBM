@@ -82,10 +82,13 @@ class Bridge:
             self.hook.end_capture()
         with self.lock:
             self.captured = want
+            f12_held = VK_F12 in self.mapper.pressed
             self.mapper.release_all()
-            # F12 ja esta marcado como pressionado pelo key_down; release_all limpou, entao
-            # o auto-repeat poderia religar. Reinsere para manter a borda.
-            self.mapper.pressed.add(VK_F12)
+            # Veio do F12: release_all limpou a tecla e o auto-repeat poderia religar; reinsere
+            # para manter a borda. Veio do botao do app: nao reinsere, senao o proximo F12 vira
+            # "repeat" e e preciso apertar duas vezes para soltar.
+            if f12_held:
+                self.mapper.pressed.add(VK_F12)
         self.say("CAPTURADO (F12 libera)" if self.captured else "LIBERADO")
 
     def on_capture_lost(self):

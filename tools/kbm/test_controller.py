@@ -151,5 +151,29 @@ class CaptureMapTests(unittest.TestCase):
         self.assertIsNone(m.mouse_result(0x202))      # botao solto nao conta
 
 
+
+class BridgeCaptureToggleTest(unittest.TestCase):
+    def _bridge(self):
+        import kbm_bridge
+        from mapping import Config
+        return kbm_bridge.Bridge(None, Config())
+
+    def test_button_capture_then_single_f12_releases(self):
+        from mapping import VK_F12
+        br = self._bridge()
+        br._toggle_capture()                    # botao "Capturar" (sem F12 apertado)
+        self.assertTrue(br.captured)
+        self.assertEqual(br.mapper.key_down(VK_F12), "toggle_capture")   # 1o F12 ja solta
+
+    def test_f12_capture_ignores_autorepeat(self):
+        from mapping import VK_F12
+        br = self._bridge()
+        self.assertEqual(br.mapper.key_down(VK_F12), "toggle_capture")
+        br._toggle_capture()
+        self.assertEqual(br.mapper.key_down(VK_F12), "repeat")           # segurando F12
+        br.mapper.key_up(VK_F12)
+        self.assertEqual(br.mapper.key_down(VK_F12), "toggle_capture")
+
+
 if __name__ == "__main__":
     unittest.main()
