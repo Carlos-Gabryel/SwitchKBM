@@ -75,4 +75,4 @@ Dois botoes de ajuste: a sensibilidade de giro dentro do jogo (Fortnite/CoD) e o
 - Fechar o console ou Ctrl+C remove os hooks e envia quadros neutros ao ESP32.
 - Eventos injetados (por software) sao ignorados.
 
-**Firmware embutido.** O exe já contém o firmware switch-side; o botão "Preparar placa" grava na porta COM selecionada (esptool embutido). `build_exe.ps1` recompila o firmware (ESP-IDF) antes de empacotar; `-SkipFirmware` pula e usa o `switch-sideuild` existente.
+**Firmware embutido.** O exe já contém o firmware switch-side; o botão "Preparar placa" grava na porta COM selecionada (esptool embutido). `build_exe.ps1` recompila o firmware (ESP-IDF) antes de empacotar; `-SkipFirmware` pula e usa o `switch-side\build` existente. O build gera o exe em `.pack\dist` e copia só o `SwitchKBM.exe` para `dist\` (o flet pack apaga a pasta de saída inteira).
