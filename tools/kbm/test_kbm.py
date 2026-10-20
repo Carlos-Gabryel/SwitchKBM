@@ -466,5 +466,49 @@ class ArrowAimTests(unittest.TestCase):
         self.assertNotEqual(st["gyro"][0], 0)
 
 
+class FlasherTests(unittest.TestCase):
+    def setUp(self):
+        import json
+        import shutil
+        import tempfile
+        self.d = tempfile.mkdtemp(prefix="kbmfw")
+        self.addCleanup(shutil.rmtree, self.d, True)
+        self.files = {"0x10000": "switch_side.bin", "0x1000": "bootloader/bootloader.bin",
+                      "0x8000": "partition_table/partition-table.bin"}
+        for rel in self.files.values():
+            os.makedirs(os.path.dirname(os.path.join(self.d, rel)), exist_ok=True)
+            open(os.path.join(self.d, rel), "wb").close()
+        self.manifest = {"write_flash_args": ["--flash_mode", "dio"], "flash_files": self.files,
+                         "extra_esptool_args": {"after": "hard_reset", "before": "default_reset",
+                                                "stub": True, "chip": "esp32"}}
+        with open(os.path.join(self.d, "flasher_args.json"), "w") as f:
+            json.dump(self.manifest, f)
+
+    def test_args_order_and_paths(self):
+        import flasher
+        a = flasher.esptool_args("COM9", self.d, flasher.load_manifest(self.d))
+        self.assertEqual(a[:4], ["--chip", "esp32", "--port", "COM9"])
+        self.assertIn("default_reset", a)
+        self.assertIn("hard_reset", a)
+        self.assertNotIn("--no-stub", a)
+        i = a.index("write_flash")
+        tail = a[i + 1:]
+        self.assertEqual(tail[:2], ["--flash_mode", "dio"])
+        pairs = tail[2:]
+        self.assertEqual(pairs[0::2], ["0x1000", "0x8000", "0x10000"])
+        self.assertTrue(all(os.path.isabs(x) for x in pairs[1::2]))
+
+    def test_no_stub(self):
+        import flasher
+        self.manifest["extra_esptool_args"]["stub"] = False
+        self.assertIn("--no-stub", flasher.esptool_args("COM9", self.d, self.manifest))
+
+    def test_missing_bin_raises(self):
+        import flasher
+        os.remove(os.path.join(self.d, "switch_side.bin"))
+        with self.assertRaises(FileNotFoundError):
+            flasher.load_manifest(self.d)
+
+
 if __name__ == "__main__":
     unittest.main()

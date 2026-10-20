@@ -87,3 +87,5 @@ O ESP32 tem 3 modos, trocados com F10 (ou PS+R2 no DualSense):
 - pwm: ZR/ZL pulsados proporcionalmente ao quanto o gatilho e apertado.
 
 O app imprime "Modo gatilho: ..." quando o ESP32 informa a mudanca.
+
+**Firmware embutido.** O exe já contém o firmware switch-side; o botão "Preparar placa" grava na porta COM selecionada (esptool embutido). `build_exe.ps1` recompila o firmware (ESP-IDF) antes de empacotar; `-SkipFirmware` pula e usa o `switch-sideuild` existente.
