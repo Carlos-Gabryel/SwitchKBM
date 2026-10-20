@@ -39,7 +39,7 @@ $buildArgs = @("--paths=$kbm",
     "--hidden-import=serial.tools.list_ports", "--hidden-import=esptool",
     "--collect-data=esptool", "--collect-submodules=esptool", "--collect-submodules=ui")
 $packArgs = @("-c", $flet, "pack", "$kbm\kbm_app.py", "--name", "SwitchKBM", "--icon", "$kbm\ui\assets\icon.ico", "-y",
-    "--distpath", "$repo\dist", "--product-name", "Switch KBM",
+    "--distpath", "$work\dist", "--product-name", "Switch KBM",
     "--add-data", "$fwDst;firmware", "$kbm\ui\assets;ui\assets")
 foreach ($a in $buildArgs) { $packArgs += "--pyinstaller-build-args=$a" }
 $env:PYTHONPATH = $kbm
@@ -48,4 +48,8 @@ try {
     python @packArgs
     if ($LASTEXITCODE -ne 0) { throw "flet pack falhou" }
 } finally { Pop-Location }
-if (Test-Path "$repo\dist\SwitchKBM.exe") { Write-Host "OK: $repo\dist\SwitchKBM.exe" } else { throw "exe nao gerado" }
+# o flet pack APAGA a pasta --distpath inteira: gera em .pack\dist e copia so o exe para dist
+if (-not (Test-Path "$work\dist\SwitchKBM.exe")) { throw "exe nao gerado" }
+New-Item -ItemType Directory -Force "$repo\dist" | Out-Null
+Copy-Item -Force "$work\dist\SwitchKBM.exe" "$repo\dist\SwitchKBM.exe"
+Write-Host "OK: $repo\dist\SwitchKBM.exe"

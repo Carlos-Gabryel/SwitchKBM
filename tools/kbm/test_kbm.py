@@ -350,6 +350,20 @@ class ProfileTests(unittest.TestCase):
             self.assertEqual(s.names(), [pf.DEFAULT_NAME])
             self.assertEqual(s.load(pf.DEFAULT_NAME)["move"], mapping.DEFAULT_MOVE)
 
+    def test_migrate_data_copies_old_profiles(self):
+        with tempfile.TemporaryDirectory() as d:
+            old, new = os.path.join(d, "old"), os.path.join(d, "new")
+            os.makedirs(os.path.join(old, "profiles"))
+            with open(os.path.join(old, "profiles", "Fortnite.json"), "w", encoding="utf-8") as f:
+                f.write("{}")
+            with open(os.path.join(old, "settings.json"), "w", encoding="utf-8") as f:
+                f.write('{"port": "COM5"}')
+            self.assertTrue(pf.migrate_data(old, new))
+            self.assertTrue(os.path.isfile(os.path.join(new, "profiles", "Fortnite.json")))
+            self.assertTrue(os.path.isfile(os.path.join(new, "settings.json")))
+            self.assertTrue(os.path.isfile(os.path.join(old, "profiles", "Fortnite.json")))  # nao apaga
+            self.assertFalse(pf.migrate_data(old, new))     # ja migrado: nao sobrescreve
+
     def test_migrate_legacy(self):
         with tempfile.TemporaryDirectory() as d:
             legacy = os.path.join(d, "config.json")
