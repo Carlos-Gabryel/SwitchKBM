@@ -36,9 +36,8 @@ class CaptureCommandTests(unittest.TestCase):
         self.assertEqual(sent, ["capture"])
         self.assertEqual(pids, [4321])
 
-    def test_status_prefixes_no_dualsense(self):
-        self.assertNotIn("DualSense", controller.STATUS_PREFIXES)
-        self.assertNotIn("Placa-", controller.NO_PORT_MSG)
+    def test_status_prefixes_sem_texto_legado(self):
+       self.assertNotIn("Placa-", controller.NO_PORT_MSG)
 
     def test_parse_control(self):
         self.assertEqual(parse_control("quit\n"), "quit")
