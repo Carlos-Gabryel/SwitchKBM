@@ -4,8 +4,16 @@ from __future__ import annotations
 import flet as ft
 
 import bindings as bd
+from controller import AIM_LABELS
 from mapping import display_name
 from ui import theme as t
+
+def _fmt(value, digits: int) -> str:
+    try:
+        return ("%." + str(digits) + "f") % float(value)
+    except (TypeError, ValueError):
+        return str(value)
+
 
 WAIT_TEXT = "Pressione uma tecla… (Esc cancela)"
 EXTRA_KEYS = (("Botão lateral 1 do mouse", "x1"), ("Botão lateral 2 do mouse", "x2"),
@@ -20,6 +28,13 @@ class ControlesView:
         self.profile = ft.Dropdown(width=220, on_select=self._pick, **t.field_style())
         self.dirty_mark = t.text("• não salvo", 12, t.AMBER)
         self.msg = t.muted("", 12)
+        self.aim = ft.Dropdown(
+            expand=True, on_select=lambda e: self._set("aim", e.control.value),
+            options=[ft.DropdownOption(key=v, text=v) for v in AIM_LABELS.values()], **t.field_style())
+        self.sens_field = ft.TextField(width=80, text_align=ft.TextAlign.RIGHT,
+                                       on_change=lambda e: self._set("sens", e.control.value), **t.field_style())
+        self.sens = ft.Slider(min=0.005, max=0.3, expand=True, active_color=t.ACCENT, inactive_color=t.FIELD,
+                              thumb_color=t.ACCENT, on_change=lambda e: self._set("sens", round(e.control.value, 4)))
         self.rows_col = ft.Column(spacing=2, scroll=ft.ScrollMode.AUTO, expand=True)
         self._build_rows()
         top = ft.Row([t.muted("Perfil", 12), self.profile,
@@ -30,8 +45,16 @@ class ControlesView:
         actions = ft.Row([t.button("Salvar", self._save, icon_name="save"),
                           t.button("Restaurar padrão", self._restore, primary=False, icon_name="rotate-ccw"),
                           self.dirty_mark], spacing=10, vertical_alignment=ft.CrossAxisAlignment.CENTER)
+        aim_cards = ft.Row([
+            t.card(ft.Column([t.text("Modo de mira", 14, bold=True),
+                              t.muted("Quem controla o giroscópio e o analógico direito.", 11), self.aim],
+                             spacing=6), expand=True),
+            t.card(ft.Column([t.text("Sensibilidade", 14, bold=True),
+                              t.muted("Graus por contagem do mouse (F7/F8 ajustam).", 11),
+                              ft.Row([self.sens, self.sens_field], spacing=8)], spacing=6), expand=True),
+        ], spacing=t.GAP, vertical_alignment=ft.CrossAxisAlignment.START)
         self.control = ft.Column(
-            [t.text("Controles", 22, bold=True), top, actions, self.msg,
+            [t.text("Controles", 22, bold=True), top, actions, aim_cards, self.msg,
              t.card(self.rows_col, padding=10, expand=True)], spacing=t.GAP, expand=True)
 
     # ---- construcao ----
@@ -81,6 +104,12 @@ class ControlesView:
         self.profile.value = c.name
         self.dirty_mark.visible = c.dirty
         self.msg.value = c.msg
+        s = c.settings
+        self.aim.value = s["aim"]
+        num = c._num(s["sens"], self.sens.min)
+        self.sens.value = min(self.sens.max, max(self.sens.min, num))
+        if c._num(self.sens_field.value, None) != num:      # nao reescreve enquanto digita
+            self.sens_field.value = _fmt(num, 4)
         for (rid, slot), (box, label) in self.cells.items():
             if c.waiting == (rid, slot):
                 label.value, label.color = WAIT_TEXT, t.ACCENT
@@ -92,6 +121,10 @@ class ControlesView:
         for rid, extra in self.extras.items():
             extra.value = c.extras(rid)
             extra.visible = bool(extra.value)
+
+    def _set(self, key: str, value) -> None:
+        self.ctrl.set_setting(key, value)
+        self.shell.render()
 
     # ---- teclas ----
     def _cell_click(self, rid: str, slot: int) -> None:

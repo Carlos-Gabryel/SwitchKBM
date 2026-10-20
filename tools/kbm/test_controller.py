@@ -7,11 +7,44 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import capture  # noqa: E402
 import profiles as pf  # noqa: E402
+import controller  # noqa: E402
 from controller import Controller  # noqa: E402
+from kbm_bridge import parse_control  # noqa: E402
 
 
 def make():
     return Controller(pf.ProfileStore(base=tempfile.mkdtemp(prefix="kbmtest")))
+
+
+class FakeProc:
+    def __init__(self):
+        self.pid = 4321
+        self.sent = []
+
+    def poll(self):
+        return None
+
+
+class CaptureCommandTests(unittest.TestCase):
+    def test_toggle_capture_sends_command(self):
+        c = make()
+        self.assertFalse(c.toggle_capture())        # parado: nao envia
+        c.runner.proc = FakeProc()
+        sent, pids = [], []
+        c.runner.send = sent.append
+        self.assertTrue(c.toggle_capture(pids.append))
+        self.assertEqual(sent, ["capture"])
+        self.assertEqual(pids, [4321])
+
+    def test_status_prefixes_no_dualsense(self):
+        self.assertNotIn("DualSense", controller.STATUS_PREFIXES)
+        self.assertNotIn("Placa-", controller.NO_PORT_MSG)
+
+    def test_parse_control(self):
+        self.assertEqual(parse_control("quit\n"), "quit")
+        self.assertEqual(parse_control(" Capture \r\n"), "capture")
+        self.assertIsNone(parse_control("outra coisa"))
+        self.assertIsNone(parse_control(""))
 
 
 class ControllerTests(unittest.TestCase):

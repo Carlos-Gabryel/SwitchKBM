@@ -61,6 +61,17 @@ class BridgeRunner:
         except Exception:
             pass
 
+    def send(self, cmd):
+        """Envia uma linha de comando ao bridge (ignora erros se ele ja morreu)."""
+        p = self.proc
+        if p is None or p.poll() is not None:
+            return
+        try:
+            p.stdin.write((cmd + "\n").encode("ascii"))
+            p.stdin.flush()
+        except Exception:
+            pass
+
     def stop(self):
         p = self.proc
         if p is None:

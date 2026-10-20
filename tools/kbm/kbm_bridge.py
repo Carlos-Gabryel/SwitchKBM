@@ -1,4 +1,4 @@
-"""Teclado + mouse do PC -> gamepad virtual via serial (ESP32 Placa-MicroB).
+"""Teclado + mouse do PC -> gamepad virtual via serial (ESP32).
 
 Uso: python tools/kbm/kbm_bridge.py --port COM4 [--config caminho] [--dry-run] [--verbose]
 """
@@ -54,7 +54,6 @@ class Bridge:
         self.seq = 0
         self.parser = proto.StreamParser()
         self.last_mode = None
-        self.last_ds5 = None
         # instrumentacao (so contadores)
         self.st_write_max = 0.0
 
@@ -131,14 +130,11 @@ class Bridge:
         if not data:
             return
         for ftype, payload in self.parser.feed(data):
-            if ftype == proto.TYPE_STATUS and len(payload) >= 2:
-                mode, ds5 = payload[0], payload[1]
+            if ftype == proto.TYPE_STATUS and len(payload) >= 1:
+                mode = payload[0]
                 if mode != self.last_mode:
                     self.last_mode = mode
                     self.say("Modo gatilho: %s" % TRIG_MODES.get(mode, str(mode)))
-                if ds5 != self.last_ds5:
-                    self.last_ds5 = ds5
-                    self.say("DualSense: %s" % ("conectado" if ds5 else "desconectado"))
         for line in self.parser.pop_text():
             if self.args.verbose:
                 self.say("[esp] " + line)
@@ -227,12 +223,21 @@ class Bridge:
             pass
 
 
+def parse_control(line):
+    """Comando do app pai: 'quit' | 'capture' | None (linha desconhecida)."""
+    cmd = line.strip().lower()
+    return cmd if cmd in ("quit", "capture") else None
+
+
 def _stdin_watch(br):
-    """Le comandos do app pai: 'quit' (ou EOF) encerra como Ctrl+C."""
+    """Le comandos do app pai: 'quit' (ou EOF) encerra como Ctrl+C; 'capture' alterna a captura (como F12)."""
     try:
         for line in sys.stdin:
-            if line.strip().lower() == "quit":
+            cmd = parse_control(line)
+            if cmd == "quit":
                 break
+            if cmd == "capture" and br.hook:
+                br.hook.call_soon(br._toggle_capture)     # janela/cursor so na thread do hook
     except Exception:
         pass
     br.stop.set()
@@ -242,13 +247,13 @@ def _stdin_watch(br):
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Teclado e mouse do PC -> gamepad virtual (ESP32)")
-    ap.add_argument("--port", help="porta COM da Placa-MicroB (ex.: COM4)")
+    ap.add_argument("--port", help="porta COM da placa ESP32 (ex.: COM4)")
     ap.add_argument("--config", default=os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                                      "config.json"))
     ap.add_argument("--dry-run", action="store_true", help="sem serial; imprime o estado a 5 Hz")
     ap.add_argument("--verbose", action="store_true", help="mostra linhas de log do ESP")
     ap.add_argument("--stdin-control", action="store_true",
-                    help="encerra ao receber 'quit' (ou EOF) no stdin")
+                    help="le comandos no stdin: 'quit' (ou EOF) encerra; 'capture' alterna a captura")
     args = ap.parse_args(argv)
     if not args.port and not args.dry_run:
         ap.error("--port e obrigatorio (ou use --dry-run)")

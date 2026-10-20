@@ -10,10 +10,10 @@ from runners import BridgeRunner, FlashRunner, list_ports, pick_default_port
 
 APP_TITLE = "Switch KBM"
 AIM_LABELS = {"gyro": "Giroscópio", "stick": "Analógico direito"}
-STATUS_PREFIXES = ("Modo gatilho", "DualSense", "CAPTURADO", "LIBERADO", "Modo de mira",
+STATUS_PREFIXES = ("Modo gatilho", "CAPTURADO", "LIBERADO", "Modo de mira",
                    "Sensibilidade")
 CAPTURE_HINT = "Pressione a tecla (ou clique/roda do mouse). Esc cancela."
-NO_PORT_MSG = "Selecione a porta COM da placa (Placa-USBC ou Placa-MicroB)."
+NO_PORT_MSG = "Selecione a porta COM da placa ESP32."
 LOG_LINES = 500
 
 
@@ -241,6 +241,16 @@ class Controller:
 
     def stop(self):
         self.runner.stop()
+
+    def toggle_capture(self, before=None):
+        """Alterna a captura de mouse/teclado no bridge (o mesmo que F12). before(pid) roda antes do envio.
+        Devolve True se enviou."""
+        if not self.runner.running:
+            return False
+        if before:
+            before(self.runner.proc.pid)
+        self.runner.send("capture")
+        return True
 
     def restart(self):
         self.runner.stop()

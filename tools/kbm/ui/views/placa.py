@@ -25,8 +25,8 @@ class PlacaView:
             ], spacing=10)),
             t.card(ft.Column([
                 t.text("Firmware", 14, bold=True),
-                t.muted("Grava na Placa-USBC o firmware do lado do Switch. Faça isso numa placa nova "
-                        "ou se ela parar de responder. Não desconecte o cabo até terminar (~30 s).", 12),
+                t.muted("Grava na placa o firmware do Switch. Faça isso numa placa nova ou se ela parar "
+                        "de responder. Não desconecte o cabo até terminar (~30 s).", 12),
                 ft.Row([self.prep, self.state], spacing=12, vertical_alignment=ft.CrossAxisAlignment.CENTER),
                 self.bar,
             ], spacing=10)),

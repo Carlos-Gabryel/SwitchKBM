@@ -1,9 +1,8 @@
-"""Ajustes: mira, sensibilidade, inversao, andar devagar e pulso da roda."""
+"""Ajustes: inversao, andar devagar e pulso da roda."""
 from __future__ import annotations
 
 import flet as ft
 
-from controller import AIM_LABELS
 from ui import theme as t
 
 
@@ -17,10 +16,6 @@ def _fmt(value, digits: int) -> str:
 class AjustesView:
     def __init__(self, shell):
         self.shell, self.ctrl = shell, shell.ctrl
-        self.aim = ft.Dropdown(
-            width=220, on_select=lambda e: self._set("aim", e.control.value),
-            options=[ft.DropdownOption(key=v, text=v) for v in AIM_LABELS.values()], **t.field_style())
-        self.sens, self.sens_field = self._slider_pair("sens", 0.005, 0.3, 4)
         self.walk, self.walk_field = self._slider_pair("walk", 0.2, 0.9, 3)
         self.invh = self._switch("invh")
         self.invv = self._switch("invv")
@@ -28,9 +23,6 @@ class AjustesView:
                                   on_change=lambda e: self._set("wheel", e.control.value), **t.field_style())
         self.control = ft.Column([
             t.text("Ajustes", 22, bold=True),
-            self._card("Modo de mira", "Quem controla o giroscópio e quem controla o analógico direito.", self.aim),
-            self._card("Sensibilidade", "Graus por contagem do mouse (F7/F8 ajustam com o bridge rodando).",
-                       ft.Row([self.sens, self.sens_field], spacing=10, expand=True), wide=True),
             self._card("Inverter horizontal", "", self.invh),
             self._card("Inverter vertical", "", self.invv),
             self._card("Andar devagar", "Escala do analógico esquerdo enquanto a tecla está pressionada.",
@@ -64,10 +56,8 @@ class AjustesView:
 
     def refresh(self) -> None:
         s = self.ctrl.settings
-        self.aim.value = s["aim"]
         self.invh.value, self.invv.value = bool(s["invh"]), bool(s["invv"])
-        for slider, field, key, digits in ((self.sens, self.sens_field, "sens", 4),
-                                           (self.walk, self.walk_field, "walk", 3)):
+        for slider, field, key, digits in ((self.walk, self.walk_field, "walk", 3),):
             num = self.ctrl._num(s[key], slider.min)
             slider.value = min(slider.max, max(slider.min, num))
             if self.ctrl._num(field.value, None) != num:        # nao reescreve enquanto digita

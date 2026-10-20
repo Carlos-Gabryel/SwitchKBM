@@ -25,6 +25,7 @@ WM_QUIT = 0x0012
 WM_PAINT, WM_ERASEBKGND = 0x000F, 0x0014
 WM_ACTIVATE, WM_KILLFOCUS = 0x0006, 0x0008
 WM_INPUT = 0x00FF
+WM_APP_CALL = 0x8002              # executa callback na thread do hook (call_soon)
 WM_APP_KEY = 0x8001               # fila de teclas do hook -> thread principal
 WM_KEYDOWN, WM_KEYUP, WM_SYSKEYDOWN, WM_SYSKEYUP = 0x100, 0x101, 0x104, 0x105
 WA_INACTIVE = 0
@@ -206,6 +207,7 @@ class InputHook:
         self.mouse_ev = 0
         self.kb_hook_max = 0.0
         self._ctrl_cb = None
+        self._calls = collections.deque()
         self.done = threading.Event()   # o chamador seta apos a limpeza (console fechando)
         # referencias para evitar coleta de lixo
         self._kb_cb = HOOKPROC(self._kb_proc)
@@ -256,6 +258,8 @@ class InputHook:
         try:
             if msg == WM_INPUT:
                 self._read_raw(lParam)
+            elif msg == WM_APP_CALL:
+                self._run_calls()
             elif msg == WM_APP_KEY:
                 self._drain_keys()
                 return 0
@@ -385,9 +389,27 @@ class InputHook:
         if self._tid:
             user32.PostThreadMessageW(self._tid, WM_QUIT, 0, 0)
 
+    def call_soon(self, fn):
+        """Roda fn() na thread do loop de mensagens (a que cria a janela/hook). Qualquer thread."""
+        self._calls.append(fn)
+        hwnd = self._hwnd
+        if not hwnd:
+            return False        # fica na fila; _install avisa quando a janela existir
+        return bool(user32.PostMessageW(hwnd, WM_APP_CALL, 0, 0))   # mensagem de janela: nao se perde
+
+    def _run_calls(self):
+        while self._calls:
+            fn = self._calls.popleft()
+            try:
+                fn()
+            except Exception as e:
+                self.log("erro no comando: %r" % (e,))
+
     def _install(self):
         self._tid = kernel32.GetCurrentThreadId()
         self._create_window()
+        if self._calls:
+            user32.PostMessageW(self._hwnd, WM_APP_CALL, 0, 0)
         self._hk = user32.SetWindowsHookExW(WH_KEYBOARD_LL, self._kb_cb, None, 0)
         if not self._hk:
             raise ctypes.WinError(ctypes.get_last_error())

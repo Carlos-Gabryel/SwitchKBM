@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import asyncio
+import ctypes
 import sys
 import traceback
 from pathlib import Path
@@ -35,6 +36,10 @@ class Shell:
         self.nav = ft.Column(spacing=4)
         self.status_box = ft.Container()
         self.run_btn = t.button("Iniciar", self.toggle_run, icon_name="play")
+        self.cap_btn = ft.Container(
+            content=t.icon("mouse-pointer-2", 16, t.TEXT), width=t.CONTROL_HEIGHT, height=t.CONTROL_HEIGHT,
+            alignment=ft.Alignment.CENTER, bgcolor=t.HOVER, border_radius=t.CONTROL_HEIGHT // 2,
+            tooltip="Capturar mouse e teclado (mesmo que F12)", on_click=self.toggle_capture, ink=True)
         self.body = ft.Container(expand=True, padding=24)
         self._sig = None
         sidebar = ft.Container(
@@ -42,7 +47,7 @@ class Shell:
             border=ft.Border(right=ft.BorderSide(1, t.BORDER)),
             content=ft.Column([ft.Container(t.brand(), padding=ft.Padding(6, 0, 0, 14)), self.nav,
                                ft.Container(expand=True), self.status_box,
-                               ft.Container(self.run_btn, padding=ft.Padding(0, 8, 0, 0))],
+                               ft.Container(ft.Row([self.run_btn, self.cap_btn], spacing=8), padding=ft.Padding(0, 8, 0, 0))],
                               spacing=0, expand=True))
         page.window.icon = str(assets_dir() / "icon.ico")
         page.window.prevent_close = True
@@ -133,6 +138,14 @@ class Shell:
             self.report(self.ctrl.start())
         self.render()
 
+    def toggle_capture(self, e=None) -> None:
+        def allow(pid):     # nossa janela esta em primeiro plano: deixa o bridge assumir o foco
+            try:
+                ctypes.windll.user32.AllowSetForegroundWindow(pid)
+            except Exception:
+                pass
+        self.ctrl.toggle_capture(allow)
+
     # ---- janela ----
     def _on_window_event(self, e) -> None:
         if e.type != ft.WindowEventType.CLOSE:
@@ -163,6 +176,9 @@ class Shell:
         self.run_btn.content = "Parar" if c.running else "Iniciar"
         self.run_btn.icon = t.icon("pause" if c.running else "play", 16, "#FFFFFF")
         self.run_btn.disabled = c.flashing
+        self.cap_btn.disabled = not c.running
+        self.cap_btn.opacity = 1.0 if c.running else 0.4
+        self.cap_btn.on_click = self.toggle_capture if c.running else None
         if not c.waiting and self.capture.active:
             self.capture.cancel()
         view = self.views[self.current]
