@@ -10,7 +10,7 @@ from pathlib import Path
 import flet as ft
 
 from capture import Capture
-from controller import APP_TITLE, Controller
+from controller import APP_TITLE, APP_VERSION, REPO_URL, Controller
 from ui import theme as t
 
 NAV = (("controles", "Controles", "gamepad-2"), ("ajustes", "Ajustes", "settings"),
@@ -49,7 +49,8 @@ class Shell:
                                ft.Container(expand=True), self.status_box,
                                ft.Container(ft.Column([self.run_btn, self.cap_btn], spacing=8,
                                                       horizontal_alignment=ft.CrossAxisAlignment.STRETCH),
-                                            padding=ft.Padding(0, 8, 0, 0))],
+                                            padding=ft.Padding(0, 8, 0, 0)),
+                               self._credit()],
                               spacing=0, expand=True))
         page.window.icon = str(assets_dir() / "icon.ico")
         page.window.prevent_close = True
@@ -57,6 +58,16 @@ class Shell:
         page.add(ft.Row([sidebar, self.body], spacing=0, expand=True))
         self.render(full=True)
         page.run_task(self._poll)
+
+    def _credit(self) -> ft.Control:
+        """Linha discreta de credito: abre o repositorio no navegador."""
+        async def open_repo(e=None):
+            await self.page.launch_url(REPO_URL)
+        row = ft.Row([t.muted("By Carlos Gabryel", 11), t.icon("external-link", 11, t.FAINT),
+                      t.text(f"v{APP_VERSION}", size=10, color=t.FAINT)],
+                     spacing=5, alignment=ft.MainAxisAlignment.CENTER)
+        return ft.Container(ft.GestureDetector(row, on_tap=open_repo, mouse_cursor=ft.MouseCursor.CLICK),
+                            padding=ft.Padding(0, 10, 0, 0), tooltip=REPO_URL)
 
     # ---- infraestrutura ----
     def ui(self, fn) -> None:
