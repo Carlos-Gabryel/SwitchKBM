@@ -10,3 +10,4 @@ third_party/jeredev/
 dist/
 tools/kbm/profiles/
 tools/kbm/settings.json
+.pack/

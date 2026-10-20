@@ -1,0 +1,6 @@
+pyserial==3.5
+esptool==4.8.1
+flet==1.0.2
+flet-desktop==1.0.2
+flet-cli==1.0.2
+pyinstaller==6.22.3

@@ -1,4 +1,4 @@
-# Gera dist\SwitchKBM.exe (PyInstaller, onefile, sem console) com o firmware switch-side embutido
+# Gera dist\SwitchKBM.exe (flet pack/PyInstaller, onefile, sem console) com o firmware switch-side embutido
 param([switch]$SkipFirmware)
 $ErrorActionPreference = "Stop"
 $repo = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
@@ -25,13 +25,27 @@ foreach ($rel in $rels) {
     Copy-Item $src $dst
 }
 
-python -m pip install --quiet pyinstaller pyserial esptool==4.8.1
-python -m PyInstaller --noconfirm --onefile --windowed --name SwitchKBM `
-    --distpath "$repo\dist" --workpath "$repo\build\pyinstaller" --specpath "$repo\build\pyinstaller" `
-    --paths "$repo\tools\kbm" `
-    --hidden-import kbm_bridge --hidden-import winput --hidden-import proto --hidden-import mapping `
-    --hidden-import flasher --hidden-import esptool --collect-data esptool --collect-submodules esptool `
-    --hidden-import serial --hidden-import serial.tools.list_ports `
-    --add-data "$fwDst;firmware" `
-    "$repo\tools\kbm\kbm_app.py"
+python -m pip install --quiet -r "$repo\tools\kbm\requirements.txt"
+
+# o flet pack apaga a pasta build\ do diretorio atual (onde esta o firmware): roda numa pasta de trabalho propria
+$work = "$repo\.pack"
+New-Item -ItemType Directory -Force $work | Out-Null
+$kbm = "$repo\tools\kbm"
+$flet = "import sys; from flet_cli.cli import main; sys.argv[0] = 'flet'; main()"
+$buildArgs = @("--paths=$kbm",
+    "--hidden-import=kbm_bridge", "--hidden-import=winput", "--hidden-import=proto", "--hidden-import=mapping",
+    "--hidden-import=flasher", "--hidden-import=runners", "--hidden-import=controller", "--hidden-import=capture",
+    "--hidden-import=bindings", "--hidden-import=profiles", "--hidden-import=serial",
+    "--hidden-import=serial.tools.list_ports", "--hidden-import=esptool",
+    "--collect-data=esptool", "--collect-submodules=esptool", "--collect-submodules=ui")
+$packArgs = @("-c", $flet, "pack", "$kbm\kbm_app.py", "--name", "SwitchKBM", "-y",
+    "--distpath", "$repo\dist", "--product-name", "Switch KBM",
+    "--add-data", "$fwDst;firmware", "$kbm\ui\assets;ui\assets")
+foreach ($a in $buildArgs) { $packArgs += "--pyinstaller-build-args=$a" }
+$env:PYTHONPATH = $kbm
+Push-Location $work
+try {
+    python @packArgs
+    if ($LASTEXITCODE -ne 0) { throw "flet pack falhou" }
+} finally { Pop-Location }
 if (Test-Path "$repo\dist\SwitchKBM.exe") { Write-Host "OK: $repo\dist\SwitchKBM.exe" } else { throw "exe nao gerado" }
