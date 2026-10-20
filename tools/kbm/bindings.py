@@ -1,4 +1,4 @@
-"""Logica pura de edicao de teclas (sem Tk): linhas do menu, conversao perfil<->linhas, conflitos."""
+"""Logica pura de edicao de teclas (sem UI): linhas do menu, conversao perfil<->linhas, conflitos."""
 import copy
 
 try:
@@ -129,19 +129,6 @@ def clear_row(rows, row_id):
     new = copy.deepcopy(rows)
     new[row_id] = ["" for _ in new[row_id]]
     return new
-
-
-def tk_event_to_name(keycode, keysym):
-    """Converte evento KeyPress do Tk (Windows: keycode = VK) em nome de tecla ou None."""
-    try:
-        from mapping import vk_to_name
-    except ImportError:  # pragma: no cover
-        from .mapping import vk_to_name
-    ks = {"Shift_L": "lshift", "Shift_R": "rshift", "Control_L": "lctrl", "Control_R": "rctrl",
-          "Alt_L": "alt", "Alt_R": "alt", "ISO_Level3_Shift": "alt"}
-    if keysym in ks:
-        return ks[keysym]
-    return vk_to_name(keycode)
 
 
 def parse_sens_line(line):

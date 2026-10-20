@@ -323,11 +323,6 @@ class KeyTableTests(unittest.TestCase):
         self.assertEqual(mapping.display_name("space"), "Espaço")
         self.assertIsNone(mapping.vk_to_name(0xFF))
 
-    def test_tk_event(self):
-        self.assertEqual(bd.tk_event_to_name(16, "Shift_R"), "rshift")
-        self.assertEqual(bd.tk_event_to_name(18, "Alt_R"), "alt")
-        self.assertEqual(bd.tk_event_to_name(0x47, "g"), "g")
-
 
 class BindingTests(unittest.TestCase):
     def rows(self):
