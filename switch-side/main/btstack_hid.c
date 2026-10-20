@@ -185,8 +185,6 @@ static void track_output(const uint8_t *packet, uint16_t len)
     last_rx_ms = btstack_run_loop_get_time_ms();
     stalled_logged = false;
     if (len >= 11 && packet[0] == 0x01) last_subcmd = packet[10];
-    /* packet[0]=report id, [1]=timer, [2..9]=HD rumble (L 4 bytes, R 4 bytes) */
-    if (len >= 10 && (packet[0] == 0x01 || packet[0] == 0x10)) bridge_rx_handle_rumble(&packet[2]);
     switch_proto_handle_output(packet, len);
 }
 
@@ -300,7 +298,6 @@ static void packet_handler(uint8_t packet_type, uint16_t channel,
         reply_head = 0; reply_count = 0;
         input_report_set_virtual_grip(false);
         btstack_run_loop_remove_timer(&input_timer);
-        bridge_rx_rumble_stop();
         ESP_LOGI(TAG, "Switch desconectado");
         break;
     case HID_SUBEVENT_CAN_SEND_NOW:

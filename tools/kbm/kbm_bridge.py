@@ -130,7 +130,7 @@ class Bridge:
         if not data:
             return
         for ftype, payload in self.parser.feed(data):
-            pass   # STATUS do ESP32 (modo de gatilho legado) e ignorado
+            pass   # STATUS do ESP32 e ignorado
         for line in self.parser.pop_text():
             if self.args.verbose:
                 self.say("[esp] " + line)

@@ -1,4 +1,4 @@
-// Protocolo UART entre ds5-side (DualSense via Bluepad32) e switch-side (Pro Controller).
+// Protocolo serial entre o app do PC (teclado/mouse) e o firmware switch-side (Pro Controller).
 // C puro, sem APIs do ESP (so tipos stdint). Little-endian, structs packed.
 //
 // Frame: 0xAA 0x55 type len payload[len] crc8
@@ -18,22 +18,21 @@ extern "C" {
 #define BRIDGE_MAX_PAYLOAD 48
 #define BRIDGE_FRAME_OVERHEAD 5 /* SOF0 SOF1 type len crc */
 
-#define BRIDGE_TYPE_STATE 0x01  /* ds5 -> switch */
-#define BRIDGE_TYPE_RUMBLE 0x02 /* switch -> ds5 */
-#define BRIDGE_TYPE_STATUS 0x03 /* ds5-side -> PC (UART0) */
+#define BRIDGE_TYPE_STATE 0x01  /* PC -> ESP32 */
+#define BRIDGE_TYPE_STATUS 0x03 /* ESP32 -> PC (0x02 era reservado e nao e mais usado) */
 
 // bridge_state_t.flags
 #define BRIDGE_FLAG_CONNECTED (1u << 0)
 #define BRIDGE_FLAG_BATTERY_LOW (1u << 1)
 #define BRIDGE_FLAG_CHARGING (1u << 2)
 
-// Bits de bridge_state_t.buttons. Letras baseadas na POSICAO PlayStation
-// (A = baixo/cruz). O mapeamento posicao -> rotulo Nintendo e feito no switch-side.
+// Bits de bridge_state_t.buttons. Letras baseadas na POSICAO fisica do botao
+// (A = baixo). O mapeamento posicao -> rotulo Nintendo e feito no switch-side.
 enum {
-    BRIDGE_BTN_A = 0,  // cross
-    BRIDGE_BTN_B,      // circle
-    BRIDGE_BTN_X,      // square
-    BRIDGE_BTN_Y,      // triangle
+    BRIDGE_BTN_A = 0,  // baixo
+    BRIDGE_BTN_B,      // direita
+    BRIDGE_BTN_X,      // esquerda
+    BRIDGE_BTN_Y,      // cima
     BRIDGE_BTN_L1,
     BRIDGE_BTN_R1,
     BRIDGE_BTN_L2_DIGITAL,
@@ -44,20 +43,19 @@ enum {
     BRIDGE_BTN_DPAD_DOWN,
     BRIDGE_BTN_DPAD_LEFT,
     BRIDGE_BTN_DPAD_RIGHT,
-    BRIDGE_BTN_SELECT,  // Create
-    BRIDGE_BTN_START,   // Options
-    BRIDGE_BTN_SYSTEM,  // PS
-    BRIDGE_BTN_CAPTURE, // Bluepad32 4.2 nao expoe o clique do touchpad; usa o botao Mute (MISC_BUTTON_CAPTURE)
+    BRIDGE_BTN_SELECT,  // Minus
+    BRIDGE_BTN_START,   // Plus
+    BRIDGE_BTN_SYSTEM,  // Home
+    BRIDGE_BTN_CAPTURE, // Captura
 };
 #define BRIDGE_BTN_MASK(b) (1u << (b))
 
-// STATE (ds5 -> switch). Eixos como o Bluepad32 entrega:
+// STATE (PC -> ESP32):
 //   lx, ly, rx, ry: -512..511; Y positivo = PARA BAIXO.
 //   l2, r2: 0..1023.
-//   gyro[3]: eixos x,y,z do DualSense (pitch, yaw, roll), em 1/16 grau/s por unidade
-//            (valor do Bluepad32, que e' 1/1024 grau/s, deslocado >> 6 e saturado em int16).
-//   accel[3]: eixos x,y,z do DualSense, em 1/8192 G por unidade (saturado em int16, +-4 G).
-//   battery: valor do Bluepad32 (0 = desconhecido; DualSense: 1..251).
+//   gyro[3]: eixos x,y,z (pitch, yaw, roll), em 1/16 grau/s por unidade (saturado em int16).
+//   accel[3]: eixos x,y,z, em 1/8192 G por unidade (saturado em int16, +-4 G).
+//   battery: 0 = desconhecido.
 //   timestamp_ms: 16 bits baixos do relogio em ms.
 typedef struct __attribute__((packed)) {
     uint8_t seq;
@@ -71,22 +69,14 @@ typedef struct __attribute__((packed)) {
     uint16_t timestamp_ms;
 } bridge_state_t;
 
-// RUMBLE (switch -> ds5). duration_ms == 0 para o motor.
+// STATUS (ESP32 -> PC): mantido so por compatibilidade de protocolo; o app ignora o conteudo.
 typedef struct __attribute__((packed)) {
-    uint8_t weak;
-    uint8_t strong;
-    uint16_t duration_ms;
-} bridge_rumble_t;
-
-// STATUS (ds5-side -> PC pela UART0): modo de gatilho atual e se o DualSense esta conectado.
-typedef struct __attribute__((packed)) {
-    uint8_t trig_mode; // 0 normal, 1 stick, 2 pwm
-    uint8_t ds5_connected;
+    uint8_t trig_mode; // sempre 0
+    uint8_t reserved;  // sempre 0
 } bridge_status_t;
 
 _Static_assert(sizeof(bridge_status_t) == 2, "bridge_status_t size");
 _Static_assert(sizeof(bridge_state_t) == 33, "bridge_state_t size");
-_Static_assert(sizeof(bridge_rumble_t) == 4, "bridge_rumble_t size");
 _Static_assert(sizeof(bridge_state_t) <= BRIDGE_MAX_PAYLOAD, "payload max");
 
 uint8_t bridge_crc8(const uint8_t *data, size_t len);

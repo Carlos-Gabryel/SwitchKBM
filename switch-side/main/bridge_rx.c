@@ -1,14 +1,12 @@
 /*
- * bridge_rx: recebe bridge_state_t do ds5-side (UART2) e/ou do PC (UART0, console USB),
- * mescla as duas fontes, aplica os modos de gatilho e entrega ao codigo JereDev
- * (controller_state_t + IMU). Devolve o rumble do Switch como bridge_rumble_t (UART2).
+ * bridge_rx: recebe bridge_state_t do app do PC (UART0, console USB), converte para o
+ * controller_state_t + IMU do Pro Controller e envia o STATUS de volta ao PC.
  */
 #include "bridge_rx.h"
 
 #include <string.h>
 
 #include "bridge_proto.h"
-#include "input_modes.h"
 #include "driver/uart.h"
 #include "esp_log.h"
 #include "esp_timer.h"
@@ -17,27 +15,20 @@
 
 static const char *TAG = "BRIDGE";
 
-#define BRIDGE_UART UART_NUM_2
-#define BRIDGE_TX_PIN 17
-#define BRIDGE_RX_PIN 16
-#define BRIDGE_BAUD 921600
-
 #define PC_UART UART_NUM_0 /* console USB: frames do app do PC (115200) */
 #define PC_TIMEOUT_US 100000
-#define MERGE_PERIOD_MS 2
+#define INGEST_PERIOD_MS 2
 #define STATUS_PERIOD_MS 500
 
 #define STALE_US 200000
 #define STICK_DEADZONE 24
 #define TRIGGER_THRESHOLD 512
-#define RUMBLE_KEEPALIVE_US 100000
-#define RUMBLE_DURATION_MS 200
 
-/* Remap de eixos DualSense (SDL: x=pitch, y=yaw, z=roll) -> Pro Controller.
+/* Remap dos eixos do protocolo (x=pitch, y=yaw, z=roll) -> Pro Controller.
  * Aplicado igual a accel e gyro. Ajustar aqui se os eixos estiverem trocados/invertidos. */
-#define IMU_SW_X(ds) (-(int32_t)(ds)[2])
-#define IMU_SW_Y(ds) (-(int32_t)(ds)[0])
-#define IMU_SW_Z(ds) ((int32_t)(ds)[1])
+#define IMU_SW_X(v) (-(int32_t)(v)[2])
+#define IMU_SW_Y(v) (-(int32_t)(v)[0])
+#define IMU_SW_Z(v) ((int32_t)(v)[1])
 #define ACCEL_SHIFT 1 /* 1/8192 G -> 1/4096 G */
 #define GYRO_NUM 1024 /* 1/16 dps -> ~1/16.384 dps */
 #define GYRO_DEN 1000
@@ -54,15 +45,10 @@ static imu_sample_t s_imu[3]; /* ring, mais antigo em s_imu_head */
 static uint8_t s_imu_head;
 static uint8_t s_imu_count;
 
-/* Ultimos frames crus de cada fonte (antes do merge) */
-static bridge_state_t s_ds5_state, s_pc_state;
-static int64_t s_ds5_us, s_pc_us;
-static volatile uint32_t s_pc_frames, s_pc_crc_errors, s_ds5_frames, s_ds5_crc_errors;
-static volatile uint32_t s_ds5_gap_max_ms, s_pc_gap_max_ms;
-
-static volatile uint32_t s_rumble_sent;
-static uint8_t s_last_weak, s_last_strong;
-static int64_t s_last_rumble_us;
+/* Ultimo frame cru do PC */
+static bridge_state_t s_pc_state;
+static int64_t s_pc_us;
+static volatile uint32_t s_pc_frames, s_pc_crc_errors, s_pc_gap_max_ms;
 
 static int16_t sat16(int32_t v)
 {
@@ -177,64 +163,6 @@ void bridge_rx_fill_imu(uint8_t *dst36)
     }
 }
 
-/* ---- Rumble ---- */
-
-static uint8_t hf_level(const uint8_t *b)
-{
-    uint32_t code = b[1] & 0xFE;
-    uint32_t v = code * 255 / 0xC8;
-    return v > 255 ? 255 : (uint8_t)v;
-}
-
-static uint8_t lf_level(const uint8_t *b)
-{
-    uint32_t c = b[3] & 0x7F;
-    uint32_t code = c >= 0x40 ? c - 0x40 : 0;
-    uint32_t v = code * 255 / 0x32;
-    return v > 255 ? 255 : (uint8_t)v;
-}
-
-static void send_rumble(uint8_t weak, uint8_t strong, uint16_t duration_ms)
-{
-    bridge_rumble_t r = { weak, strong, duration_ms };
-    uint8_t frame[BRIDGE_FRAME_OVERHEAD + sizeof(r)];
-    size_t n = bridge_encode(BRIDGE_TYPE_RUMBLE, &r, sizeof(r), frame, sizeof(frame));
-    if (n) {
-        uart_write_bytes(BRIDGE_UART, frame, n);
-        s_rumble_sent++;
-    }
-}
-
-void bridge_rx_handle_rumble(const uint8_t *rumble8)
-{
-    uint8_t hf_l = hf_level(rumble8), hf_r = hf_level(rumble8 + 4);
-    uint8_t lf_l = lf_level(rumble8), lf_r = lf_level(rumble8 + 4);
-    uint8_t weak = hf_l > hf_r ? hf_l : hf_r;
-    uint8_t strong = lf_l > lf_r ? lf_l : lf_r;
-    int64_t now = esp_timer_get_time();
-    bool changed = weak != s_last_weak || strong != s_last_strong;
-    bool nonzero = weak || strong;
-
-    if (changed) {
-        send_rumble(weak, strong, nonzero ? RUMBLE_DURATION_MS : 0);
-    } else if (nonzero && (now - s_last_rumble_us) >= RUMBLE_KEEPALIVE_US) {
-        send_rumble(weak, strong, RUMBLE_DURATION_MS);
-    } else {
-        return;
-    }
-    s_last_weak = weak;
-    s_last_strong = strong;
-    s_last_rumble_us = now;
-}
-
-void bridge_rx_rumble_stop(void)
-{
-    static const uint8_t neutral[8] = { 0x00, 0x01, 0x40, 0x40, 0x00, 0x01, 0x40, 0x40 };
-    bridge_rx_handle_rumble(neutral);
-}
-
-/* ---- RX tasks ---- */
-
 /* Grava o estado ja mesclado e empilha a amostra IMU */
 static void ingest_state(const bridge_state_t *s)
 {
@@ -254,86 +182,68 @@ static void ingest_state(const bridge_state_t *s)
     portEXIT_CRITICAL(&s_lock);
 }
 
-/* Le frames de uma UART; guarda o ultimo STATE cru em dst/dst_us */
-static void rx_common(uart_port_t uart, bridge_state_t *dst, int64_t *dst_us,
-                      volatile uint32_t *frames, volatile uint32_t *crc_errors,
-                      volatile uint32_t *gap_max_ms)
+/* Le frames da UART0 (PC); guarda o ultimo STATE cru */
+static void pc_rx_task(void *arg)
 {
+    (void)arg;
     bridge_parser_t parser;
     bridge_parser_init(&parser);
     uint8_t buf[128];
     int64_t last_frame_us = 0;
 
     for (;;) {
-        int n = uart_read_bytes(uart, buf, sizeof(buf), pdMS_TO_TICKS(20));
+        int n = uart_read_bytes(PC_UART, buf, sizeof(buf), pdMS_TO_TICKS(20));
         for (int i = 0; i < n; i++) {
             if (!bridge_parser_feed(&parser, buf[i])) continue;
             if (parser.type != BRIDGE_TYPE_STATE || parser.len != sizeof(bridge_state_t)) continue;
             bridge_state_t s;
             memcpy(&s, parser.payload, sizeof(s));
             int64_t t = esp_timer_get_time();
-            if (last_frame_us != 0 && (uint32_t)((t - last_frame_us) / 1000) > *gap_max_ms) {
-                *gap_max_ms = (uint32_t)((t - last_frame_us) / 1000);
+            if (last_frame_us != 0 && (uint32_t)((t - last_frame_us) / 1000) > s_pc_gap_max_ms) {
+                s_pc_gap_max_ms = (uint32_t)((t - last_frame_us) / 1000);
             }
             last_frame_us = t;
             portENTER_CRITICAL(&s_lock);
-            *dst = s;
-            *dst_us = t;
+            s_pc_state = s;
+            s_pc_us = t;
             portEXIT_CRITICAL(&s_lock);
         }
-        *frames = parser.frames_ok;
-        *crc_errors = parser.crc_errors;
+        s_pc_frames = parser.frames_ok;
+        s_pc_crc_errors = parser.crc_errors;
     }
 }
 
-static void rx_task(void *arg)
-{
-    (void)arg;
-    rx_common(BRIDGE_UART, &s_ds5_state, &s_ds5_us, &s_ds5_frames, &s_ds5_crc_errors,
-              &s_ds5_gap_max_ms);
-}
-
-static void pc_rx_task(void *arg)
-{
-    (void)arg;
-    rx_common(PC_UART, &s_pc_state, &s_pc_us, &s_pc_frames, &s_pc_crc_errors, &s_pc_gap_max_ms);
-}
-
-/* Mescla ds5 + PC e alimenta o estado final */
-static void merge_task(void *arg)
+/* Repete o ultimo frame do PC a cada INGEST_PERIOD_MS enquanto ele estiver fresco
+ * e envia o STATUS periodico ao PC */
+static void ingest_task(void *arg)
 {
     (void)arg;
     TickType_t last_wake = xTaskGetTickCount();
     int64_t last_log = esp_timer_get_time();
     int64_t last_status = 0;
     bool first_status = true;
-    uint32_t last_ds5 = 0, last_pc = 0;
+    uint32_t last_pc = 0;
 
     for (;;) {
-        vTaskDelayUntil(&last_wake, pdMS_TO_TICKS(MERGE_PERIOD_MS));
+        vTaskDelayUntil(&last_wake, pdMS_TO_TICKS(INGEST_PERIOD_MS));
 
-        bridge_state_t ds5, pc, merged;
-        int64_t ds5_us, pc_us;
+        bridge_state_t pc;
+        int64_t pc_us;
         portENTER_CRITICAL(&s_lock);
-        ds5 = s_ds5_state;
-        ds5_us = s_ds5_us;
         pc = s_pc_state;
         pc_us = s_pc_us;
         portEXIT_CRITICAL(&s_lock);
 
         int64_t now = esp_timer_get_time();
-        bool ds5_ok = ds5_us != 0 && (now - ds5_us) < STALE_US && (ds5.flags & BRIDGE_FLAG_CONNECTED);
         bool pc_ok = pc_us != 0 && (now - pc_us) < PC_TIMEOUT_US && (pc.flags & BRIDGE_FLAG_CONNECTED);
 
-        input_merge(ds5_ok ? &ds5 : NULL, pc_ok ? &pc : NULL, &merged);
-
-        /* Sem fonte valida: nao atualiza, o estado envelhece e vira neutro */
-        if (ds5_ok || pc_ok) {
-            ingest_state(&merged);
+        /* Sem frame valido: nao atualiza, o estado envelhece e vira neutro */
+        if (pc_ok) {
+            ingest_state(&pc);
         }
 
         if (first_status || (now - last_status) >= STATUS_PERIOD_MS * 1000) {
-            bridge_status_t st = { .trig_mode = 0, .ds5_connected = ds5_ok ? 1 : 0 };
+            bridge_status_t st = { .trig_mode = 0, .reserved = 0 };
             uint8_t frame[BRIDGE_FRAME_OVERHEAD + sizeof(st)];
             size_t n = bridge_encode(BRIDGE_TYPE_STATUS, &st, sizeof(st), frame, sizeof(frame));
             if (n) uart_write_bytes(PC_UART, frame, n);
@@ -342,19 +252,12 @@ static void merge_task(void *arg)
         }
 
         if (now - last_log >= 1000000) {
-            uint32_t ds5_f = s_ds5_frames, pc_f = s_pc_frames;
-            ESP_LOGI(TAG,
-                     "ds5/s=%u pc/s=%u crc_err=%u/%u conn=%d btn=%08lx L=%d,%d R=%d,%d "
-                     "rumble_tx=%u gap_max=%u/%ums",
-                     (unsigned)(ds5_f - last_ds5), (unsigned)(pc_f - last_pc),
-                     (unsigned)s_ds5_crc_errors, (unsigned)s_pc_crc_errors,
-                     (ds5_ok || pc_ok) ? 1 : 0, (unsigned long)merged.buttons,
-                     merged.lx, merged.ly, merged.rx, merged.ry,
-                     (unsigned)s_rumble_sent, (unsigned)s_ds5_gap_max_ms,
+            uint32_t pc_f = s_pc_frames;
+            ESP_LOGI(TAG, "pc/s=%u crc_err=%u conn=%d btn=%08lx L=%d,%d R=%d,%d gap_max=%ums",
+                     (unsigned)(pc_f - last_pc), (unsigned)s_pc_crc_errors, pc_ok ? 1 : 0,
+                     (unsigned long)pc.buttons, pc.lx, pc.ly, pc.rx, pc.ry,
                      (unsigned)s_pc_gap_max_ms);
-            s_ds5_gap_max_ms = 0;
             s_pc_gap_max_ms = 0;
-            last_ds5 = ds5_f;
             last_pc = pc_f;
             last_log = now;
         }
@@ -363,22 +266,8 @@ static void merge_task(void *arg)
 
 void bridge_rx_init(void)
 {
-    const uart_config_t cfg = {
-        .baud_rate = BRIDGE_BAUD,
-        .data_bits = UART_DATA_8_BITS,
-        .parity = UART_PARITY_DISABLE,
-        .stop_bits = UART_STOP_BITS_1,
-        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
-        .source_clk = UART_SCLK_DEFAULT,
-    };
-    ESP_ERROR_CHECK(uart_driver_install(BRIDGE_UART, 1024, 1024, 0, NULL, 0));
-    ESP_ERROR_CHECK(uart_param_config(BRIDGE_UART, &cfg));
-    ESP_ERROR_CHECK(uart_set_pin(BRIDGE_UART, BRIDGE_TX_PIN, BRIDGE_RX_PIN,
-                                 UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
     ESP_ERROR_CHECK(uart_driver_install(PC_UART, 1024, 0, 0, NULL, 0));
-    xTaskCreate(rx_task, "bridge_rx", 6144, NULL, 5, NULL);
     xTaskCreate(pc_rx_task, "pc_rx", 4096, NULL, 5, NULL);
-    xTaskCreate(merge_task, "merge", 4096, NULL, 6, NULL);
-    ESP_LOGI(TAG, "UART2 pronta (TX=%d RX=%d %d baud)", BRIDGE_TX_PIN, BRIDGE_RX_PIN, BRIDGE_BAUD);
+    xTaskCreate(ingest_task, "ingest", 4096, NULL, 6, NULL);
     ESP_LOGI(TAG, "UART0 (PC) pronta");
 }

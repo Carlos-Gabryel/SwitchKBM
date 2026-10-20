@@ -1,5 +1,5 @@
-# Grava e abre o monitor serial. Uso: .\tools\flash.ps1 [-Side switch|ds5] [-Port COM5]
-param([ValidateSet("switch", "ds5")][string]$Side = "switch", [string]$Port)
+# Grava o firmware switch-side e abre o monitor serial. Uso: .\tools\flash.ps1 [-Port COM5]
+param([string]$Port)
 $root = Split-Path -Parent $PSScriptRoot
 . "$PSScriptRoot\idf-env.ps1"
 
@@ -16,4 +16,4 @@ if (-not $Port) {
         exit 1
     }
 }
-idf.py -C "$root\$Side-side" -p $Port flash monitor
+idf.py -C "$root\switch-side" -p $Port flash monitor

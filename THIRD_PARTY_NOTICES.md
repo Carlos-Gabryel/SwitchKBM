@@ -19,12 +19,6 @@ Consequência: o firmware e o `SwitchKBM.exe` podem ser compartilhados livrement
 | micro-ecc | BSD-2-Clause | `switch-side/components/btstack/3rd-party/` |
 | [ESP-IDF](https://github.com/espressif/esp-idf) (Espressif) | Apache-2.0 | Compilação do firmware (não incluído no repositório) |
 
-## Lado DualSense (experimental, ds5-side/, não usado pelo app)
-
-| Componente | Licença | Onde |
-|---|---|---|
-| [Bluepad32](https://github.com/ricardoquesada/bluepad32) | Apache-2.0 (depende do BTstack, que não é livre para uso comercial) | submódulo `third_party/bluepad32` |
-
 ## Aplicativo para Windows (tools/kbm/, SwitchKBM.exe)
 
 | Componente | Licença | Observação |
