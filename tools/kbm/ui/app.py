@@ -44,6 +44,7 @@ class Shell:
                                ft.Container(expand=True), self.status_box,
                                ft.Container(self.run_btn, padding=ft.Padding(0, 8, 0, 0))],
                               spacing=0, expand=True))
+        page.window.icon = str(assets_dir() / "icon.ico")
         page.window.prevent_close = True
         page.window.on_event = self._on_window_event
         page.add(ft.Row([sidebar, self.body], spacing=0, expand=True))

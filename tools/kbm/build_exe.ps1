@@ -38,7 +38,7 @@ $buildArgs = @("--paths=$kbm",
     "--hidden-import=bindings", "--hidden-import=profiles", "--hidden-import=serial",
     "--hidden-import=serial.tools.list_ports", "--hidden-import=esptool",
     "--collect-data=esptool", "--collect-submodules=esptool", "--collect-submodules=ui")
-$packArgs = @("-c", $flet, "pack", "$kbm\kbm_app.py", "--name", "SwitchKBM", "-y",
+$packArgs = @("-c", $flet, "pack", "$kbm\kbm_app.py", "--name", "SwitchKBM", "--icon", "$kbm\ui\assets\icon.ico", "-y",
     "--distpath", "$repo\dist", "--product-name", "Switch KBM",
     "--add-data", "$fwDst;firmware", "$kbm\ui\assets;ui\assets")
 foreach ($a in $buildArgs) { $packArgs += "--pyinstaller-build-args=$a" }

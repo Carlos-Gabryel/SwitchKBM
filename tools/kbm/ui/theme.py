@@ -70,7 +70,7 @@ def status_card(key: str, title: str, detail: str) -> ft.Container:
 
 
 def brand(size: int = 15) -> ft.Row:
-    return ft.Row([icon("gamepad-2", size + 5, ACCENT), text("Switch KBM", size, bold=True)],
+    return ft.Row([ft.Image(src="icon.png", width=size + 13, height=size + 13), text("Switch KBM", size, bold=True)],
                   spacing=8, vertical_alignment=ft.CrossAxisAlignment.CENTER)
 
 
