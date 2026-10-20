@@ -1,6 +1,7 @@
 """Switch KBM - programa para remapear teclado/mouse -> botoes do Switch e rodar o bridge."""
 import os
 import queue
+import re
 import subprocess
 import sys
 import threading
@@ -98,6 +99,49 @@ class BridgeRunner:
             self.proc = None
 
 
+class FlashRunner:
+    """Executa o gravador de firmware como subprocesso; linhas (separadas por CR ou LF) na fila."""
+
+    def __init__(self):
+        self.proc = None
+        self.q = queue.Queue()
+
+    @property
+    def running(self):
+        return self.proc is not None and self.proc.poll() is None
+
+    def start(self, port):
+        import flasher
+        env = dict(os.environ, PYTHONIOENCODING="utf-8", PYTHONUNBUFFERED="1")
+        self.proc = subprocess.Popen(
+            flasher.command(port), stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+            creationflags=CREATE_NO_WINDOW, env=env)
+        threading.Thread(target=self._reader, args=(self.proc,), daemon=True).start()
+
+    def _reader(self, proc):
+        buf = b""
+        try:
+            while True:
+                chunk = proc.stdout.read1(256)
+                if not chunk:
+                    break
+                buf += chunk
+                parts = buf.replace(b"\r", b"\n").split(b"\n")
+                buf = parts.pop()
+                for raw in parts:
+                    if raw.strip():
+                        self.q.put(raw.decode("utf-8", "replace"))
+            if buf.strip():
+                self.q.put(buf.decode("utf-8", "replace"))
+        except Exception:
+            pass
+
+    def kill(self):
+        p = self.proc
+        if p is not None and p.poll() is None:
+            p.kill()
+
+
 class App(tk.Tk):
     def __init__(self, store=None):
         super().__init__()
@@ -120,6 +164,9 @@ class App(tk.Tk):
         self.extras = {}
         self.ports = []
         self.stat_extra = ""
+        self.flasher = FlashRunner()
+        self.flash_resume = False
+        self._flash_pct = -1
         self._build()
         st = self.store.load_settings()
         names = self.store.names()
@@ -154,6 +201,8 @@ class App(tk.Tk):
         self.port_cb.bind("<<ComboboxSelected>>", self._on_port_pick)
         ttk.Button(top, text="Atualizar", command=self._refresh_ports, width=9).grid(
             row=1, column=5, padx=2, pady=(6, 0))
+        self.prep_btn = ttk.Button(top, text="Preparar placa", command=self._prepare, width=14)
+        self.prep_btn.grid(row=1, column=6, padx=2, pady=(6, 0))
 
         # parte de baixo primeiro (para o canvas expandir no meio)
         bottom = ttk.Frame(self)
@@ -588,6 +637,9 @@ class App(tk.Tk):
             self._start()
 
     def _start(self):
+        if self.flasher.running:
+            messagebox.showwarning(APP_TITLE, "Aguarde o fim da gravação do firmware.")
+            return
         port = self._cur_port()
         if not port:
             messagebox.showwarning(APP_TITLE, "Selecione a porta COM da placa (Placa-USBC ou Placa-MicroB).")
@@ -601,6 +653,54 @@ class App(tk.Tk):
             return
         self.stat_extra = ""
         self._set_status()
+
+    def _prepare(self):
+        if self.flasher.running:
+            return
+        port = self._cur_port()
+        if not port:
+            messagebox.showwarning(APP_TITLE, "Selecione a porta COM da placa (Placa-USBC ou Placa-MicroB).")
+            return
+        if not messagebox.askyesno(APP_TITLE, "Gravar o firmware na placa em %s? "
+                                   "Não desconecte o cabo até terminar (~30 s)." % port):
+            return
+        self.flash_resume = self.runner.running
+        if self.flash_resume:
+            self._stop()
+        if not self.log_open:
+            self._toggle_log()
+        try:
+            self.flasher.start(port)
+        except OSError as e:
+            messagebox.showerror(APP_TITLE, "Não foi possível iniciar a gravação: %s" % e)
+            return
+        self._flash_pct = -1
+        self.prep_btn.configure(state="disabled")
+        self.run_btn.configure(state="disabled")
+        self._msg("Gravando firmware...")
+
+    def _on_flash_line(self, line):
+        m = re.search(r"\((\d+) ?%\)", line)
+        if m and line.startswith("Writing at"):
+            pct = int(m.group(1)) // 10 * 10
+            if pct == self._flash_pct:
+                return
+            self._flash_pct = pct
+        self._log(line)
+
+    def _flash_done(self):
+        code = self.flasher.proc.returncode
+        self.flasher.proc = None
+        self.prep_btn.configure(state="normal")
+        self.run_btn.configure(state="normal")
+        if code == 0:
+            self._msg("Placa pronta.")
+            messagebox.showinfo(APP_TITLE, "Placa pronta.")
+            if self.flash_resume:
+                self._start()
+        else:
+            self._msg("Falha ao gravar o firmware.")
+            messagebox.showerror(APP_TITLE, "Falha ao gravar — veja o Log.")
 
     def _stop(self):
         self.runner.stop()
@@ -635,6 +735,13 @@ class App(tk.Tk):
                 self._on_bridge_line(self.runner.q.get_nowait())
         except queue.Empty:
             pass
+        try:
+            while True:
+                self._on_flash_line(self.flasher.q.get_nowait())
+        except queue.Empty:
+            pass
+        if self.flasher.proc is not None and not self.flasher.running:
+            self._flash_done()
         if self.runner.proc is not None and not self.runner.running:
             code = self.runner.proc.returncode
             self.runner.proc = None
@@ -643,8 +750,13 @@ class App(tk.Tk):
         self.after(100, self._poll)
 
     def _on_close(self):
+        if self.flasher.running and not messagebox.askyesno(
+                APP_TITLE, "A gravação do firmware está em andamento. "
+                "Interromper agora pode deixar a placa sem firmware. Sair mesmo assim?"):
+            return
         if not self._confirm_discard():
             return
+        self.flasher.kill()
         self.runner.stop()
         self.destroy()
 
@@ -704,6 +816,10 @@ def main(argv=None):
         import kbm_bridge
         kbm_bridge.main(argv[1:])
         return 0
+    if argv and argv[0] == "--flash":
+        _fix_std_streams()
+        import flasher
+        return flasher.run(argv[1])
     if "--selftest" in argv:
         return selftest()
     App().mainloop()
