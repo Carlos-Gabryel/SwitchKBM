@@ -40,6 +40,11 @@ def _set_priorities(thread=False):
         pass
 
 
+def status_fw_version(payload):
+    """Versao do firmware no payload do STATUS (byte 1; firmware antigo envia 0). None se curto demais."""
+    return payload[1] if len(payload) >= 2 else None
+
+
 class Bridge:
     def __init__(self, args, cfg):
         self.args = args
@@ -51,6 +56,7 @@ class Bridge:
         self.hook = None
         self.seq = 0
         self.parser = proto.StreamParser()
+        self.fw_version = None
         # instrumentacao (so contadores)
         self.st_write_max = 0.0
 
@@ -130,7 +136,11 @@ class Bridge:
         if not data:
             return
         for ftype, payload in self.parser.feed(data):
-            pass   # STATUS do ESP32 e ignorado
+            if ftype == proto.TYPE_STATUS:
+                fw = status_fw_version(payload)
+                if fw is not None and fw != self.fw_version:
+                    self.fw_version = fw
+                    self.say("FIRMWARE v%d" % fw)
         for line in self.parser.pop_text():
             if self.args.verbose:
                 self.say("[esp] " + line)

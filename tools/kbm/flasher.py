@@ -3,6 +3,10 @@ import json
 import os
 import sys
 
+# Versao do firmware embutida neste programa; tem de ser igual a BRIDGE_FW_VERSION em
+# common/bridge_proto/include/bridge_proto.h (um teste confere). A placa informa a dela no STATUS.
+FIRMWARE_VERSION = 1
+
 
 def firmware_dir():
     if getattr(sys, "frozen", False):

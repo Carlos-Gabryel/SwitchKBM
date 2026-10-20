@@ -69,6 +69,14 @@ def status_card(key: str, title: str, detail: str) -> ft.Container:
                            muted(detail, 11)], spacing=4))
 
 
+def notice(message: str, size: int = 11) -> ft.Container:
+    """Aviso ambar (algo que merece atencao, mas nao impede de usar)."""
+    return ft.Container(
+        padding=10, border_radius=RADIUS_SMALL, bgcolor="#2A2112", border=border("#5A4519"),
+        content=ft.Row([icon("triangle-alert", 14, AMBER), ft.Container(text(message, size, AMBER), expand=True)],
+                       spacing=8, vertical_alignment=ft.CrossAxisAlignment.START))
+
+
 def brand(size: int = 15) -> ft.Row:
     return ft.Row([ft.Image(src="icon.png", width=size + 13, height=size + 13), text("Switch KBM", size, bold=True)],
                   spacing=8, vertical_alignment=ft.CrossAxisAlignment.CENTER)

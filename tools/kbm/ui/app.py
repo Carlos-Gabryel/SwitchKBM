@@ -10,7 +10,8 @@ from pathlib import Path
 import flet as ft
 
 from capture import Capture
-from controller import APP_TITLE, APP_VERSION, REPO_URL, Controller
+import updater
+from controller import APP_TITLE, APP_VERSION, FIRMWARE_OLD_MSG, REPO_URL, Controller
 from ui import theme as t
 
 NAV = (("controles", "Controles", "gamepad-2"), ("ajustes", "Ajustes", "settings"),
@@ -35,6 +36,10 @@ class Shell:
                       "placa": PlacaView(self)}
         self.nav = ft.Column(spacing=4)
         self.status_box = ft.Container()
+        self.fw_box = ft.Container(visible=False, padding=ft.Padding(0, 0, 0, 8),
+                                   content=t.notice(FIRMWARE_OLD_MSG))
+        self.update_bar = ft.Container(visible=False, bgcolor=t.CARD, padding=ft.Padding(24, 8, 24, 8),
+                                       border=ft.Border(bottom=ft.BorderSide(1, t.BORDER)))
         self.run_btn = t.button("Iniciar", self.toggle_run, icon_name="play")
         self.cap_btn = t.button("Capturar mouse e teclado", self.toggle_capture, primary=False,
                                 icon_name="mouse-pointer-2")
@@ -46,7 +51,7 @@ class Shell:
             width=t.SIDEBAR_WIDTH, bgcolor=t.SIDEBAR, padding=ft.Padding(12, 16, 12, 16),
             border=ft.Border(right=ft.BorderSide(1, t.BORDER)),
             content=ft.Column([ft.Container(t.brand(), padding=ft.Padding(6, 0, 0, 14)), self.nav,
-                               ft.Container(expand=True), self.status_box,
+                               ft.Container(expand=True), self.fw_box, self.status_box,
                                ft.Container(ft.Column([self.run_btn, self.cap_btn], spacing=8,
                                                       horizontal_alignment=ft.CrossAxisAlignment.STRETCH),
                                             padding=ft.Padding(0, 8, 0, 0)),
@@ -55,9 +60,39 @@ class Shell:
         page.window.icon = str(assets_dir() / "icon.ico")
         page.window.prevent_close = True
         page.window.on_event = self._on_window_event
-        page.add(ft.Row([sidebar, self.body], spacing=0, expand=True))
+        page.add(ft.Row([sidebar, ft.Column([self.update_bar, self.body], spacing=0, expand=True)],
+                        spacing=0, expand=True))
         self.render(full=True)
+        self.ctrl.start_check()         # em segundo plano; falha so vai para o log
         page.run_task(self._poll)
+
+    # ---- atualizacao do programa ----
+    def update_now(self, e=None) -> None:
+        """Pede confirmacao (perfil nao salvo) e baixa+troca o .exe; a janela fecha quando o novo abrir."""
+        why = self.ctrl.update_blocker()
+        if why:
+            self.info(why)
+            return
+
+        def go():
+            problem = self.ctrl.install_update()
+            if problem:
+                self.info(problem)
+            self.render()
+        self.confirm_discard(go)
+
+    def _update_row(self) -> ft.Row:
+        c = self.ctrl
+        rel = c.update_release
+        if c.update_state == "downloading":
+            return ft.Row([t.icon("download", 16, t.GREEN),
+                           t.text(f"Baixando a versão {rel.tag.lstrip('v')}…", 13),
+                           ft.ProgressBar(value=c.update_progress, color=t.ACCENT, bgcolor=t.FIELD,
+                                          width=180)], spacing=10)
+        return ft.Row([t.icon("download", 16, t.GREEN),
+                       t.text(f"Nova versão {rel.tag.lstrip('v')} disponível", 13), ft.Container(expand=True),
+                       t.button("Atualizar", self.update_now, disabled=c.flashing or not updater.can_apply())],
+                      spacing=10)
 
     def _credit(self) -> ft.Control:
         """Linha discreta de credito: abre o repositorio no navegador."""
@@ -190,6 +225,11 @@ class Shell:
         self.run_btn.icon = t.icon("pause" if c.running else "play", 16, "#FFFFFF")
         self.run_btn.disabled = c.flashing
         self.cap_btn.disabled = not c.running
+        self.fw_box.visible = c.firmware_old
+        self.update_bar.visible = (c.update_state in ("available", "downloading") and c.update_release is not None
+                                   and updater.can_apply())
+        if self.update_bar.visible:
+            self.update_bar.content = self._update_row()
         if not c.waiting and self.capture.active:
             self.capture.cancel()
         view = self.views[self.current]
@@ -201,11 +241,16 @@ class Shell:
     def _signature(self):
         c = self.ctrl
         return (c.status(), c.port, c.msg, c.log_seq, c.flash_progress, c.dirty, c.waiting, c.running,
-                c.settings.get("sens"), c.name, c.flashing)
+                c.settings.get("sens"), c.name, c.flashing, c.firmware_old, c.update_state,
+                round(c.update_progress, 2), c.update_error)
 
     async def _poll(self) -> None:
         while True:
             try:
+                if self.ctrl.update_ready:      # o .exe novo ja abriu: fecha este sem perguntar
+                    self.ctrl.update_ready = False
+                    self._quit()
+                    return
                 for ev in self.ctrl.poll():
                     if ev[0] == "flash_done":
                         self._flash_finished(ev[1], ev[2])
@@ -227,6 +272,8 @@ class Shell:
 
 def run() -> None:
     tab = sys.argv[sys.argv.index("--tab") + 1] if "--tab" in sys.argv else "controles"   # so para depuracao
+    if getattr(sys, "frozen", False):
+        updater.cleanup(Path(sys.executable))       # apaga o SwitchKBM.exe.old de uma atualizacao anterior
     ctrl = Controller()
 
     def main(page: ft.Page) -> None:

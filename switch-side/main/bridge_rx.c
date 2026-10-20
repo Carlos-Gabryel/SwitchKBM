@@ -243,7 +243,7 @@ static void ingest_task(void *arg)
         }
 
         if (first_status || (now - last_status) >= STATUS_PERIOD_MS * 1000) {
-            bridge_status_t st = { .trig_mode = 0, .reserved = 0 };
+            bridge_status_t st = { .trig_mode = 0, .fw_version = BRIDGE_FW_VERSION };
             uint8_t frame[BRIDGE_FRAME_OVERHEAD + sizeof(st)];
             size_t n = bridge_encode(BRIDGE_TYPE_STATUS, &st, sizeof(st), frame, sizeof(frame));
             if (n) uart_write_bytes(PC_UART, frame, n);

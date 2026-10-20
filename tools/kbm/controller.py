@@ -2,9 +2,15 @@
 import collections
 import queue
 import re
+import sys
+import tempfile
+import threading
+from pathlib import Path
 
 import bindings as bd
 import profiles as pf
+import updater
+from flasher import FIRMWARE_VERSION
 from mapping import display_name
 from runners import BridgeRunner, FlashRunner, list_ports, pick_default_port
 
@@ -17,6 +23,8 @@ STATUS_PREFIXES = ("CAPTURADO", "LIBERADO", "Modo de mira",
 CAPTURE_HINT = "Pressione a tecla (ou clique/roda do mouse). Esc cancela."
 NO_PORT_MSG = "Selecione a porta COM da placa ESP32."
 LOG_LINES = 500
+FIRMWARE_RE = re.compile(r"^FIRMWARE v(\d+)\s*$")
+FIRMWARE_OLD_MSG = "Firmware da placa desatualizado — vá em Placa › Preparar placa"
 
 
 class Controller:
@@ -40,6 +48,12 @@ class Controller:
         self.flash_progress = None  # 0..1 enquanto grava (None = parado)
         self.log = collections.deque(maxlen=LOG_LINES)
         self.log_seq = 0            # cresce a cada linha (a UI detecta novidade)
+        self.fw_version = None      # versao do firmware informada pela placa (None = ainda nao sei)
+        self.update_state = "idle"  # idle | checking | uptodate | available | downloading | error
+        self.update_release = None
+        self.update_error = ""
+        self.update_progress = 0.0
+        self.update_ready = False   # o .exe novo ja foi trocado e relancado: a UI deve fechar
         st = self.store.load_settings()
         names = self.store.names()
         last = st.get("last_profile")
@@ -239,6 +253,7 @@ class Controller:
         except OSError as e:
             return "error", "Não foi possível iniciar o bridge: %s" % e
         self.stat_extra = ""
+        self.fw_version = None
         return None
 
     def stop(self):
@@ -258,8 +273,17 @@ class Controller:
         self.runner.stop()
         return self.start()
 
+    @property
+    def firmware_old(self):
+        """True se a placa informou um firmware mais antigo que o embutido neste programa."""
+        return self.fw_version is not None and self.fw_version < FIRMWARE_VERSION
+
     def on_bridge_line(self, line):
         self.add_log(line)
+        m = FIRMWARE_RE.match(line)
+        if m:
+            self.fw_version = int(m.group(1))
+            return
         sens = bd.parse_sens_line(line)
         if sens is not None:
             self.set_setting("sens", round(sens, 4))    # marca dirty como antes
@@ -307,6 +331,7 @@ class Controller:
         self.flash_progress = None
         if code == 0:
             self.msg = "Placa pronta."
+            self.fw_version = None      # a placa informa de novo quando o bridge reconectar
             return True, (self.start() if self.flash_resume else None)
         self.msg = "Falha ao gravar o firmware."
         return False, None
@@ -334,6 +359,65 @@ class Controller:
             self.msg = "Bridge encerrou (código %s)." % code
             events.append(("bridge_exit", code))
         return events
+
+    # ---------------- atualizacao do programa ----------------
+    def check_update(self, opener=None):
+        """Consulta o GitHub (bloqueante; a UI chama por start_check). Nunca levanta."""
+        self.update_state, self.update_error = "checking", ""
+        try:
+            rel = updater.latest(**({"opener": opener} if opener else {}))
+            if updater.newer(rel, APP_VERSION):
+                self.update_release, self.update_state = rel, "available"
+            else:
+                self.update_release, self.update_state = None, "uptodate"
+        except Exception as e:      # UpdateError ou qualquer outra: nunca derruba a UI
+            self.update_state, self.update_error = "error", str(e)
+            self.add_log("Atualização: %s" % e)
+        return self.update_state
+
+    def start_check(self):
+        if self.update_state in ("checking", "downloading"):
+            return False
+        self.update_state = "checking"
+        threading.Thread(target=self.check_update, daemon=True).start()
+        return True
+
+    def update_blocker(self):
+        """None se pode atualizar agora, senao o motivo."""
+        if self.flasher.running:
+            return "Aguarde o fim da gravação do firmware."
+        if not updater.can_apply():
+            return updater.NOT_FROZEN_MSG
+        if self.update_state != "available" or self.update_release is None:
+            return "Nenhuma atualização disponível."
+        return None
+
+    def install_update(self, exe=None, opener=None, launch=None, wait=False):
+        """Para o bridge e baixa+troca o exe em segundo plano. Devolve o motivo da recusa ou None."""
+        why = self.update_blocker()
+        if why:
+            return why
+        self.stop()
+        self.update_state, self.update_progress, self.update_error = "downloading", 0.0, ""
+        th = threading.Thread(target=self._install, args=(exe, opener, launch), daemon=True)
+        th.start()
+        if wait:
+            th.join()
+        return None
+
+    def _install(self, exe, opener, launch):
+        try:
+            exe = Path(exe or sys.executable)
+            kw = {"opener": opener} if opener else {}
+            new = updater.download(self.update_release, Path(tempfile.gettempdir()) / "SwitchKBM-update",
+                                   progress=lambda f: setattr(self, "update_progress", f), **kw)
+            if self.flasher.running:        # nunca troca o programa no meio da gravacao
+                raise updater.UpdateError("a gravação do firmware começou; tente de novo depois")
+            updater.apply(new, exe, **({"launch": launch} if launch else {}))
+            self.update_ready = True
+        except (updater.UpdateError, OSError) as e:
+            self.update_state, self.update_error = "error", str(e)
+            self.add_log("Atualização: %s" % e)
 
     # ---------------- status e encerramento ----------------
     def status(self):

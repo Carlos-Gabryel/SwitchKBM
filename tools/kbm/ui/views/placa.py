@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import flet as ft
 
+from controller import FIRMWARE_OLD_MSG
 from ui import theme as t
 
 LOG_MAX = 500
@@ -15,10 +16,12 @@ class PlacaView:
         self.prep = t.button("Preparar placa", self._prepare, icon_name="zap")
         self.bar = ft.ProgressBar(value=0, color=t.ACCENT, bgcolor=t.FIELD, visible=False)
         self.state = t.muted("", 12)
+        self.fw_notice = ft.Container(content=t.notice(FIRMWARE_OLD_MSG, 12), visible=False)
         self.log = ft.ListView(expand=True, auto_scroll=True, spacing=0)
         self._seen = 0
         self.control = ft.Column([
             t.text("Placa", 22, bold=True),
+            self.fw_notice,
             t.card(ft.Column([
                 t.text("Porta", 14, bold=True),
                 ft.Row([self.port, t.icon_button("refresh-cw", "Atualizar", self._refresh_ports)], spacing=8),
@@ -40,6 +43,7 @@ class PlacaView:
         c = self.ctrl
         self.port.options = [ft.DropdownOption(key=dev, text=label) for dev, label in c.ports]
         self.port.value = c.port or None
+        self.fw_notice.visible = c.firmware_old
         self.prep.disabled = c.flashing
         self.bar.visible = c.flash_progress is not None
         self.bar.value = c.flash_progress

@@ -22,6 +22,7 @@ extern "C" {
 #define BRIDGE_TYPE_STATUS 0x03 /* ESP32 -> PC (0x02 era reservado e nao e mais usado) */
 
 // bridge_state_t.flags
+#define BRIDGE_FW_VERSION 1     /* versao do firmware; enviada no STATUS (0 = firmware antigo) */
 #define BRIDGE_FLAG_CONNECTED (1u << 0)
 #define BRIDGE_FLAG_BATTERY_LOW (1u << 1)
 #define BRIDGE_FLAG_CHARGING (1u << 2)
@@ -69,10 +70,10 @@ typedef struct __attribute__((packed)) {
     uint16_t timestamp_ms;
 } bridge_state_t;
 
-// STATUS (ESP32 -> PC): mantido so por compatibilidade de protocolo; o app ignora o conteudo.
+// STATUS (ESP32 -> PC): o app so le fw_version (firmwares antigos enviavam 0 aqui).
 typedef struct __attribute__((packed)) {
     uint8_t trig_mode; // sempre 0
-    uint8_t reserved;  // sempre 0
+    uint8_t fw_version; // BRIDGE_FW_VERSION
 } bridge_status_t;
 
 _Static_assert(sizeof(bridge_status_t) == 2, "bridge_status_t size");

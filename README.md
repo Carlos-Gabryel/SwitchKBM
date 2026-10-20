@@ -33,6 +33,7 @@ o analógico direito.
 - **Andar devagar:** uma tecla (Alt) reduz o analógico esquerdo pela metade.
 - **Captura com F12 ou com um botão:** enquanto capturado, o teclado e o mouse ficam só para o jogo. O F12 sempre solta.
 - **Prepara a placa com um clique:** o firmware vai dentro do programa, sem instalar mais nada.
+- **Atualiza sozinho:** avisa quando sai versão nova.
 - **Perfis por jogo:** crie, duplique e troque de perfil sem mexer em arquivos.
 
 ## 🧰 Do que você precisa
@@ -74,6 +75,13 @@ para criar, duplicar, renomear e apagar. Depois de mexer, clique em **Salvar**.
 > controle virtual perde com o tempo, e a mira para de girar na horizontal.
 
 ## 🛠️ Problemas comuns
+
+<details>
+<summary><b>Placa desatualizada</b></summary>
+
+- Aparece um aviso âmbar quando a placa tem um firmware mais antigo. Vá em **Placa › Preparar placa**; o bridge continua funcionando enquanto isso.
+
+</details>
 
 <details>
 <summary><b>A porta da placa não aparece</b></summary>
