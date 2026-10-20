@@ -36,10 +36,10 @@ class Shell:
         self.nav = ft.Column(spacing=4)
         self.status_box = ft.Container()
         self.run_btn = t.button("Iniciar", self.toggle_run, icon_name="play")
-        self.cap_btn = ft.Container(
-            content=t.icon("mouse-pointer-2", 16, t.TEXT), width=t.CONTROL_HEIGHT, height=t.CONTROL_HEIGHT,
-            alignment=ft.Alignment.CENTER, bgcolor=t.HOVER, border_radius=t.CONTROL_HEIGHT // 2,
-            tooltip="Capturar mouse e teclado (mesmo que F12)", on_click=self.toggle_capture, ink=True)
+        self.cap_btn = t.button("Capturar mouse e teclado", self.toggle_capture, primary=False,
+                                icon_name="mouse-pointer-2")
+        self.cap_btn.tooltip = "Mesmo que apertar F12 (F12 também solta)"
+        self.cap_btn.style.padding = ft.Padding(10, 8, 10, 8)
         self.body = ft.Container(expand=True, padding=24)
         self._sig = None
         sidebar = ft.Container(
@@ -47,7 +47,9 @@ class Shell:
             border=ft.Border(right=ft.BorderSide(1, t.BORDER)),
             content=ft.Column([ft.Container(t.brand(), padding=ft.Padding(6, 0, 0, 14)), self.nav,
                                ft.Container(expand=True), self.status_box,
-                               ft.Container(ft.Row([self.run_btn, self.cap_btn], spacing=8), padding=ft.Padding(0, 8, 0, 0))],
+                               ft.Container(ft.Column([self.run_btn, self.cap_btn], spacing=8,
+                                                      horizontal_alignment=ft.CrossAxisAlignment.STRETCH),
+                                            padding=ft.Padding(0, 8, 0, 0))],
                               spacing=0, expand=True))
         page.window.icon = str(assets_dir() / "icon.ico")
         page.window.prevent_close = True
@@ -177,8 +179,6 @@ class Shell:
         self.run_btn.icon = t.icon("pause" if c.running else "play", 16, "#FFFFFF")
         self.run_btn.disabled = c.flashing
         self.cap_btn.disabled = not c.running
-        self.cap_btn.opacity = 1.0 if c.running else 0.4
-        self.cap_btn.on_click = self.toggle_capture if c.running else None
         if not c.waiting and self.capture.active:
             self.capture.cancel()
         view = self.views[self.current]
