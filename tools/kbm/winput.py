@@ -25,6 +25,9 @@ WM_QUIT = 0x0012
 WM_PAINT, WM_ERASEBKGND = 0x000F, 0x0014
 WM_ACTIVATE, WM_KILLFOCUS = 0x0006, 0x0008
 WM_INPUT = 0x00FF
+WM_APP_CALL = 0x8002              # executa callback na thread do hook (call_soon)
+WM_APP_REFOCUS = 0x8003           # retoma o foco logo apos begin_capture
+REFOCUS_GRACE_S = 0.6             # perda de foco nesse intervalo = retoma (nao libera)
 WM_APP_KEY = 0x8001               # fila de teclas do hook -> thread principal
 WM_KEYDOWN, WM_KEYUP, WM_SYSKEYDOWN, WM_SYSKEYUP = 0x100, 0x101, 0x104, 0x105
 WA_INACTIVE = 0
@@ -206,6 +209,9 @@ class InputHook:
         self.mouse_ev = 0
         self.kb_hook_max = 0.0
         self._ctrl_cb = None
+        self._cap_t0 = 0.0
+        self._refocus_left = 0
+        self._calls = collections.deque()
         self.done = threading.Event()   # o chamador seta apos a limpeza (console fechando)
         # referencias para evitar coleta de lixo
         self._kb_cb = HOOKPROC(self._kb_proc)
@@ -256,6 +262,8 @@ class InputHook:
         try:
             if msg == WM_INPUT:
                 self._read_raw(lParam)
+            elif msg == WM_APP_CALL:
+                self._run_calls()
             elif msg == WM_APP_KEY:
                 self._drain_keys()
                 return 0
@@ -266,7 +274,18 @@ class InputHook:
                 return 0
             elif msg == WM_ACTIVATE or msg == WM_KILLFOCUS:
                 if self._capturing and (msg == WM_KILLFOCUS or (wParam & 0xFFFF) == WA_INACTIVE):
-                    self._focus_lost()
+                    # Logo apos capturar pelo botao do app, a janela do Flet se reativa uma vez
+                    # (o 1o clique foca o botao) e roubaria o foco: retoma em vez de liberar.
+                    if (time.perf_counter() - self._cap_t0 < REFOCUS_GRACE_S
+                            and self._refocus_left > 0):
+                        self._refocus_left -= 1
+                        user32.PostMessageW(hwnd, WM_APP_REFOCUS, 0, 0)
+                    else:
+                        self._focus_lost()
+            elif msg == WM_APP_REFOCUS:
+                if self._capturing:
+                    self._take_focus()
+                    self._clip_center()
         except Exception as e:
             self.log("erro na janela de captura: %r" % (e,))
         return user32.DefWindowProcW(hwnd, msg, wParam, lParam)
@@ -345,6 +364,18 @@ class InputHook:
         h = user32.GetSystemMetrics(SM_CYSCREEN)
         user32.SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, w, h, SWP_SHOWWINDOW)
         user32.ShowWindow(hwnd, SW_SHOWNOACTIVATE)
+        self._cap_t0 = time.perf_counter()
+        self._refocus_left = 4
+        self._take_focus()
+        self._clip_center()
+        if not self._cursor_hidden:
+            user32.ShowCursor(False)
+            self._cursor_hidden = True
+        user32.InvalidateRect(hwnd, None, True)
+        self._capturing = True
+
+    def _take_focus(self):
+        hwnd = self._hwnd
         # SetForegroundWindow pode ser negado; anexa a entrada da thread do foco atual
         fg = user32.GetForegroundWindow()
         fg_tid = user32.GetWindowThreadProcessId(fg, None) if fg else 0
@@ -358,15 +389,13 @@ class InputHook:
             user32.AttachThreadInput(self._tid, fg_tid, False)
         if user32.GetForegroundWindow() != hwnd:
             self.log("aviso: janela de captura nao obteve o foco")
-        cx, cy = w // 2, h // 2
+
+    def _clip_center(self):
+        cx = user32.GetSystemMetrics(SM_CXSCREEN) // 2
+        cy = user32.GetSystemMetrics(SM_CYSCREEN) // 2
         rc = RECT(cx - 4, cy - 4, cx + 4, cy + 4)
         user32.ClipCursor(ctypes.byref(rc))
         user32.SetCursorPos(cx, cy)
-        if not self._cursor_hidden:
-            user32.ShowCursor(False)
-            self._cursor_hidden = True
-        user32.InvalidateRect(hwnd, None, True)
-        self._capturing = True
 
     def end_capture(self):
         """Esconde a janela, libera o cursor e restaura. Idempotente."""
@@ -385,9 +414,27 @@ class InputHook:
         if self._tid:
             user32.PostThreadMessageW(self._tid, WM_QUIT, 0, 0)
 
+    def call_soon(self, fn):
+        """Roda fn() na thread do loop de mensagens (a que cria a janela/hook). Qualquer thread."""
+        self._calls.append(fn)
+        hwnd = self._hwnd
+        if not hwnd:
+            return False        # fica na fila; _install avisa quando a janela existir
+        return bool(user32.PostMessageW(hwnd, WM_APP_CALL, 0, 0))   # mensagem de janela: nao se perde
+
+    def _run_calls(self):
+        while self._calls:
+            fn = self._calls.popleft()
+            try:
+                fn()
+            except Exception as e:
+                self.log("erro no comando: %r" % (e,))
+
     def _install(self):
         self._tid = kernel32.GetCurrentThreadId()
         self._create_window()
+        if self._calls:
+            user32.PostMessageW(self._hwnd, WM_APP_CALL, 0, 0)
         self._hk = user32.SetWindowsHookExW(WH_KEYBOARD_LL, self._kb_cb, None, 0)
         if not self._hk:
             raise ctypes.WinError(ctypes.get_last_error())

@@ -1,4 +1,7 @@
-"""Gerencia perfis (json) e settings.json ao lado do programa."""
+"""Gerencia perfis (json) e settings.json.
+
+No exe ficam em %LOCALAPPDATA%\SwitchKBM (fora da pasta do exe, que o build recria); em modo
+fonte, ao lado deste arquivo."""
 import json
 import os
 import re
@@ -16,8 +19,29 @@ _BAD = re.compile(r'[<>:"/\|?*\x00-\x1f]')
 
 def app_dir():
     if getattr(sys, "frozen", False):
-        return os.path.dirname(os.path.abspath(sys.executable))
+        base = os.path.join(os.environ.get("LOCALAPPDATA") or os.path.expanduser("~"), "SwitchKBM")
+        migrate_data(os.path.dirname(os.path.abspath(sys.executable)), base)
+        return base
     return os.path.dirname(os.path.abspath(__file__))
+
+
+def migrate_data(old, new):
+    """Copia perfis/settings de versoes antigas (salvos ao lado do exe) se new ainda nao tem perfis.
+    So copia: nunca apaga nada em old."""
+    src = os.path.join(old, "profiles")
+    dst = os.path.join(new, "profiles")
+    if os.path.isdir(dst) and any(f.lower().endswith(".json") for f in os.listdir(dst)):
+        return False
+    if not os.path.isdir(src) or not any(f.lower().endswith(".json") for f in os.listdir(src)):
+        return False
+    os.makedirs(dst, exist_ok=True)
+    for f in os.listdir(src):
+        if f.lower().endswith(".json"):
+            shutil.copy2(os.path.join(src, f), os.path.join(dst, f))
+    st = os.path.join(old, "settings.json")
+    if os.path.isfile(st) and not os.path.exists(os.path.join(new, "settings.json")):
+        shutil.copy2(st, os.path.join(new, "settings.json"))
+    return True
 
 
 def default_profile():

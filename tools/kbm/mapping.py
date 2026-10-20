@@ -9,9 +9,9 @@ try:
 except ImportError:  # pragma: no cover
     from .proto import BTN, FLAG_CONNECTED
 
-VK_F7, VK_F8, VK_F10, VK_F11, VK_F12 = 0x76, 0x77, 0x79, 0x7A, 0x7B
+VK_F7, VK_F8, VK_F11, VK_F12 = 0x76, 0x77, 0x7A, 0x7B
 VK_ALT = 0x12
-HOTKEY_VKS = {VK_F7, VK_F8, VK_F10, VK_F11, VK_F12}
+HOTKEY_VKS = {VK_F7, VK_F8, VK_F11, VK_F12}
 VK_W, VK_A, VK_S, VK_D = 0x57, 0x41, 0x53, 0x44
 ARROW_VKS = {"left": 0x25, "up": 0x26, "right": 0x27, "down": 0x28}
 
@@ -46,7 +46,7 @@ def _build_key_names():
 
 KEY_NAMES = _build_key_names()
 VK_TO_NAME = {v: k for k, v in KEY_NAMES.items()}
-RESERVED_NAMES = ("f7", "f8", "f10", "f11", "f12")
+RESERVED_NAMES = ("f7", "f8", "f11", "f12")
 
 _DISPLAY = {
     "space": "Espaço", "tab": "Tab", "esc": "Esc", "enter": "Enter", "backspace": "Backspace",
@@ -148,7 +148,6 @@ class Mapper:
         self.acc_dx = 0.0
         self.theta = 0.0  # pitch do controle virtual (graus)
         self.acc_dy = 0.0
-        self.combo_start = None
         self.warnings = []
         self._key_binds = {}        # vk -> botao
         self._mouse_binds = {}      # nome -> botao
@@ -196,9 +195,6 @@ class Mapper:
                 self.aim_mode = "stick" if self.aim_mode == "gyro" else "gyro"
                 self.notify("Modo de mira: %s" % self.aim_mode)
                 return "toggle_aim"
-            if vk == VK_F10:
-                self.combo_start = now_s
-                return "cycle_trigger"
             if vk == VK_F8:
                 self.sens *= 1.1
                 self.notify("Sensibilidade giro: %.3f" % self.sens)
@@ -231,7 +227,6 @@ class Mapper:
         self.wheel_until.clear()
         self.acc_dx = self.acc_dy = 0.0
         self.theta = 0.0
-        self.combo_start = None
 
     # ---- saida ----
     def _gyro_axis(self, counts, dt):
@@ -285,18 +280,6 @@ class Mapper:
         for name, btn in self._mouse_binds.items():
             if name in self.mouse or self.wheel_until.get(name, -1.0) > now_s:
                 apply(btn)
-
-        # combo F10: SYSTEM 0..60 ms, R2 15..45 ms
-        if self.combo_start is not None:
-            t = now_s - self.combo_start
-            if t > 0.060:
-                self.combo_start = None
-            else:
-                if t >= 0:
-                    buttons |= 1 << BTN["SYSTEM"]
-                if 0.015 <= t < 0.045:
-                    r2 = 1023
-                    buttons |= 1 << BTN["R2_DIGITAL"]
 
         # stick esquerdo (Y positivo = baixo)
         p = self.pressed
