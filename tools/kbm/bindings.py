@@ -27,9 +27,10 @@ MOVE_IDS = [r for r, _ in MOVE_ROWS]
 SLOTS = 2
 
 SETTING_KEYS = ("aim_mode", "deg_per_count", "invert_yaw", "invert_pitch", "walk_scale",
-                "wheel_pulse_ms")
+                "wheel_pulse_ms", "stick_sens", "stick_deadzone_comp")
 SETTING_DEFAULTS = {"aim_mode": "gyro", "deg_per_count": 0.05, "invert_yaw": True,
-                    "invert_pitch": True, "walk_scale": 0.5, "wheel_pulse_ms": 80.0}
+                    "invert_pitch": True, "walk_scale": 0.5, "wheel_pulse_ms": 80.0,
+                    "stick_sens": 1.0, "stick_deadzone_comp": 60}
 
 
 def valid_key(name):
@@ -135,4 +136,11 @@ def parse_sens_line(line):
     """Linha 'SENS deg_per_count=0.0550' do bridge -> float (ou None)."""
     import re
     m = re.search(r"SENS deg_per_count=([0-9.]+)", line)
+    return float(m.group(1)) if m else None
+
+
+def parse_stick_sens_line(line):
+    """Linha 'STICKSENS stick_sens=1.210' do bridge -> float (ou None)."""
+    import re
+    m = re.search(r"STICKSENS stick_sens=([0-9.]+)", line)
     return float(m.group(1)) if m else None

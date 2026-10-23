@@ -15,7 +15,7 @@ from mapping import display_name
 from runners import BridgeRunner, FlashRunner, list_ports, pick_default_port
 
 APP_TITLE = "Switch KBM"
-APP_VERSION = "1.0.1"
+APP_VERSION = "1.0.2"
 REPO_URL = "https://github.com/Carlos-Gabryel/switch-kbm"
 AIM_LABELS = {"gyro": "Giroscópio", "stick": "Analógico direito"}
 STATUS_PREFIXES = ("CAPTURADO", "LIBERADO", "Modo de mira",
@@ -100,6 +100,8 @@ class Controller:
             "invv": not data.get("invert_pitch", True),
             "walk": round(float(data.get("walk_scale", d["walk_scale"])), 3),
             "wheel": float(data.get("wheel_pulse_ms", d["wheel_pulse_ms"])),
+            "ssens": round(float(data.get("stick_sens", d["stick_sens"])), 3),
+            "sdz": int(round(float(data.get("stick_deadzone_comp", d["stick_deadzone_comp"])))),
         }
         self.waiting = None
 
@@ -120,6 +122,8 @@ class Controller:
             "invert_pitch": not s.get("invv"),
             "walk_scale": round(min(0.95, max(0.1, self._num(s.get("walk"), 0.5))), 3),
             "wheel_pulse_ms": max(10.0, self._num(s.get("wheel"), 80)),
+            "stick_sens": round(min(3.0, max(0.1, self._num(s.get("ssens"), 1.0))), 3),
+            "stick_deadzone_comp": int(round(min(200, max(0, self._num(s.get("sdz"), 60))))),
         }
         return bd.rows_to_profile(self.rows, s, self.base)
 
@@ -287,6 +291,10 @@ class Controller:
         sens = bd.parse_sens_line(line)
         if sens is not None:
             self.set_setting("sens", round(sens, 4))    # marca dirty como antes
+            return
+        ss = bd.parse_stick_sens_line(line)
+        if ss is not None:
+            self.set_setting("ssens", round(ss, 3))
             return
         if line.startswith(STATUS_PREFIXES):
             self.stat_extra = line

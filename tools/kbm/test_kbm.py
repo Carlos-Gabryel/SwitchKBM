@@ -208,16 +208,118 @@ class MapperTests(unittest.TestCase):
         m = mk()
         self.assertEqual(m.key_down(0x7A), "toggle_aim")
         self.assertEqual(m.aim_mode, "stick")
-        m.mouse_move(100, -50)
+        m.mouse_move(100, 50)
         st = m.build_state(0, 0.005, True)
-        # 100/0.005*0.6 = 12000 -> clamp 511 ; -50/0.005*0.6 = -6000 -> -512
-        self.assertEqual((st["rx"], st["ry"]), (511, -512))
+        self.assertGreater(st["rx"], 0)
+        self.assertGreater(st["ry"], 0)
         self.assertEqual(st["gyro"], (0, 0, 0))
-        m.mouse_move(0, 1)
-        st = m.build_state(0.005, 0.005, True)
-        self.assertEqual(st["rx"], 0)
-        self.assertEqual(st["ry"], 120 + 60)       # mouse para baixo = stick para baixo (positivo)
-        self.assertEqual(m.build_state(0.01, 0.005, True)["ry"], 0)
+        for _ in range(10):     # deixa o saldo esvaziar
+            m.build_state(0, 0.005, True)
+        m.mouse_move(-100, -50)
+        st = m.build_state(0, 0.005, True)
+        self.assertLess(st["rx"], 0)
+        m.key_up(0x7A)
+        m.key_down(0x7A)
+        self.assertEqual(m.aim_mode, "gyro")
+        self.assertEqual((m.sbx, m.sby), (0.0, 0.0))
+
+    def _run_stick(self, m, per_tick, ticks=40):
+        out = []
+        for i in range(ticks):
+            v = per_tick(i)
+            m.mouse_move(v[0], v[1])
+            st = m.build_state(i * 0.005, 0.005, True)
+            out.append((st["rx"], st["ry"]))
+        return out
+
+    def _stick_mk(self, **kw):
+        m = Mapper(Config(**kw), notify=lambda s: None)
+        m.key_down(0x7A)
+        return m
+
+    def _s_of(self, r):
+        import math
+        dz = 60 / 512
+        return (math.hypot(*r) / 512 - dz) / (0.92 - dz)
+
+    def test_stick_constant_1000cps(self):
+        import math
+        m = self._stick_mk()
+        dz = 60 / 512
+        rx, ry = self._run_stick(m, lambda i: (5, 0), 200)[-1]
+        exp = 512 * (dz + (0.92 - dz) * 0.2)
+        self.assertAlmostEqual(math.hypot(rx, ry), exp, delta=exp * 0.01)
+
+    def test_stick_flick_conserves_distance(self):
+        m = self._stick_mk()
+        out = self._run_stick(m, lambda i: (600, 0) if i == 0 else (0, 0), 200)
+        total = sum(self._s_of(r) * 5000 * 0.005 for r in out if r != (0, 0))
+        self.assertAlmostEqual(total, 600, delta=600 * 0.02)
+        for r in out[:5]:
+            self.assertAlmostEqual(r[0], 0.92 * 512, delta=1)
+
+    def test_stick_flick_vs_medium_same_distance(self):
+        tot = []
+        for n in (2, 60):
+            m = self._stick_mk()
+            out = self._run_stick(m, lambda i: ((400 * (i + 1)) // n - (400 * i) // n, 0) if i < n else (0, 0), 400)
+            tot.append(sum(self._s_of(r) * 5000 * 0.005 for r in out if r != (0, 0)))
+        self.assertAlmostEqual(tot[0], tot[1], delta=max(tot) * 0.03)
+
+    def test_stick_stop_decays_to_center(self):
+        import math
+        m = self._stick_mk()
+        self._run_stick(m, lambda i: (5, 0), 100)
+        out = self._run_stick(m, lambda i: (0, 0), 60)
+        mags = [math.hypot(*r) for r in out]
+        for a, b in zip(mags, mags[1:]):
+            self.assertLessEqual(b, a)
+        self.assertEqual(out[-1], (0, 0))
+
+    def test_stick_irregular_bursts_stable(self):
+        import math
+        m = self._stick_mk()
+        pat = (0, 15, 0, 5, 0, 0, 20, 0)
+        out = self._run_stick(m, lambda i: (pat[i % 8], 0), 400)[200:]
+        mags = [math.hypot(*r) for r in out]
+        self.assertGreater(min(mags), 0)
+        self.assertLess((max(mags) - min(mags)) / max(mags), 0.30)   # formula da ~28%
+
+    def test_stick_diagonal(self):
+        m = self._stick_mk()
+        rx, ry = self._run_stick(m, lambda i: (5, 5), 40)[-1]
+        self.assertLessEqual(abs(abs(rx) - abs(ry)), 1)
+
+    def test_stick_huge_move_clamped(self):
+        import math
+        m = self._stick_mk()
+        for rx, ry in self._run_stick(m, lambda i: (5000, -3000), 20):
+            self.assertLessEqual(math.hypot(rx, ry), 512.5)
+            self.assertTrue(-512 <= rx <= 511 and -512 <= ry <= 511)
+
+    def test_stick_huge_move_below_edge(self):
+        import math
+        m = self._stick_mk()
+        for rx, ry in self._run_stick(m, lambda i: (5000, -3000), 20):
+            self.assertLessEqual(math.hypot(rx, ry), 0.92 * 512 + 1)
+
+    def test_stick_sens_scales_speed(self):
+        dz = 60 / 512
+        res = []
+        for sens in (1.0, 2.0):
+            m = self._stick_mk(stick_sens=sens)
+            rx, _ = self._run_stick(m, lambda i: (5, 0), 80)[-1]
+            res.append(((rx / 512) - dz) / (0.92 - dz))
+        self.assertAlmostEqual(res[1] / res[0], 2.0, delta=0.1)
+
+    def test_stick_f8_changes_stick_sens(self):
+        logs = []
+        m = Mapper(Config(), notify=logs.append)
+        m.key_down(0x7A)
+        self.assertEqual(m.key_down(0x77), "sens_up")
+        self.assertAlmostEqual(m.stick_sens, 1.1)
+        self.assertEqual(m.sens, 1.0)
+        self.assertTrue(any("STICKSENS stick_sens=" in x for x in logs))
         m.key_up(0x7A)
         m.key_down(0x7A)
         self.assertEqual(m.aim_mode, "gyro")
@@ -247,7 +349,7 @@ class MapperTests(unittest.TestCase):
         finally:
             os.unlink(f.name)
         self.assertEqual(c.deg_per_count, 0.1)
-        self.assertEqual(c.stick_gain, 0.6)
+        self.assertEqual(c.stick_sens, 1.0)
         self.assertEqual(c.binds["space"], "A")
         d = Config.load(os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json"))
         self.assertEqual(d.binds, Config().binds)

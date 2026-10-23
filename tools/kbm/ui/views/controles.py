@@ -35,6 +35,14 @@ class ControlesView:
                                        on_change=lambda e: self._set("sens", e.control.value), **t.field_style())
         self.sens = ft.Slider(min=0.005, max=0.3, expand=True, active_color=t.ACCENT, inactive_color=t.FIELD,
                               thumb_color=t.ACCENT, on_change=lambda e: self._set("sens", round(e.control.value, 4)))
+        self.ssens_field = ft.TextField(width=80, text_align=ft.TextAlign.RIGHT,
+                                        on_change=lambda e: self._set("ssens", e.control.value), **t.field_style())
+        self.ssens = ft.Slider(min=0.1, max=3.0, expand=True, active_color=t.ACCENT, inactive_color=t.FIELD,
+                               thumb_color=t.ACCENT, on_change=lambda e: self._set("ssens", round(e.control.value, 3)))
+        self.sdz_field = ft.TextField(width=80, text_align=ft.TextAlign.RIGHT,
+                                      on_change=lambda e: self._set("sdz", e.control.value), **t.field_style())
+        self.sdz = ft.Slider(min=0, max=200, divisions=200, expand=True, active_color=t.ACCENT, inactive_color=t.FIELD,
+                             thumb_color=t.ACCENT, on_change=lambda e: self._set("sdz", int(round(e.control.value))))
         self.rows_col = ft.Column(spacing=2, scroll=ft.ScrollMode.AUTO, expand=True)
         self._build_rows()
         top = ft.Row([t.muted("Perfil", 12), self.profile,
@@ -45,13 +53,22 @@ class ControlesView:
         actions = ft.Row([t.button("Salvar", self._save, icon_name="save"),
                           t.button("Restaurar padrão", self._restore, primary=False, icon_name="rotate-ccw"),
                           self.dirty_mark], spacing=10, vertical_alignment=ft.CrossAxisAlignment.CENTER)
+        # so aparece o card de sensibilidade do modo de mira selecionado (ver refresh)
+        self.gyro_card = t.card(ft.Column([t.text("Sensibilidade do giroscópio", 14, bold=True),
+                                           t.muted("Graus por contagem do mouse (F7/F8 ajustam).", 11),
+                                           ft.Row([self.sens, self.sens_field], spacing=8)], spacing=6),
+                                expand=True)
+        self.stick_card = t.card(ft.Column([t.text("Sensibilidade do analógico", 14, bold=True),
+                                            t.muted("Maior = mais rápido; F7/F8 ajustam.", 11),
+                                            ft.Row([self.ssens, self.ssens_field], spacing=8),
+                                            t.muted("Zona morta do jogo (0–200). Ajuste até o menor movimento do mouse mexer a mira.", 11),
+                                            ft.Row([self.sdz, self.sdz_field], spacing=8)], spacing=6),
+                                 expand=True)
         aim_cards = ft.Row([
             t.card(ft.Column([t.text("Modo de mira", 14, bold=True),
                               t.muted("Quem controla o giroscópio e o analógico direito.", 11), self.aim],
                              spacing=6), expand=True),
-            t.card(ft.Column([t.text("Sensibilidade", 14, bold=True),
-                              t.muted("Graus por contagem do mouse (F7/F8 ajustam).", 11),
-                              ft.Row([self.sens, self.sens_field], spacing=8)], spacing=6), expand=True),
+            self.gyro_card, self.stick_card,
         ], spacing=t.GAP, vertical_alignment=ft.CrossAxisAlignment.START)
         self.control = ft.Column(
             [t.text("Controles", 22, bold=True), top, actions, aim_cards, self.msg,
@@ -106,10 +123,21 @@ class ControlesView:
         self.msg.value = c.msg
         s = c.settings
         self.aim.value = s["aim"]
+        stick = s["aim"] == AIM_LABELS["stick"]
+        self.gyro_card.visible = not stick
+        self.stick_card.visible = stick
         num = c._num(s["sens"], self.sens.min)
         self.sens.value = min(self.sens.max, max(self.sens.min, num))
         if c._num(self.sens_field.value, None) != num:      # nao reescreve enquanto digita
             self.sens_field.value = _fmt(num, 4)
+        num = c._num(s["ssens"], self.ssens.min)
+        self.ssens.value = min(self.ssens.max, max(self.ssens.min, num))
+        if c._num(self.ssens_field.value, None) != num:
+            self.ssens_field.value = _fmt(num, 3)
+        num = c._num(s["sdz"], self.sdz.min)
+        self.sdz.value = min(self.sdz.max, max(self.sdz.min, num))
+        if c._num(self.sdz_field.value, None) != num:
+            self.sdz_field.value = _fmt(num, 0)
         for (rid, slot), (box, label) in self.cells.items():
             if c.waiting == (rid, slot):
                 label.value, label.color = WAIT_TEXT, t.ACCENT

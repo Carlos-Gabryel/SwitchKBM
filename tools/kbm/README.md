@@ -55,7 +55,7 @@ Chaves ausentes usam o padrao. `binds`, se presente, substitui todo o mapa padra
 - `gyro_sensitivity` (1.0): multiplicador inicial (ajustavel em F7/F8).
 - `invert_yaw`, `invert_pitch` (true): invertem o sinal do giro.
 - `aim_mode`: `gyro` ou `stick`.
-- `stick_gain` (0.6), `stick_deadzone_comp` (60): usados no modo stick (velocidade do mouse -> stick direito).
+- `stick_sens` (1.0), `stick_full_speed` (5000 contagens/s), `stick_curve` (1.0), `stick_max` (0.92), `stick_drain_ms` (30), `stick_stop_counts` (0.5), `stick_deadzone_comp` (60, em circulo; ajustavel na UI, 0-200): modo stick (saldo de contagens do mouse drenado ao stick direito, preservando a distancia). F7/F8 no modo stick ajustam `stick_sens`.
 - `walk_scale` (0.5): fator da tecla Alt.
 - `wheel_pulse_ms` (80): duracao do pulso da roda.
 - `binds`: nome da tecla -> botao. Teclas: letras, digitos, `f1`..`f12`, `space`, `tab`, `esc`, `enter`, `lshift`, `rshift`, `lctrl`, `rctrl`, `alt`, `home`, `end`, `insert`, `delete`, `pgup`, `pgdn`, `left`, `up`, `right`, `down`; mouse: `lmb`, `rmb`, `mmb`, `x1`, `x2`, `wheel_up`, `wheel_down`. Botoes: `A B X Y L1 R1 L3 R3 DPAD_UP DPAD_DOWN DPAD_LEFT DPAD_RIGHT SELECT START SYSTEM CAPTURE`, mais `L2` / `R2` (gatilho analogico no maximo + bit digital).
