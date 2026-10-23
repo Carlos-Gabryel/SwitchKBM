@@ -47,7 +47,7 @@ def migrate_data(old, new):
 def default_profile():
     return {
         "deg_per_count": 0.05, "gyro_sensitivity": 1.0, "invert_yaw": True,
-        "invert_pitch": True, "aim_mode": "gyro", "stick_gain": 0.6,
+        "invert_pitch": True, "aim_mode": "gyro", "stick_sens": 1.0,
         "stick_deadzone_comp": 60, "walk_scale": 0.5, "wheel_pulse_ms": 80,
         "move": dict(DEFAULT_MOVE), "binds": dict(DEFAULT_BINDS),
     }

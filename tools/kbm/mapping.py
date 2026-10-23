@@ -106,8 +106,13 @@ class Config:
     aim_mode: str = "gyro"
     max_pitch_deg: float = 80.0
     virtual_tilt: bool = False  # inclina a gravidade com o pitch (experimental)
-    stick_gain: float = 0.6
+    stick_sens: float = 1.0          # multiplicador; maior = mais rapido
+    stick_full_speed: float = 5000.0  # contagens/s do mouse que dao deflexao total com sens 1.0
+    stick_max: float = 0.92          # deflexao maxima; evita a borda (o CoD acelera a virada no maximo)
+    stick_curve: float = 1.0         # expoente na velocidade normalizada (<1 reforca movimentos lentos)
     stick_deadzone_comp: float = 60.0
+    stick_drain_ms: float = 30.0     # constante de tempo para drenar o saldo de contagens
+    stick_stop_counts: float = 0.5   # saldo abaixo disso -> centro
     walk_scale: float = 0.5
     wheel_pulse_ms: float = 80.0
     accel_noise: int = 40           # ruido no accel (1/8192 G) quando ha giro; evita o Switch aprender drift
@@ -142,6 +147,8 @@ class Mapper:
         self.notify = notify
         self.aim_mode = self.cfg.aim_mode
         self.sens = float(self.cfg.gyro_sensitivity)
+        self.stick_sens = float(self.cfg.stick_sens)
+        self.sbx = self.sby = 0.0   # saldo de contagens do mouse ainda nao entregues ao analogico
         self.pressed = set()        # VKs normalizados
         self.mouse = set()          # "lmb", ...
         self.wheel_until = {}       # "wheel_up" -> instante de expiracao
@@ -193,8 +200,14 @@ class Mapper:
                 return "toggle_capture"
             if vk == VK_F11:
                 self.aim_mode = "stick" if self.aim_mode == "gyro" else "gyro"
+                self._stick_reset()
                 self.notify("Modo de mira: %s" % self.aim_mode)
                 return "toggle_aim"
+            if self.aim_mode == "stick":
+                self.stick_sens = self.stick_sens * 1.1 if vk == VK_F8 else self.stick_sens / 1.1
+                self.notify("Sensibilidade analogico: %.3f" % self.stick_sens)
+                self.notify("STICKSENS stick_sens=%.3f" % self.stick_sens)
+                return "sens_up" if vk == VK_F8 else "sens_down"
             if vk == VK_F8:
                 self.sens *= 1.1
                 self.notify("Sensibilidade giro: %.3f" % self.sens)
@@ -226,6 +239,7 @@ class Mapper:
         self.mouse.clear()
         self.wheel_until.clear()
         self.acc_dx = self.acc_dy = 0.0
+        self._stick_reset()
         self.theta = 0.0
 
     # ---- saida ----
@@ -241,11 +255,29 @@ class Mapper:
         emitted = units * dt / (16 * dpc)
         return units, counts - emitted
 
-    def _stick_axis(self, counts, dt):
-        v = counts / dt * self.cfg.stick_gain
-        if v:
-            v += _sgn(v) * self.cfg.stick_deadzone_comp
-        return int(max(-512, min(511, round(v))))
+    def _stick_reset(self):
+        self.sbx = self.sby = 0.0
+
+    def _stick_vec(self, dx, dy, dt):
+        """Saldo de contagens do mouse -> analogico direito (rx, ry); preserva a distancia."""
+        cfg = self.cfg
+        self.sbx += dx
+        self.sby += dy
+        b = math.hypot(self.sbx, self.sby)
+        if b < cfg.stick_stop_counts:
+            self.sbx = self.sby = 0.0
+            return 0, 0
+        full = cfg.stick_full_speed / max(self.stick_sens, 0.01)
+        s = min(1.0, (b / (cfg.stick_drain_ms / 1000)) / full) ** cfg.stick_curve
+        emit = min(b, s * full * dt)     # contagens entregues neste tick
+        ux, uy = self.sbx / b, self.sby / b
+        self.sbx -= ux * emit
+        self.sby -= uy * emit
+        dz = cfg.stick_deadzone_comp / 512
+        mag = dz + (cfg.stick_max - dz) * s
+        rx = round(ux * mag * 512)
+        ry = round(uy * mag * 512)
+        return max(-512, min(511, rx)), max(-512, min(511, ry))
 
     def _arrow_dir(self):
         """Direcao das setas livres: (x, y), Y positivo = baixo."""
@@ -257,6 +289,7 @@ class Mapper:
               "l2": 0, "r2": 0, "gyro": (0, 0, 0), "accel": (0, 8192, 0)}
         if not captured:
             self.acc_dx = self.acc_dy = 0.0
+            self._stick_reset()
             return st
         st["flags"] = FLAG_CONNECTED
         dt = max(dt_s, 1e-3)
@@ -297,8 +330,7 @@ class Mapper:
         adx, ady = self._arrow_dir()
         stick_mode = self.aim_mode == "stick"
         if stick_mode:
-            st["rx"] = self._stick_axis(self.acc_dx, dt)
-            st["ry"] = self._stick_axis(self.acc_dy, dt)
+            st["rx"], st["ry"] = self._stick_vec(self.acc_dx, self.acc_dy, dt)
             self.acc_dx = self.acc_dy = 0.0
             uy = up = 0
         else:

@@ -40,7 +40,7 @@ $buildArgs = @("--paths=$kbm",
     "--collect-data=esptool", "--collect-submodules=esptool", "--collect-submodules=ui")
 $packArgs = @("-c", $flet, "pack", "$kbm\kbm_app.py", "--name", "SwitchKBM", "--icon", "$kbm\ui\assets\icon.ico", "-y",
     "--distpath", "$work\dist", "--product-name", "Switch KBM", "--file-description", "Switch KBM",
-    "--product-version", "1.0.1", "--file-version", "1.0.1.0", "--company-name", "Carlos Gabryel",
+    "--product-version", "1.0.2", "--file-version", "1.0.2.0", "--company-name", "Carlos Gabryel",
     "--copyright", "(c) 2026 Carlos Gabryel - GPL-3.0",
     "--add-data", "$fwDst;firmware", "$kbm\ui\assets;ui\assets")
 foreach ($a in $buildArgs) { $packArgs += "--pyinstaller-build-args=$a" }

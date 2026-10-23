@@ -87,6 +87,27 @@ class ControllerTests(unittest.TestCase):
         self.assertTrue(c.save())
         self.assertFalse(c.dirty)
 
+    def test_stick_sens_line_and_collect(self):
+        c = make()
+        c.on_bridge_line("STICKSENS stick_sens=1.210")
+        self.assertEqual(c.settings["ssens"], 1.21)
+        self.assertTrue(c.dirty)
+        self.assertEqual(c.collect()["stick_sens"], 1.21)
+        c.set_setting("ssens", 99)
+        self.assertEqual(c.collect()["stick_sens"], 3.0)
+        c.set_setting("ssens", 0)
+        self.assertEqual(c.collect()["stick_sens"], 0.1)
+
+    def test_stick_deadzone_roundtrip_and_clamp(self):
+        c = make()
+        c.apply_data({"stick_deadzone_comp": 90})
+        self.assertEqual(c.settings["sdz"], 90)
+        self.assertEqual(c.collect()["stick_deadzone_comp"], 90)
+        c.set_setting("sdz", 999)
+        self.assertEqual(c.collect()["stick_deadzone_comp"], 200)
+        c.set_setting("sdz", -5)
+        self.assertEqual(c.collect()["stick_deadzone_comp"], 0)
+
     def test_status_prefix_goes_to_status(self):
         c = make()
         c.on_bridge_line("CAPTURADO")
