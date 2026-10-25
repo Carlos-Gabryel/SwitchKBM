@@ -6,12 +6,12 @@
 
 **Jogue no Nintendo Switch e no Switch 2 com teclado e mouse do PC, usando uma placa ESP32 de poucos reais.**
 
-[![Última versão](https://img.shields.io/github/v/release/Carlos-Gabryel/switch-kbm?label=vers%C3%A3o&color=e8445a)](https://github.com/Carlos-Gabryel/switch-kbm/releases/latest)
-[![Downloads](https://img.shields.io/github/downloads/Carlos-Gabryel/switch-kbm/total?color=00b4d8)](https://github.com/Carlos-Gabryel/switch-kbm/releases)
+[![Última versão](https://img.shields.io/github/v/release/Carlos-Gabryel/SwitchKBM?label=vers%C3%A3o&color=e8445a)](https://github.com/Carlos-Gabryel/SwitchKBM/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/Carlos-Gabryel/SwitchKBM/total?color=00b4d8)](https://github.com/Carlos-Gabryel/SwitchKBM/releases)
 ![Windows](https://img.shields.io/badge/Windows-10%20%7C%2011-0078d4?logo=windows)
 [![Licença GPL-3.0](https://img.shields.io/badge/licen%C3%A7a-GPL--3.0-ffcb05)](LICENSE)
 
-[**⬇ Baixar para Windows**](https://github.com/Carlos-Gabryel/switch-kbm/releases/latest/download/SwitchKBM.exe)
+[**⬇ Baixar para Windows**](https://github.com/Carlos-Gabryel/SwitchKBM/releases/latest/download/SwitchKBM.exe)
 
 <img src="docs/screenshot.png" width="720" alt="Tela de Controles do Switch KBM">
 
@@ -47,7 +47,7 @@ o analógico direito.
 
 ## 🚀 Primeiros passos
 
-1. **Baixe** o [`SwitchKBM.exe`](https://github.com/Carlos-Gabryel/switch-kbm/releases/latest/download/SwitchKBM.exe) e abra.
+1. **Baixe** o [`SwitchKBM.exe`](https://github.com/Carlos-Gabryel/SwitchKBM/releases/latest/download/SwitchKBM.exe) e abra.
    > Se aparecer *"O Windows protegeu o computador"*, clique em **Mais informações → Executar assim mesmo**. O programa não tem assinatura digital, que é paga.
 2. **Prepare a placa:** plugue a ESP32, abra a aba **Placa**, escolha a porta e clique em **Preparar placa**. É só na primeira vez e quando sair firmware novo.
 3. **Pareie no console:** no Switch, abra **Configurações do sistema → Controles e acessórios** e entre na tela de parear controles (por exemplo, **Mudar estilo/ordem**). A placa aparece como Pro Controller.
@@ -120,8 +120,8 @@ placa (ou aperte o botão EN/RESET dela) e entre de novo na tela de parear contr
 Requer Python 3.12+ e o ESP-IDF 5.4 em `C:\Espressif\esp-idf`.
 
 ```powershell
-git clone https://github.com/Carlos-Gabryel/switch-kbm
-cd switch-kbm
+git clone https://github.com/Carlos-Gabryel/SwitchKBM
+cd SwitchKBM
 
 python -m unittest discover -s tools/kbm      # testes
 python tools\kbm\kbm_app.py                   # roda o app sem gerar o exe

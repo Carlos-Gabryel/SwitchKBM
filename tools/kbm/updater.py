@@ -16,7 +16,7 @@ import urllib.request
 from dataclasses import dataclass, field
 from pathlib import Path
 
-REPO = "Carlos-Gabryel/switch-kbm"
+REPO = "Carlos-Gabryel/SwitchKBM"
 API = f"https://api.github.com/repos/{REPO}/releases/latest"
 ASSET = "SwitchKBM.exe"
 HEADERS = {"Accept": "application/vnd.github+json", "User-Agent": "SwitchKBM"}

@@ -16,7 +16,7 @@ from runners import BridgeRunner, FlashRunner, list_ports, pick_default_port
 
 APP_TITLE = "Switch KBM"
 APP_VERSION = "1.0.2"
-REPO_URL = "https://github.com/Carlos-Gabryel/switch-kbm"
+REPO_URL = "https://github.com/Carlos-Gabryel/SwitchKBM"
 AIM_LABELS = {"gyro": "Giroscópio", "stick": "Analógico direito"}
 STATUS_PREFIXES = ("CAPTURADO", "LIBERADO", "Modo de mira",
                    "Sensibilidade")
