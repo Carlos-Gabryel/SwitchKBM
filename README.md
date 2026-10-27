@@ -9,9 +9,11 @@
 [![Última versão](https://img.shields.io/github/v/release/Carlos-Gabryel/SwitchKBM?label=vers%C3%A3o&color=e8445a)](https://github.com/Carlos-Gabryel/SwitchKBM/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/Carlos-Gabryel/SwitchKBM/total?color=00b4d8)](https://github.com/Carlos-Gabryel/SwitchKBM/releases)
 ![Windows](https://img.shields.io/badge/Windows-10%20%7C%2011-0078d4?logo=windows)
+![Linux](https://img.shields.io/badge/Linux-AppImage-fcc624?logo=linux&logoColor=black)
 [![Licença GPL-3.0](https://img.shields.io/badge/licen%C3%A7a-GPL--3.0-ffcb05)](LICENSE)
 
-[**⬇ Baixar para Windows**](https://github.com/Carlos-Gabryel/SwitchKBM/releases/latest/download/SwitchKBM.exe)
+[**⬇ Baixar para Windows**](https://github.com/Carlos-Gabryel/SwitchKBM/releases/latest/download/SwitchKBM.exe) ·
+[**⬇ Baixar para Linux**](https://github.com/Carlos-Gabryel/SwitchKBM/releases/latest/download/SwitchKBM-x86_64.AppImage)
 
 <img src="docs/screenshot.png" width="720" alt="Tela de Controles do Switch KBM">
 
@@ -42,7 +44,7 @@ o analógico direito.
 |---|---|
 | **Placa ESP32 original** | ESP32-WROOM / DevKit. Os modelos S2, S3, C3 e C6 **não servem**: não têm Bluetooth Classic. |
 | **Cabo USB de dados** | Cabo só de carga não funciona. |
-| **Windows 10/11 x64** | Não precisa instalar nada. |
+| **Windows 10/11 x64** ou **Linux x86_64** | No Windows não precisa instalar nada. No Linux veja [Linux](#-linux). |
 | **Nintendo Switch ou Switch 2** | Em qualquer um dos dois a placa aparece como Pro Controller. |
 
 ## 🚀 Primeiros passos
@@ -53,7 +55,30 @@ o analógico direito.
 3. **Pareie no console:** no Switch, abra **Configurações do sistema → Controles e acessórios** e entre na tela de parear controles (por exemplo, **Mudar estilo/ordem**). A placa aparece como Pro Controller.
 4. **Jogue:** na aba **Controles**, escolha o perfil e clique em **Iniciar**. Depois clique em **Capturar mouse e teclado** ou aperte **F12**.
 
-Seus perfis e ajustes ficam em `%LOCALAPPDATA%\SwitchKBM`.
+Seus perfis e ajustes ficam em `%LOCALAPPDATA%\SwitchKBM` (no Linux, `~/.local/share/SwitchKBM`).
+
+## 🐧 Linux
+
+1. Baixe o [`SwitchKBM-x86_64.AppImage`](https://github.com/Carlos-Gabryel/SwitchKBM/releases/latest/download/SwitchKBM-x86_64.AppImage), dê permissão e abra:
+   ```bash
+   chmod +x SwitchKBM-x86_64.AppImage
+   ./SwitchKBM-x86_64.AppImage
+   ```
+   Sem FUSE, rode com `--appimage-extract-and-run`. O AppImage se atualiza sozinho; fora dele só avisa que há versão nova.
+2. **Grupo `input` (obrigatório).** O programa captura teclado e mouse de forma exclusiva lendo `/dev/input` (evdev), por isso funciona em Wayland e X11, mas o usuário precisa estar no grupo `input`:
+   ```bash
+   sudo usermod -aG input $USER
+   ```
+   Saia e entre na sessão. No **Bazzite / Fedora Atomic** rode antes: `grep -E '^input:' /usr/lib/group | sudo tee -a /etc/group`.
+   Sem a permissão o programa mostra essa instrução no log em vez de capturar.
+3. **Porta da placa:** entre no grupo `dialout` (`sudo usermod -aG dialout $USER`; no Fedora, `uucp` no lugar de `dialout`) **ou** instale a regra udev, que dá acesso ao usuário logado e evita o ModemManager:
+   ```bash
+   sudo cp packaging/linux/60-switchkbm-serial.rules /etc/udev/rules.d/
+   sudo udevadm control --reload && sudo udevadm trigger
+   ```
+4. A porta aparece como `/dev/ttyUSB0` (CP210x/CH340) ou `/dev/ttyACM0` (USB nativa). Daí é igual ao Windows: **Placa › Preparar placa**.
+
+Com a captura ligada o teclado e o mouse ficam exclusivos do programa (a área de trabalho não recebe nada); **F12** libera. Não há "perder o foco libera": só F12 ou o botão do app.
 
 ## ⌨️ Atalhos
 
@@ -86,7 +111,8 @@ para criar, duplicar, renomear e apagar. Depois de mexer, clique em **Salvar**.
 <details>
 <summary><b>A porta da placa não aparece</b></summary>
 
-- Instale o driver do chip USB da placa. O nome vem escrito perto do conector: **CP210x**
+- No Linux, veja o passo 3 da seção [Linux](#-linux) (grupo `dialout`/`uucp` ou regra udev).
+- No Windows, instale o driver do chip USB da placa. O nome vem escrito perto do conector: **CP210x**
   ([driver](https://www.silabs.com/developer-tools/usb-to-uart-bridge-vcp-drivers)) ou
   **CH340 / CH9102** ([driver](https://www.wch-ic.com/downloads/CH341SER_EXE.html)).
 - Troque o cabo. Muitos só carregam e não transmitem dados.
@@ -117,7 +143,7 @@ placa (ou aperte o botão EN/RESET dela) e entre de novo na tela de parear contr
 
 ## 👩‍💻 Desenvolvimento
 
-Requer Python 3.12+ e o ESP-IDF 5.4 em `C:\Espressif\esp-idf`.
+Requer Python 3.12+ e o ESP-IDF **5.4.4** (Windows: `C:\Espressif\esp-idf`; Linux: `~/esp/esp-idf-v5.4`).
 
 ```powershell
 git clone https://github.com/Carlos-Gabryel/SwitchKBM
@@ -132,14 +158,29 @@ powershell -ExecutionPolicy Bypass -File tools\kbm\build_exe.ps1 -SkipFirmware  
 tools\flash.ps1 -Port COM4                    # só o firmware: grava e abre o monitor serial
 ```
 
+No Linux:
+
+```bash
+git clone -b v5.4.4 --depth 1 --recursive --shallow-submodules https://github.com/espressif/esp-idf ~/esp/esp-idf-v5.4
+~/esp/esp-idf-v5.4/install.sh esp32            # uma vez (IDF_PATH padrão: ~/esp/esp-idf-v5.4)
+
+python -m venv tools/kbm/.venv && tools/kbm/.venv/bin/pip install -r tools/kbm/requirements.txt pytest
+tools/kbm/.venv/bin/python -m pytest -q tools/kbm      # testes
+tools/kbm/.venv/bin/python tools/kbm/kbm_app.py        # roda o app sem empacotar
+
+tools/kbm/.venv/bin/python tools/kbm/build.py          # gera dist/SwitchKBM-x86_64.AppImage (--skip-firmware reaproveita o firmware)
+tools/flash.sh /dev/ttyUSB0                            # só o firmware: grava e abre o monitor serial
+```
+
 <details>
 <summary>Estrutura do projeto</summary>
 
 ```
 switch-side/       firmware da ESP32 (ESP-IDF + BTstack): emula o Pro Controller por Bluetooth Classic
-tools/kbm/         app Windows (Flet): captura de teclado/mouse, perfis e gravação da placa
+tools/kbm/         app Windows/Linux (Flet): captura de teclado/mouse, perfis e gravação da placa
 common/bridge_proto/   protocolo serial entre o app e o firmware
-tools/             flash.ps1, idf-env.ps1 e utilitários
+tools/             flash.ps1/.sh, idf-env.ps1/.sh e utilitários
+packaging/linux/   regra udev da porta serial
 ```
 
 Mais detalhes do app em [`tools/kbm/README.md`](tools/kbm/README.md).

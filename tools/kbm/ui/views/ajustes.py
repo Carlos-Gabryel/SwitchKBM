@@ -79,13 +79,13 @@ class AjustesView:
         if st == "available":
             text = f"Nova versão {c.update_release.tag.lstrip('v')} disponível."
             if not updater.can_apply():
-                text += " " + updater.NOT_FROZEN_MSG + "."
+                text += " " + updater.not_frozen_msg() + "."
         elif st == "error":
             text = "Não foi possível verificar/atualizar: %s" % c.update_error
         else:
             text = UPDATE_TEXT.get(st, "")
         if st != "available" and not updater.can_apply():
-            text = (text + " " if text else "") + updater.NOT_FROZEN_MSG + "."
+            text = (text + " " if text else "") + updater.not_frozen_msg() + "."
         self.up_status.value = text
         self.up_status.color = t.AMBER if st == "error" else t.MUTED
         busy = st in ("checking", "downloading")

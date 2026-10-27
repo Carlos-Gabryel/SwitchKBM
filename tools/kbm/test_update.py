@@ -37,6 +37,17 @@ def api(assets, tag="v2.1.0"):
     return lambda req, timeout: Resp(json.dumps({"tag_name": tag, "assets": assets}).encode())
 
 
+def setUpModule():
+    # os testes abaixo cobrem o caminho do Windows (.exe); o do Linux esta em LinuxUpdaterTests
+    global _pin
+    _pin = mock.patch.object(updater, "IS_LINUX", False)
+    _pin.start()
+
+
+def tearDownModule():
+    _pin.stop()
+
+
 def make():
     return Controller(pf.ProfileStore(base=tempfile.mkdtemp(prefix="kbmtest")))
 
@@ -121,6 +132,88 @@ class UpdaterTests(unittest.TestCase):
         self.assertFalse(updater.can_apply())
         with mock.patch.object(sys, "frozen", True, create=True):
             self.assertTrue(updater.can_apply())
+
+
+LINUX_BODY = b"novo appimage" * 100
+LINUX_SHA = hashlib.sha256(LINUX_BODY).hexdigest()
+LINUX_ASSET = {"name": "SwitchKBM-x86_64.AppImage", "browser_download_url": "https://x/S.AppImage",
+               "size": len(LINUX_BODY), "digest": "sha256:" + LINUX_SHA}
+
+
+class LinuxUpdaterTests(unittest.TestCase):
+    def setUp(self):
+        p = mock.patch.object(updater, "IS_LINUX", True)
+        p.start()
+        self.addCleanup(p.stop)
+        self.tmp = Path(tempfile.mkdtemp(prefix="kbmupd"))
+        self.addCleanup(shutil.rmtree, self.tmp, True)
+
+    def test_asset_is_the_appimage(self):
+        rel = updater.latest(opener=api([ASSET, LINUX_ASSET]))
+        self.assertEqual(rel.url, "https://x/S.AppImage")
+        self.assertEqual(rel.sha256, LINUX_SHA)
+        self.assertIsNone(updater.latest(opener=api([ASSET])))      # so o .exe: nada para o Linux
+        bad = dict(LINUX_ASSET, digest="")
+        with self.assertRaises(updater.UpdateError):
+            updater.latest(opener=api([bad]))
+
+    def test_can_apply_needs_frozen_and_appimage_env(self):
+        env = {k: v for k, v in os.environ.items() if k != "APPIMAGE"}
+        with mock.patch.dict(os.environ, env, clear=True):
+            self.assertFalse(updater.can_apply())
+            with mock.patch.object(sys, "frozen", True, create=True):
+                self.assertFalse(updater.can_apply())           # empacotado mas fora do AppImage
+                self.assertEqual(updater.not_frozen_msg(), updater.NOT_APPIMAGE_MSG)
+                os.environ["APPIMAGE"] = "/x/SwitchKBM-x86_64.AppImage"
+                self.assertTrue(updater.can_apply())
+                self.assertEqual(updater.target_path(), Path("/x/SwitchKBM-x86_64.AppImage"))
+
+    def test_download_verifies_digest(self):
+        rel = updater.Release("v2.1.0", (2, 1, 0), "https://x/S.AppImage", len(LINUX_BODY), LINUX_SHA)
+        path = updater.download(rel, self.tmp, opener=lambda req, timeout: Resp(LINUX_BODY))
+        self.assertEqual(path.name, "SwitchKBM-v2.1.0.AppImage")
+        self.assertEqual(path.read_bytes(), LINUX_BODY)
+        bad = updater.Release("v2.1.0", (2, 1, 0), "https://x/S.AppImage", len(LINUX_BODY), "0" * 64)
+        with self.assertRaises(updater.UpdateError):
+            updater.download(bad, self.tmp, opener=lambda req, timeout: Resp(LINUX_BODY))
+        self.assertFalse((self.tmp / "SwitchKBM-x86_64.AppImage.part").exists())
+
+    def test_apply_replaces_chmods_and_relaunches(self):
+        img = self.tmp / "SwitchKBM-x86_64.AppImage"
+        img.write_bytes(b"velho")
+        new = self.tmp / "SwitchKBM-v2.1.0.AppImage"
+        new.write_bytes(b"novo")
+        launched = []
+        updater.apply_update(new, img, launch=lambda argv, **kw: launched.append((argv, kw)))
+        self.assertEqual(img.read_bytes(), b"novo")
+        self.assertFalse(new.exists())
+        self.assertEqual(img.stat().st_mode & 0o777, 0o755)
+        self.assertEqual(launched[0][0], [str(img)])
+        self.assertEqual(launched[0][1]["env"]["PYINSTALLER_RESET_ENVIRONMENT"], "1")
+
+    def test_controller_downloads_next_to_appimage_and_replaces_it(self):
+        c = make()
+        c.check_update(api([LINUX_ASSET], tag="v99.0.0"))
+        img = self.tmp / "SwitchKBM-x86_64.AppImage"
+        img.write_bytes(b"velho")
+        launched = []
+        c.stop = lambda: None
+        with mock.patch.object(sys, "frozen", True, create=True), \
+                mock.patch.dict(os.environ, {"APPIMAGE": str(img)}):
+            self.assertIsNone(c.install_update(opener=lambda req, timeout: Resp(LINUX_BODY),
+                                               launch=lambda argv, **kw: launched.append(argv), wait=True))
+        self.assertTrue(c.update_ready)
+        self.assertEqual(img.read_bytes(), LINUX_BODY)
+        self.assertEqual(launched, [[str(img)]])
+        self.assertEqual(sorted(p.name for p in self.tmp.iterdir()), [img.name])
+
+    def test_controller_refuses_outside_appimage(self):
+        c = make()
+        c.check_update(api([LINUX_ASSET], tag="v99.0.0"))
+        env = {k: v for k, v in os.environ.items() if k != "APPIMAGE"}
+        with mock.patch.dict(os.environ, env, clear=True), \
+                mock.patch.object(sys, "frozen", True, create=True):
+            self.assertEqual(c.install_update(), updater.NOT_APPIMAGE_MSG)
 
 
 class ControllerUpdateTests(unittest.TestCase):

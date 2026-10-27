@@ -24,7 +24,9 @@ Ctrl+C ou fechar o console tambem libera tudo."""
 
 
 def _set_priorities(thread=False):
-    """Prioridade alta do processo; com thread=True, maxima para a thread atual."""
+    """Prioridade alta do processo; com thread=True, maxima para a thread atual (so Windows)."""
+    if os.name != "nt":
+        return
     try:
         import ctypes
         k32 = ctypes.WinDLL("kernel32")
@@ -253,7 +255,7 @@ def _stdin_watch(br):
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Teclado e mouse do PC -> gamepad virtual (ESP32)")
-    ap.add_argument("--port", help="porta COM da placa ESP32 (ex.: COM4)")
+    ap.add_argument("--port", help="porta serial da placa ESP32 (ex.: COM4 no Windows, /dev/ttyUSB0 no Linux)")
     ap.add_argument("--config", default=os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                                      "config.json"))
     ap.add_argument("--dry-run", action="store_true", help="sem serial; imprime o estado a 5 Hz")
@@ -266,6 +268,16 @@ def main(argv=None):
 
     cfg = Config.load(args.config if os.path.exists(args.config) else None)
     br = Bridge(args, cfg)
+    access_errors = ()
+    if sys.platform.startswith("linux"):
+        import linput
+        access_errors = (linput.InputAccessError,)
+        try:
+            linput.require_access()         # sem permissao em /dev/input: avisa e sai, sem travar
+        except linput.InputAccessError as e:
+            for line in e.lines:
+                print(line, flush=True)
+            sys.exit(1)
     for w in br.mapper.warnings:
         print("aviso config: " + w, flush=True)
     print(BANNER, flush=True)
@@ -273,29 +285,40 @@ def main(argv=None):
         br.open_serial()
         print("Serial aberta em %s" % args.port, flush=True)
 
-    import winput
+    if sys.platform.startswith("linux"):
+        inputmod = linput
+    else:
+        import winput as inputmod
     _set_priorities()
-    br.hook = winput.InputHook(br.on_key, br.on_mouse_button, br.on_wheel, br.on_move,
+    br.hook = inputmod.InputHook(br.on_key, br.on_mouse_button, br.on_wheel, br.on_move,
                                br.is_captured, always_block_vks={VK_F12}, log=br.say,
                                on_capture_lost=br.on_capture_lost)
-    try:
-        import ctypes
-        ctypes.WinDLL("winmm").timeBeginPeriod(1)
-    except Exception:
-        pass
+    if os.name == "nt":
+        try:
+            import ctypes
+            ctypes.WinDLL("winmm").timeBeginPeriod(1)
+        except Exception:
+            pass
     th = threading.Thread(target=br.sender_loop, daemon=True)
     th.start()
     if args.stdin_control:
         threading.Thread(target=_stdin_watch, args=(br,), daemon=True).start()
     print("Pronto. Pressione F12 para capturar.", flush=True)
+    code = 0
     try:
         br.hook.run()
+    except access_errors as e:
+        for line in e.lines:
+            print(line, flush=True)
+        code = 1
     finally:
         br.stop.set()
         th.join(timeout=1.0)
         br.shutdown()
         br.hook.done.set()
         print("Encerrado.", flush=True)
+    if code:
+        sys.exit(code)
 
 
 if __name__ == "__main__":

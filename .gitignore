@@ -12,3 +12,6 @@ tools/kbm/profiles/
 tools/kbm/settings.json
 .pack/
 recuperado/
+tools/kbm/.venv/
+.appimagetool/
+*.AppImage

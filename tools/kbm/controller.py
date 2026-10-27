@@ -15,13 +15,14 @@ from mapping import display_name
 from runners import BridgeRunner, FlashRunner, list_ports, pick_default_port
 
 APP_TITLE = "Switch KBM"
-APP_VERSION = "1.0.2"
+APP_VERSION = "1.0.3"
 REPO_URL = "https://github.com/Carlos-Gabryel/SwitchKBM"
 AIM_LABELS = {"gyro": "Giroscópio", "stick": "Analógico direito"}
 STATUS_PREFIXES = ("CAPTURADO", "LIBERADO", "Modo de mira",
                    "Sensibilidade")
 CAPTURE_HINT = "Pressione a tecla (ou clique/roda do mouse). Esc cancela."
-NO_PORT_MSG = "Selecione a porta COM da placa ESP32."
+NO_PORT_MSG = ("Selecione a porta serial da placa ESP32." if sys.platform.startswith("linux")
+               else "Selecione a porta COM da placa ESP32.")
 LOG_LINES = 500
 FIRMWARE_RE = re.compile(r"^FIRMWARE v(\d+)\s*$")
 FIRMWARE_OLD_MSG = "Firmware da placa desatualizado — vá em Placa › Preparar placa"
@@ -40,6 +41,7 @@ class Controller:
         self.loading = False
         self.waiting = None         # (row_id, slot) aguardando uma tecla
         self.msg = ""
+        self.bridge_errors = []     # linhas "ERRO: ..." do bridge (ex.: sem permissao em /dev/input)
         self.ports = []
         self.port = ""              # dispositivo selecionado (ex.: COM4)
         self.stat_extra = ""
@@ -258,6 +260,7 @@ class Controller:
             return "error", "Não foi possível iniciar o bridge: %s" % e
         self.stat_extra = ""
         self.fw_version = None
+        self.bridge_errors = []
         return None
 
     def stop(self):
@@ -284,6 +287,9 @@ class Controller:
 
     def on_bridge_line(self, line):
         self.add_log(line)
+        if line.startswith("ERRO:"):
+            self.bridge_errors.append(line[5:].strip())
+            return
         m = FIRMWARE_RE.match(line)
         if m:
             self.fw_version = int(m.group(1))
@@ -364,7 +370,8 @@ class Controller:
         if self.runner.proc is not None and not self.runner.running:
             code = self.runner.proc.returncode
             self.runner.proc = None
-            self.msg = "Bridge encerrou (código %s)." % code
+            self.msg = ("Bridge encerrou: " + " ".join(self.bridge_errors) if self.bridge_errors
+                        else "Bridge encerrou (código %s)." % code)
             events.append(("bridge_exit", code))
         return events
 
@@ -395,7 +402,7 @@ class Controller:
         if self.flasher.running:
             return "Aguarde o fim da gravação do firmware."
         if not updater.can_apply():
-            return updater.NOT_FROZEN_MSG
+            return updater.not_frozen_msg()
         if self.update_state != "available" or self.update_release is None:
             return "Nenhuma atualização disponível."
         return None
@@ -415,13 +422,15 @@ class Controller:
 
     def _install(self, exe, opener, launch):
         try:
-            exe = Path(exe or sys.executable)
+            exe = Path(exe or updater.target_path())
             kw = {"opener": opener} if opener else {}
-            new = updater.download(self.update_release, Path(tempfile.gettempdir()) / "SwitchKBM-update",
+            # Linux: baixa ao lado do AppImage (o os.replace precisa do mesmo sistema de arquivos)
+            folder = exe.parent if updater.IS_LINUX else Path(tempfile.gettempdir()) / "SwitchKBM-update"
+            new = updater.download(self.update_release, folder,
                                    progress=lambda f: setattr(self, "update_progress", f), **kw)
             if self.flasher.running:        # nunca troca o programa no meio da gravacao
                 raise updater.UpdateError("a gravação do firmware começou; tente de novo depois")
-            updater.apply(new, exe, **({"launch": launch} if launch else {}))
+            updater.apply_update(new, exe, **({"launch": launch} if launch else {}))
             self.update_ready = True
         except (updater.UpdateError, OSError) as e:
             self.update_state, self.update_error = "error", str(e)

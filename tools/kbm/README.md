@@ -4,17 +4,18 @@
 
 Interface gráfica para remapear teclado/mouse -> botões do Switch (como o menu de controles de um jogo) e iniciar/parar o bridge.
 
+- Linux: AppImage (`dist/SwitchKBM-x86_64.AppImage`, gerado por `python tools/kbm/build.py`). Captura teclado/mouse via evdev com grab exclusivo e exige o usuário no grupo `input` (`sudo usermod -aG input $USER`; no Bazzite/Fedora Atomic antes: `grep -E '^input:' /usr/lib/group | sudo tee -a /etc/group`); a porta é `/dev/ttyUSB*`/`/dev/ttyACM*` (grupo `dialout` ou a regra `packaging/linux/60-switchkbm-serial.rules`). Perfis em `~/.local/share/SwitchKBM`. Auto-atualização só quando roda como AppImage.
 - Gerar o exe: `powershell -ExecutionPolicy Bypass -File tools\kbm\build_exe.ps1` (cria `dist\SwitchKBM.exe`; precisa de Python + pip). Sem exe: `python tools\kbm\kbm_app.py`.
 - Uso: escolha o Perfil (um por jogo) e a Porta (a CH9102 vem pré-selecionada). Clique numa célula "Tecla 1/2", pressione a tecla (ou clique/roda do mouse); Esc cancela. Clique direito na célula: botões laterais do mouse, roda, Esc, Limpar. F7/F8/F11/F12 são reservadas. Se a tecla já estava em outro botão, ela é movida. Movimento (WASD/Andar devagar) também é configurável.
 - Ajuste a mira/sensibilidade na aba Controles (Modo de mira e Sensibilidade) e em Ajustes (guardados no perfil). Clique em **Salvar** (título com `*` = alterações pendentes), depois **Iniciar**. Com o bridge rodando, o botão **Capturar mouse e teclado** (abaixo de Iniciar/Parar) ou **F12** captura; só **F12** libera. Salvar com o bridge rodando reinicia-o. F7/F8 durante o jogo mudam a sensibilidade na tela (marca como não salvo; clique Salvar para manter naquele perfil).
-- Perfis ficam em `%LOCALAPPDATA%\SwitchKBM\profiles\` (a partir do código: `tools\kbm\profiles\`); `settings.json` na pasta acima guarda o último perfil e a porta. Na primeira execução o exe copia os perfis de versões antigas (`profiles\` ao lado do exe) ou cria "Padrão".
+- Perfis ficam em `%LOCALAPPDATA%\SwitchKBM\profiles\` (Linux: `~/.local/share/SwitchKBM/profiles/`; a partir do código: `tools\kbm\profiles\`); `settings.json` na pasta acima guarda o último perfil e a porta. Na primeira execução o exe copia os perfis de versões antigas (`profiles\` ao lado do exe) ou cria "Padrão".
 - Selftest sem interação: `SwitchKBM.exe --selftest`.
 
 App para Windows que captura teclado e mouse e envia um gamepad virtual pela serial (USB) para a placa ESP32, que repassa ao emulador de Pro Controller. O movimento do mouse vira GIROSCOPIO (mira por giro) por padrao.
 
 ## Como rodar
 
-Requer Python 3 com `pyserial`. A porta COM e a da placa ESP32 (a que aparece como porta serial no Gerenciador de Dispositivos).
+Requer Python 3 com `pyserial` (e `evdev` no Linux). A porta (COM no Windows, `/dev/ttyUSB0` no Linux) e a da placa ESP32 (a que aparece como porta serial no Gerenciador de Dispositivos).
 
 ```
 python tools\kbm\kbm_bridge.py --port COM4
@@ -75,4 +76,4 @@ Dois botoes de ajuste: a sensibilidade de giro dentro do jogo (Fortnite/CoD) e o
 - Fechar o console ou Ctrl+C remove os hooks e envia quadros neutros ao ESP32.
 - Eventos injetados (por software) sao ignorados.
 
-**Firmware embutido.** O exe já contém o firmware switch-side; o botão "Preparar placa" grava na porta COM selecionada (esptool embutido). `build_exe.ps1` recompila o firmware (ESP-IDF) antes de empacotar; `-SkipFirmware` pula e usa o `switch-side\build` existente. O build gera o exe em `.pack\dist` e copia só o `SwitchKBM.exe` para `dist\` (o flet pack apaga a pasta de saída inteira).
+**Firmware embutido.** O exe já contém o firmware switch-side; o botão "Preparar placa" grava na porta serial selecionada (esptool embutido). `build.py` (no Windows, `build_exe.ps1` o chama) recompila o firmware (ESP-IDF 5.4.4) antes de empacotar; `--skip-firmware` (`-SkipFirmware`) pula e usa o `switch-side\build` existente. O build gera o exe em `.pack\dist` e copia só o `SwitchKBM.exe` para `dist\` (o flet pack apaga a pasta de saída inteira).

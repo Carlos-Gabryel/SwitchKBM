@@ -1,0 +1,86 @@
+name: release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  firmware:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compilar o firmware (ESP-IDF 5.4.4)
+        uses: espressif/esp-idf-ci-action@v1
+        with:
+          esp_idf_version: v5.4.4
+          target: esp32
+          path: switch-side
+      - name: Preparar build/firmware
+        run: python3 tools/kbm/build.py --stage-firmware-only
+      - uses: actions/upload-artifact@v4
+        with:
+          name: firmware
+          path: build/firmware
+          if-no-files-found: error
+
+  pack:
+    needs: firmware
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            artifact: SwitchKBM.exe
+          - os: ubuntu-22.04
+            artifact: SwitchKBM-x86_64.AppImage
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: firmware
+          path: build/firmware
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+      - name: Dependencias do sistema (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libfuse2 libgtk-3-dev libmpv-dev
+      - name: Instalar requirements
+        run: python -m pip install -r tools/kbm/requirements.txt pytest
+      - name: Testes
+        run: python -m pytest -q tools/kbm
+      - name: Empacotar
+        run: python tools/kbm/build.py --skip-firmware
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: dist/${{ matrix.artifact }}
+          if-no-files-found: error
+
+  release:
+    needs: pack
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: SwitchKBM*
+          path: dist
+          merge-multiple: true
+      # O updater.py confere o campo "digest" (sha256:...) que o GitHub calcula sozinho para cada
+      # arquivo enviado ao Release; os .sha256 abaixo sao so para conferencia manual.
+      - name: SHA-256
+        run: cd dist && for f in SwitchKBM*; do sha256sum "$f" > "$f.sha256"; done
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/SwitchKBM.exe
+            dist/SwitchKBM-x86_64.AppImage
+            dist/*.sha256

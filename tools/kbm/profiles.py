@@ -1,7 +1,8 @@
 """Gerencia perfis (json) e settings.json.
 
-No exe ficam em %LOCALAPPDATA%\SwitchKBM (fora da pasta do exe, que o build recria); em modo
-fonte, ao lado deste arquivo."""
+No exe ficam em %LOCALAPPDATA%\SwitchKBM (fora da pasta do exe, que o build recria); no Linux em
+$XDG_DATA_HOME/SwitchKBM (~/.local/share/SwitchKBM; se ~/SwitchKBM ja existir, continua nela); em
+modo fonte, ao lado deste arquivo."""
 import json
 import os
 import re
@@ -17,9 +18,20 @@ DEFAULT_NAME = "Padrão"
 _BAD = re.compile(r'[<>:"/\|?*\x00-\x1f]')
 
 
+def data_base():
+    """Pasta de dados do programa empacotado."""
+    if os.name == "nt":
+        return os.path.join(os.environ.get("LOCALAPPDATA") or os.path.expanduser("~"), "SwitchKBM")
+    legacy = os.path.join(os.path.expanduser("~"), "SwitchKBM")
+    if os.path.isdir(legacy):
+        return legacy
+    xdg = os.environ.get("XDG_DATA_HOME") or os.path.join(os.path.expanduser("~"), ".local", "share")
+    return os.path.join(xdg, "SwitchKBM")
+
+
 def app_dir():
     if getattr(sys, "frozen", False):
-        base = os.path.join(os.environ.get("LOCALAPPDATA") or os.path.expanduser("~"), "SwitchKBM")
+        base = data_base()
         migrate_data(os.path.dirname(os.path.abspath(sys.executable)), base)
         return base
     return os.path.dirname(os.path.abspath(__file__))
