@@ -5,7 +5,13 @@ import subprocess
 import sys
 import threading
 
-CREATE_NO_WINDOW = 0x08000000
+CREATE_NO_WINDOW = 0x08000000 if os.name == "nt" else 0     # creationflags so existe no Windows
+# placas ESP32 comuns: CP210x, CH9102, CH340 e a USB nativa da Espressif
+KNOWN_USB_IDS = {(0x10C4, 0xEA60), (0x1A86, 0x55D4), (0x1A86, 0x7523)}
+ESPRESSIF_VID = 0x303A
+
+
+_USB_IDS = {}       # dispositivo -> (VID, PID) da ultima listagem
 
 
 def list_ports():
@@ -15,12 +21,17 @@ def list_ports():
         out = []
         for p in sorted(lp.comports(), key=lambda x: x.device):
             out.append((p.device, "%s — %s" % (p.device, p.description or "serial")))
+            _USB_IDS[p.device] = (p.vid, p.pid)
         return out
     except Exception:
         return []
 
 
 def pick_default_port(ports):
+    for dev, _ in ports:        # por VID:PID (vale para /dev/ttyUSB*, /dev/ttyACM* e COMx)
+        vid, pid = _USB_IDS.get(dev, (None, None))
+        if (vid, pid) in KNOWN_USB_IDS or vid == ESPRESSIF_VID:
+            return dev
     for key in ("cp210", "ch9102"):
         for dev, label in ports:
             if key in label.lower():

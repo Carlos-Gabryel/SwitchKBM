@@ -1,5 +1,7 @@
-"""Placa: porta COM, gravacao do firmware e log."""
+"""Placa: porta serial, gravacao do firmware e log."""
 from __future__ import annotations
+
+import sys
 
 import flet as ft
 
@@ -7,6 +9,7 @@ from controller import FIRMWARE_OLD_MSG
 from ui import theme as t
 
 LOG_MAX = 500
+MONO = "Consolas" if sys.platform == "win32" else "monospace"
 
 
 class PlacaView:
@@ -57,7 +60,7 @@ class PlacaView:
             return
         lines = list(c.log)[-min(new, len(c.log)):]
         self._seen = c.log_seq
-        self.log.controls.extend(ft.Text(line, size=11, font_family="Consolas", color=t.MUTED, selectable=True)
+        self.log.controls.extend(ft.Text(line, size=11, font_family=MONO, color=t.MUTED, selectable=True)
                                  for line in lines)
         del self.log.controls[:-LOG_MAX]
 

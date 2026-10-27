@@ -1,7 +1,10 @@
 """Captura de uma tecla/botao do mouse sem Tk: hooks de baixo nivel temporarios (so enquanto uma
 celula espera). O primeiro evento 'para baixo' depois do inicio vale e e engolido."""
 import ctypes
+import os
+import sys
 import threading
+import time
 from ctypes import wintypes
 
 import bindings as bd
@@ -149,3 +152,81 @@ class Capture:
             self._tid = 0
             self._done = True
             ready.set()
+
+
+def evdev_result(etype, code, value, hires=False):
+    """Evento evdev (tipo EV_KEY/EV_REL) -> ('name'|'cancel'|'error', valor) ou None (ignorar).
+    So o 'para baixo' conta; roda: REL_WHEEL (ou HI_RES nos mouses que o tem, sem contar em dobro)."""
+    import linput as li
+    from keymap_linux import MOUSE_BUTTONS, code_to_vk
+    if etype == li.EV_KEY:
+        if value != 1:
+            return None
+        if code in MOUSE_BUTTONS:
+            return "name", MOUSE_BUTTONS[code]
+        vk = code_to_vk(code)
+        return key_result(vk) if vk is not None else ("error", "Tecla não suportada (código evdev %s)." % code)
+    if etype == li.EV_REL and value:
+        if code == (li.REL_WHEEL_HI_RES if hires else li.REL_WHEEL):
+            return "name", "wheel_up" if value > 0 else "wheel_down"
+    return None
+
+
+class LinuxCapture(Capture):
+    """Mesma interface, lendo os eventos do evdev (sem grab: a tecla tambem chega ao desktop)."""
+
+    def _quit(self):
+        pass        # a thread confere _done a cada 50 ms
+
+    def _run(self, callback, timeout, ready):
+        import selectors
+        import linput as li
+        devs = []
+        try:
+            sc = li.Scanner()
+            devs = sc.scan(set())
+            ready.set()
+            if not devs:
+                self._finish(callback, "cancel", "Sem permissão para ler o teclado/mouse "
+                             "(grupo input) — veja o Log após Iniciar." if sc.denied else
+                             "Nenhum teclado ou mouse encontrado.")
+                return
+            sel = selectors.DefaultSelector()
+            for d in devs:
+                try:
+                    os.set_blocking(d.dev.fd, False)
+                except OSError:
+                    pass
+                sel.register(d.dev.fd, selectors.EVENT_READ, d)
+            end = time.monotonic() + timeout
+            while not self._done:
+                if time.monotonic() >= end:
+                    self._finish(callback, "cancel", "Tempo esgotado.")
+                    break
+                for key, _ in sel.select(0.05):
+                    d = key.data
+                    try:
+                        events = list(d.dev.read())
+                    except OSError:
+                        continue
+                    for ev in events:
+                        res = evdev_result(ev.type, ev.code, ev.value, d.hires)
+                        if res is None or self._done:
+                            continue
+                        if res[0] == "error":
+                            callback(*res)
+                        else:
+                            self._finish(callback, *res)
+            sel.close()
+        finally:
+            for d in devs:
+                try:
+                    d.dev.close()
+                except OSError:
+                    pass
+            self._done = True
+            ready.set()
+
+
+if sys.platform.startswith("linux"):
+    Capture = LinuxCapture

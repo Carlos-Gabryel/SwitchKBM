@@ -57,7 +57,7 @@ class Shell:
                                             padding=ft.Padding(0, 8, 0, 0)),
                                self._credit()],
                               spacing=0, expand=True))
-        page.window.icon = str(assets_dir() / "icon.ico")
+        page.window.icon = str(assets_dir() / ("icon.ico" if sys.platform == "win32" else "icon.png"))
         page.window.prevent_close = True
         page.window.on_event = self._on_window_event
         page.add(ft.Row([sidebar, ft.Column([self.update_bar, self.body], spacing=0, expand=True)],
