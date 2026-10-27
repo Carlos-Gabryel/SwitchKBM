@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Compilar o firmware (ESP-IDF 5.4.4)
-        uses: espressif/esp-idf-ci-action@v1
+        uses: espressif/esp-idf-ci-action@9d38657f3d789ca759b2b37aaf5ceffbc42c4f0d  # branch v1 em 2026-10-27
         with:
           esp_idf_version: v5.4.4
           target: esp32
@@ -78,9 +78,9 @@ jobs:
       # arquivo enviado ao Release; os .sha256 abaixo sao so para conferencia manual.
       - name: SHA-256
         run: cd dist && for f in SwitchKBM*; do sha256sum "$f" > "$f.sha256"; done
-      - uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            dist/SwitchKBM.exe
-            dist/SwitchKBM-x86_64.AppImage
-            dist/*.sha256
+      # gh (do proprio GitHub) em vez de uma action de terceiros com permissao de escrita
+      - name: Publicar o Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: gh release create "$GITHUB_REF_NAME" --verify-tag --title "$GITHUB_REF_NAME" --notes "" dist/SwitchKBM.exe dist/SwitchKBM-x86_64.AppImage dist/*.sha256

@@ -11,6 +11,31 @@ RADIUS, RADIUS_SMALL, GAP, SIDEBAR_WIDTH, CONTROL_HEIGHT = 12, 8, 12, 236, 36
 STATUS_COLORS = {"running": GREEN, "flashing": AMBER}     # parado = ACCENT (estado "ruim")
 
 
+CLICK = ft.MouseCursor.CLICK    # Linux/Flutter nao mostra a mao no cursor "clickable" padrao: setar explicito (no Windows e inofensivo)
+
+
+def clickable(c: ft.Container) -> ft.Control:
+    """Container com on_click ganha a mao: Container nao tem mouse_cursor, entao vai num GestureDetector.
+    Sem ink: o InkWell tem cursor proprio e venceria o do GestureDetector (a mao so nas bordas)."""
+    if not c.on_click:
+        return c
+    c.ink = False
+    if c.on_hover is None:
+        _hover_bg(c)
+    return ft.GestureDetector(content=c, mouse_cursor=CLICK)
+
+
+def _hover_bg(c: ft.Container) -> None:
+    """Destaque ao passar o mouse, no lugar do que o ink fazia."""
+    base = c.bgcolor
+    lit = "#262B32" if base == HOVER else HOVER
+
+    def on_hover(e):
+        c.bgcolor = lit if str(e.data).lower() == "true" else base
+        c.update()
+    c.on_hover = on_hover
+
+
 def text(value: str, size: int = 13, color: str = TEXT, bold: bool = False, **kw) -> ft.Text:
     return ft.Text(value, size=size, color=color, weight=ft.FontWeight.W_600 if bold else None, **kw)
 
@@ -30,10 +55,10 @@ def border(color: str = BORDER, width: int = 1) -> ft.Border:
 
 
 def card(content: ft.Control, padding: int = 14, on_click=None, selected: bool = False,
-         **kw) -> ft.Container:
-    return ft.Container(content=content, padding=padding, bgcolor=CARD, border_radius=RADIUS,
+         **kw) -> ft.Control:
+    return clickable(ft.Container(content=content, padding=padding, bgcolor=CARD, border_radius=RADIUS,
                         border=border(ACCENT if selected else BORDER), on_click=on_click,
-                        ink=on_click is not None, **kw)
+                        ink=on_click is not None, **kw))
 
 
 def button(label: str, on_click=None, primary: bool = True, icon_name: str | None = None,
@@ -42,17 +67,18 @@ def button(label: str, on_click=None, primary: bool = True, icon_name: str | Non
     style = ft.ButtonStyle(
         bgcolor={ft.ControlState.DISABLED: HOVER, ft.ControlState.DEFAULT: ACCENT if primary else HOVER},
         color={ft.ControlState.DISABLED: FAINT, ft.ControlState.DEFAULT: ink},
+        mouse_cursor={ft.ControlState.DISABLED: ft.MouseCursor.BASIC, ft.ControlState.DEFAULT: CLICK},
         shape=ft.StadiumBorder(), padding=ft.Padding(18, 8, 18, 8), elevation=0,
         text_style=ft.TextStyle(size=13, weight=ft.FontWeight.W_600))
     return ft.Button(label, icon=icon(icon_name, 16, ink) if icon_name else None,
                      on_click=on_click, style=style, disabled=disabled, height=CONTROL_HEIGHT)
 
 
-def icon_button(name: str, tooltip: str, on_click=None, color: str = MUTED, disabled: bool = False) -> ft.Container:
-    return ft.Container(content=icon(name, 16, FAINT if disabled else color), width=32, height=32,
-                        alignment=ft.Alignment.CENTER, border_radius=RADIUS_SMALL, tooltip=tooltip,
-                        bgcolor=FIELD, border=border(), on_click=None if disabled else on_click,
-                        ink=not disabled)
+def icon_button(name: str, tooltip: str, on_click=None, color: str = MUTED, disabled: bool = False) -> ft.Control:
+    return clickable(ft.Container(content=icon(name, 16, FAINT if disabled else color), width=32, height=32,
+                                  alignment=ft.Alignment.CENTER, border_radius=RADIUS_SMALL, tooltip=tooltip,
+                                  bgcolor=FIELD, border=border(), on_click=None if disabled else on_click,
+                                  ink=not disabled))
 
 
 def dot(color: str) -> ft.Container:
@@ -78,15 +104,15 @@ def notice(message: str, size: int = 11) -> ft.Container:
 
 
 def brand(size: int = 15) -> ft.Row:
-    return ft.Row([ft.Image(src="icon.png", width=size + 13, height=size + 13), text("Switch KBM", size, bold=True)],
+    return ft.Row([ft.Image(src="icon.png", width=size + 13, height=size + 13), text("Switch KBM", size, bold=True, expand=True)],
                   spacing=8, vertical_alignment=ft.CrossAxisAlignment.CENTER)
 
 
-def nav_item(label: str, icon_name: str, selected: bool, on_click) -> ft.Container:
+def nav_item(label: str, icon_name: str, selected: bool, on_click) -> ft.Control:
     color = TEXT if selected else MUTED
-    return ft.Container(content=ft.Row([icon(icon_name, 16, color), text(label, 13, color)], spacing=10),
+    return clickable(ft.Container(content=ft.Row([icon(icon_name, 16, color), text(label, 14, color)], spacing=10),
                         padding=ft.Padding(10, 8, 10, 8), border_radius=RADIUS_SMALL,
-                        bgcolor=HOVER if selected else None, on_click=on_click, ink=True)
+                        bgcolor=HOVER if selected else None, on_click=on_click, ink=True))
 
 
 def field_style() -> dict:
@@ -101,5 +127,7 @@ def apply_page(page: ft.Page) -> None:
     page.theme_mode = ft.ThemeMode.DARK
     page.theme = ft.Theme(color_scheme=ft.ColorScheme(primary=ACCENT, surface=CARD))
     page.padding = 0
-    page.window.width, page.window.height = 900, 680
+    page.window.title_bar_hidden = True       # barra propria (ver Shell._build_title_bar)
+    page.window.title_bar_buttons_hidden = True
+    page.window.width, page.window.height = 1180, 760     # mesmo tamanho do Distribuidor
     page.window.min_width, page.window.min_height = 760, 560

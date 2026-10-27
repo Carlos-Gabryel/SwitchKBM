@@ -48,13 +48,13 @@ class AjustesView:
     def _slider_pair(self, key: str, lo: float, hi: float, digits: int):
         field = ft.TextField(width=90, text_align=ft.TextAlign.RIGHT,
                              on_change=lambda e, k=key: self._set(k, e.control.value), **t.field_style())
-        slider = ft.Slider(min=lo, max=hi, expand=True, active_color=t.ACCENT, inactive_color=t.FIELD,
+        slider = ft.Slider(mouse_cursor=t.CLICK, min=lo, max=hi, expand=True, active_color=t.ACCENT, inactive_color=t.FIELD,
                            thumb_color=t.ACCENT,
                            on_change=lambda e, k=key, d=digits: self._slide(k, e.control.value, d))
         return slider, field
 
     def _switch(self, key: str) -> ft.Switch:
-        return ft.Switch(active_color=t.ACCENT, on_change=lambda e, k=key: self._set(k, bool(e.control.value)))
+        return ft.Switch(mouse_cursor=t.CLICK, active_color=t.ACCENT, on_change=lambda e, k=key: self._set(k, bool(e.control.value)))
 
     def _card(self, title: str, detail: str, control: ft.Control, wide: bool = False) -> ft.Container:
         label = ft.Column([t.text(title, 14, bold=True)] + ([t.muted(detail, 11)] if detail else []),

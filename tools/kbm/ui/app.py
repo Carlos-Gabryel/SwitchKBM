@@ -50,7 +50,7 @@ class Shell:
         sidebar = ft.Container(
             width=t.SIDEBAR_WIDTH, bgcolor=t.SIDEBAR, padding=ft.Padding(12, 16, 12, 16),
             border=ft.Border(right=ft.BorderSide(1, t.BORDER)),
-            content=ft.Column([ft.Container(t.brand(), padding=ft.Padding(6, 0, 0, 14)), self.nav,
+            content=ft.Column([ft.WindowDragArea(ft.Container(t.brand(), padding=ft.Padding(6, 0, 0, 14))), self.nav,
                                ft.Container(expand=True), self.fw_box, self.status_box,
                                ft.Container(ft.Column([self.run_btn, self.cap_btn], spacing=8,
                                                       horizontal_alignment=ft.CrossAxisAlignment.STRETCH),
@@ -60,7 +60,8 @@ class Shell:
         page.window.icon = str(assets_dir() / ("icon.ico" if sys.platform == "win32" else "icon.png"))
         page.window.prevent_close = True
         page.window.on_event = self._on_window_event
-        page.add(ft.Row([sidebar, ft.Column([self.update_bar, self.body], spacing=0, expand=True)],
+        self._build_title_bar()
+        page.add(ft.Row([sidebar, ft.Column([self.title_bar, self.update_bar, self.body], spacing=0, expand=True)],
                         spacing=0, expand=True))
         self.render(full=True)
         self.ctrl.start_check()         # em segundo plano; falha so vai para o log
@@ -195,7 +196,44 @@ class Shell:
         self.ctrl.toggle_capture(allow)
 
     # ---- janela ----
+    def _build_title_bar(self) -> None:
+        """Barra de título própria (a nativa fica escondida): arrastar + minimizar/maximizar/fechar."""
+        self.max_icon = ft.Container(content=t.icon("square", 14))
+        self.title_bar = ft.Row([
+            ft.WindowDragArea(ft.Container(height=36), expand=True),
+            self._window_button(t.icon("minus", 16), self._minimize),
+            self._window_button(self.max_icon, self._toggle_max),
+            self._window_button(t.icon("x", 16), self._close, danger=True),
+        ], spacing=0, height=36)
+
+    def _window_button(self, content, on_click, danger: bool = False) -> ft.Control:
+        hover = "#C42B1C" if danger else t.HOVER
+
+        def on_hover(e):
+            e.control.bgcolor = hover if e.data in (True, "true") else None
+            e.control.update()
+        return t.clickable(ft.Container(content=content, width=46, height=36, alignment=ft.Alignment.CENTER,
+                                        on_click=on_click, on_hover=on_hover))
+
+    def _minimize(self, e=None) -> None:
+        self.page.window.minimized = True
+        self.page.update()
+
+    def _toggle_max(self, e=None) -> None:
+        self.page.window.maximized = not self.page.window.maximized
+        self.page.update()
+
+    def _close(self, e=None) -> None:
+        # dispara o evento CLOSE (prevent_close) -> _on_window_event pede confirmação e chama _quit
+        self.page.run_task(self.page.window.close)
+
     def _on_window_event(self, e) -> None:
+        if e.type in (ft.WindowEventType.MAXIMIZE, ft.WindowEventType.UNMAXIMIZE):
+            maximized = e.type == ft.WindowEventType.MAXIMIZE
+            self.page.window.maximized = maximized
+            self.max_icon.content = t.icon("copy" if maximized else "square", 14)
+            self.max_icon.update()
+            return
         if e.type != ft.WindowEventType.CLOSE:
             return
         if self.ctrl.flashing:

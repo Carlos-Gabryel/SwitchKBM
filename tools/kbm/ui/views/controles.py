@@ -33,15 +33,15 @@ class ControlesView:
             options=[ft.DropdownOption(key=v, text=v) for v in AIM_LABELS.values()], **t.field_style())
         self.sens_field = ft.TextField(width=80, text_align=ft.TextAlign.RIGHT,
                                        on_change=lambda e: self._set("sens", e.control.value), **t.field_style())
-        self.sens = ft.Slider(min=0.005, max=0.3, expand=True, active_color=t.ACCENT, inactive_color=t.FIELD,
+        self.sens = ft.Slider(mouse_cursor=t.CLICK, min=0.005, max=0.3, expand=True, active_color=t.ACCENT, inactive_color=t.FIELD,
                               thumb_color=t.ACCENT, on_change=lambda e: self._set("sens", round(e.control.value, 4)))
         self.ssens_field = ft.TextField(width=80, text_align=ft.TextAlign.RIGHT,
                                         on_change=lambda e: self._set("ssens", e.control.value), **t.field_style())
-        self.ssens = ft.Slider(min=0.1, max=3.0, expand=True, active_color=t.ACCENT, inactive_color=t.FIELD,
+        self.ssens = ft.Slider(mouse_cursor=t.CLICK, min=0.1, max=3.0, expand=True, active_color=t.ACCENT, inactive_color=t.FIELD,
                                thumb_color=t.ACCENT, on_change=lambda e: self._set("ssens", round(e.control.value, 3)))
         self.sdz_field = ft.TextField(width=80, text_align=ft.TextAlign.RIGHT,
                                       on_change=lambda e: self._set("sdz", e.control.value), **t.field_style())
-        self.sdz = ft.Slider(min=0, max=200, divisions=200, expand=True, active_color=t.ACCENT, inactive_color=t.FIELD,
+        self.sdz = ft.Slider(mouse_cursor=t.CLICK, min=0, max=200, divisions=200, expand=True, active_color=t.ACCENT, inactive_color=t.FIELD,
                              thumb_color=t.ACCENT, on_change=lambda e: self._set("sdz", int(round(e.control.value))))
         self.rows_col = ft.Column(spacing=2, scroll=ft.ScrollMode.AUTO, expand=True)
         self._build_rows()

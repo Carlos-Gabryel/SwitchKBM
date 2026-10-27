@@ -140,6 +140,7 @@ LINUX_ASSET = {"name": "SwitchKBM-x86_64.AppImage", "browser_download_url": "htt
                "size": len(LINUX_BODY), "digest": "sha256:" + LINUX_SHA}
 
 
+@unittest.skipIf(os.name == "nt", "chmod/os.replace do AppImage: so no Linux")
 class LinuxUpdaterTests(unittest.TestCase):
     def setUp(self):
         p = mock.patch.object(updater, "IS_LINUX", True)
