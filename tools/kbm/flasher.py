@@ -3,6 +3,8 @@ import json
 import os
 import sys
 
+from i18n import N_
+
 # Versao do firmware embutida neste programa; tem de ser igual a BRIDGE_FW_VERSION em
 # common/bridge_proto/include/bridge_proto.h (um teste confere). A placa informa a dela no STATUS.
 FIRMWARE_VERSION = 1
@@ -18,12 +20,12 @@ def firmware_dir():
 def load_manifest(fw_dir):
     path = os.path.join(fw_dir, "flasher_args.json")
     if not os.path.isfile(path):
-        raise FileNotFoundError("Firmware não encontrado (falta flasher_args.json em %s)." % fw_dir)
+        raise FileNotFoundError(N_("Firmware não encontrado (falta flasher_args.json em %s).") % fw_dir)
     with open(path, encoding="utf-8") as f:
         manifest = json.load(f)
     for rel in manifest.get("flash_files", {}).values():
         if not os.path.isfile(os.path.join(fw_dir, rel)):
-            raise FileNotFoundError("Arquivo de firmware ausente: %s" % rel)
+            raise FileNotFoundError(N_("Arquivo de firmware ausente: %s") % rel)
     return manifest
 
 
@@ -51,17 +53,17 @@ def run(port):
     try:
         fw = firmware_dir()
         args = esptool_args(port, fw, load_manifest(fw))
-        print("Gravando firmware em %s..." % port, flush=True)
+        print(N_("Gravando firmware em %s...") % port, flush=True)
         import esptool
         esptool.main(args)
     except SystemExit as e:
         if e.code in (None, 0):
             print("FLASH OK", flush=True)
             return 0
-        print("FLASH ERRO: esptool terminou com código %s" % e.code, flush=True)
+        print(N_("FLASH ERRO: esptool terminou com código %s") % e.code, flush=True)
         return 1
     except Exception as e:
-        print("FLASH ERRO: %s" % e, flush=True)
+        print(N_("FLASH ERRO: %s") % e, flush=True)
         return 1
     print("FLASH OK", flush=True)
     return 0

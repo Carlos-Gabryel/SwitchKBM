@@ -20,14 +20,16 @@ import urllib.request
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from i18n import N_, tr
+
 REPO = "Carlos-Gabryel/SwitchKBM"
 API = f"https://api.github.com/repos/{REPO}/releases/latest"
 IS_LINUX = sys.platform.startswith("linux")
 ASSET = "SwitchKBM.exe"
 ASSET_LINUX = "SwitchKBM-x86_64.AppImage"
 HEADERS = {"Accept": "application/vnd.github+json", "User-Agent": "SwitchKBM"}
-NOT_FROZEN_MSG = "Atualização automática só no programa (.exe)"
-NOT_APPIMAGE_MSG = "Atualização automática só no AppImage — baixe a nova versão pelo link do Release"
+NOT_FROZEN_MSG = N_("Atualização automática só no programa (.exe)")
+NOT_APPIMAGE_MSG = N_("Atualização automática só no AppImage — baixe a nova versão pelo link do Release")
 
 
 def asset_name() -> str:
@@ -35,7 +37,7 @@ def asset_name() -> str:
 
 
 def not_frozen_msg() -> str:
-    return NOT_APPIMAGE_MSG if IS_LINUX else NOT_FROZEN_MSG
+    return tr(NOT_APPIMAGE_MSG if IS_LINUX else NOT_FROZEN_MSG)
 
 
 def target_path() -> Path:
@@ -67,7 +69,7 @@ def can_apply() -> bool:
 def parse_version(text: str) -> tuple[int, ...]:
     match = re.fullmatch(r"v?(\d+(?:\.\d+)*)", str(text).strip())
     if not match:
-        raise UpdateError(f"versão inválida: {text!r}")
+        raise UpdateError(tr("versão inválida: %r") % (text,))
     return tuple(int(part) for part in match.group(1).split("."))
 
 
@@ -78,9 +80,9 @@ def _release(opener) -> dict:
     except UpdateError:
         raise
     except Exception as e:      # offline, limite da API, JSON ruim...
-        raise UpdateError(f"não foi possível consultar o GitHub ({type(e).__name__}: {e})") from e
+        raise UpdateError(tr("não foi possível consultar o GitHub (%s: %s)") % (type(e).__name__, e)) from e
     if not isinstance(data, dict):
-        raise UpdateError("resposta inesperada do GitHub")
+        raise UpdateError(tr("resposta inesperada do GitHub"))
     return data
 
 
@@ -92,13 +94,13 @@ def latest(opener=urllib.request.urlopen) -> Release | None:
             continue
         digest = asset.get("digest") or ""
         if not digest.startswith("sha256:"):
-            raise UpdateError("o Release não publica o SHA-256 do arquivo")
+            raise UpdateError(tr("o Release não publica o SHA-256 do arquivo"))
         try:
             return Release(data["tag_name"], parse_version(data["tag_name"]),
                            asset["browser_download_url"], int(asset["size"]),
                            digest.removeprefix("sha256:"), data.get("html_url", ""))
         except (KeyError, TypeError, ValueError) as e:
-            raise UpdateError(f"Release malformado ({e})") from e
+            raise UpdateError(tr("Release malformado (%s)") % e) from e
     return None
 
 
@@ -122,10 +124,10 @@ def download(release: Release, folder: Path, opener=urllib.request.urlopen, prog
                     progress(min(1.0, size / release.size))
     except Exception as e:
         part.unlink(missing_ok=True)
-        raise UpdateError(f"falha no download ({type(e).__name__}: {e})") from e
+        raise UpdateError(tr("falha no download (%s: %s)") % (type(e).__name__, e)) from e
     if size != release.size or digest.hexdigest() != release.sha256.lower():
         part.unlink(missing_ok=True)
-        raise UpdateError("o download não confere (tamanho ou SHA-256)")
+        raise UpdateError(tr("o download não confere (tamanho ou SHA-256)"))
     ready = folder / (f"SwitchKBM-{release.tag}.AppImage" if IS_LINUX else f"SwitchKBM-{release.tag}.exe")
     part.replace(ready)
     return ready

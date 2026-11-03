@@ -9,14 +9,17 @@ from pathlib import Path
 
 import flet as ft
 
+import i18n
+import profiles as pf
 from capture import Capture
 import updater
 import winfocus
+from i18n import N_, tr
 from controller import APP_TITLE, APP_VERSION, FIRMWARE_OLD_MSG, REPO_URL, Controller
 from ui import theme as t
 
-NAV = (("controles", "Controles", "gamepad-2"), ("digitacao", "Digitação", "keyboard"),
-       ("ajustes", "Ajustes", "settings"), ("placa", "Placa", "cpu"))
+NAV = (("controles", N_("Controles"), "gamepad-2"), ("digitacao", N_("Digitação"), "keyboard"),
+       ("ajustes", N_("Ajustes"), "settings"), ("placa", N_("Placa"), "cpu"))
 
 
 def assets_dir() -> Path:
@@ -30,27 +33,47 @@ class Shell:
         self.page, self.ctrl = page, ctrl
         self.capture = Capture()
         self.current = tab if tab in [k for k, _, _ in NAV] else "controles"
+        self._typing_seen = False       # ultimo estado do modo digitacao tratado (F9 liga/desliga)
+        self._typing_back = "controles" # view para voltar ao sair do modo digitacao
+        self._prev_key_handler = page.on_keyboard_event
+        page.on_keyboard_event = self._on_keyboard
+        page.window.icon = str(assets_dir() / ("icon.ico" if sys.platform == "win32" else "icon.png"))
+        page.window.prevent_close = True
+        page.window.on_event = self._on_window_event
+        self._build()
+        self.render(full=True)
+        self.ctrl.start_check()         # em segundo plano; falha so vai para o log
+        page.run_task(self._poll)
+
+    def set_language(self, code: str) -> None:
+        """Troca o idioma ao vivo: reconstroi as views (textos novos), mantendo aba e estado do Controller."""
+        self.ctrl.set_language(code)
+        self.page.controls.clear()
+        self._build()
+        self._sig = self._tsig = None
+        self.render(full=True)
+        self.page.update()
+
+    def _build(self) -> None:
+        """Cria views, botoes, barra lateral e barra de titulo (refeito quando o idioma muda)."""
+        page = self.page
         from ui.views.ajustes import AjustesView
         from ui.views.controles import ControlesView
         from ui.views.digitacao import DigitacaoView
         from ui.views.placa import PlacaView
         self.views = {"controles": ControlesView(self), "digitacao": DigitacaoView(self),
                       "ajustes": AjustesView(self), "placa": PlacaView(self)}
-        self._typing_seen = False       # ultimo estado do modo digitacao tratado (F9 liga/desliga)
-        self._typing_back = "controles" # view para voltar ao sair do modo digitacao
         self._tsig = None
-        self._prev_key_handler = page.on_keyboard_event
-        page.on_keyboard_event = self._on_keyboard
         self.nav = ft.Column(spacing=4)
         self.status_box = ft.Container()
         self.fw_box = ft.Container(visible=False, padding=ft.Padding(0, 0, 0, 8),
-                                   content=t.notice(FIRMWARE_OLD_MSG))
+                                   content=t.notice(tr(FIRMWARE_OLD_MSG)))
         self.update_bar = ft.Container(visible=False, bgcolor=t.CARD, padding=ft.Padding(24, 8, 24, 8),
                                        border=ft.Border(bottom=ft.BorderSide(1, t.BORDER)))
-        self.run_btn = t.button("Iniciar", self.toggle_run, icon_name="play")
-        self.cap_btn = t.button("Capturar mouse e teclado", self.toggle_capture, primary=False,
+        self.run_btn = t.button(tr("Iniciar"), self.toggle_run, icon_name="play")
+        self.cap_btn = t.button(tr("Capturar mouse e teclado"), self.toggle_capture, primary=False,
                                 icon_name="mouse-pointer-2")
-        self.cap_btn.tooltip = "Mesmo que apertar F12 (F12 também solta)"
+        self.cap_btn.tooltip = tr("Mesmo que apertar F12 (F12 também solta)")
         self.cap_btn.style.padding = ft.Padding(10, 8, 10, 8)
         self.body = ft.Container(expand=True, padding=24)
         self._sig = None
@@ -64,15 +87,9 @@ class Shell:
                                             padding=ft.Padding(0, 8, 0, 0)),
                                self._credit()],
                               spacing=0, expand=True))
-        page.window.icon = str(assets_dir() / ("icon.ico" if sys.platform == "win32" else "icon.png"))
-        page.window.prevent_close = True
-        page.window.on_event = self._on_window_event
         self._build_title_bar()
         page.add(ft.Row([sidebar, ft.Column([self.title_bar, self.update_bar, self.body], spacing=0, expand=True)],
                         spacing=0, expand=True))
-        self.render(full=True)
-        self.ctrl.start_check()         # em segundo plano; falha so vai para o log
-        page.run_task(self._poll)
 
     # ---- atualizacao do programa ----
     def update_now(self, e=None) -> None:
@@ -94,12 +111,12 @@ class Shell:
         rel = c.update_release
         if c.update_state == "downloading":
             return ft.Row([t.icon("download", 16, t.GREEN),
-                           t.text(f"Baixando a versão {rel.tag.lstrip('v')}…", 13),
+                           t.text(tr("Baixando a versão %s…") % rel.tag.lstrip("v"), 13),
                            ft.ProgressBar(value=c.update_progress, color=t.ACCENT, bgcolor=t.FIELD,
                                           width=180)], spacing=10)
         return ft.Row([t.icon("download", 16, t.GREEN),
-                       t.text(f"Nova versão {rel.tag.lstrip('v')} disponível", 13), ft.Container(expand=True),
-                       t.button("Atualizar", self.update_now, disabled=c.flashing or not updater.can_apply())],
+                       t.text(tr("Nova versão %s disponível") % rel.tag.lstrip("v"), 13), ft.Container(expand=True),
+                       t.button(tr("Atualizar"), self.update_now, disabled=c.flashing or not updater.can_apply())],
                       spacing=10)
 
     def _credit(self) -> ft.Control:
@@ -133,7 +150,9 @@ class Shell:
     def info(self, message: str) -> None:
         self.dialog(APP_TITLE, t.muted(message, 13), [t.button("OK", self.close_dialog)])
 
-    def ask(self, message: str, on_yes, yes: str = "Sim", no: str = "Não") -> None:
+    def ask(self, message: str, on_yes, yes: str | None = None, no: str | None = None) -> None:
+        yes, no = yes or tr("Sim"), no or tr("Não")
+
         def go(e=None):
             self.close_dialog()
             on_yes()
@@ -141,7 +160,6 @@ class Shell:
                     [t.button(no, self.close_dialog, primary=False), t.button(yes, go)])
 
     def ask_name(self, title: str, initial: str, on_ok) -> None:
-        import profiles as pf
         field = ft.TextField(value=initial, autofocus=True, **t.field_style())
 
         def go(e=None):
@@ -151,7 +169,7 @@ class Shell:
                 on_ok(name)
         field.on_submit = go
         self.dialog(title, ft.Container(field, width=320),
-                    [t.button("Cancelar", self.close_dialog, primary=False), t.button("OK", go)])
+                    [t.button(tr("Cancelar"), self.close_dialog, primary=False), t.button("OK", go)])
 
     def confirm_discard(self, then) -> None:
         """Chama then() se pode seguir (nada a salvar, salvou ou descartou)."""
@@ -167,16 +185,16 @@ class Shell:
         def discard(e=None):
             self.close_dialog()
             then()
-        self.dialog(APP_TITLE, t.muted("Há alterações não salvas no perfil \"%s\". Salvar antes de "
-                                       "continuar?" % self.ctrl.name, 13),
-                    [t.button("Cancelar", self.close_dialog, primary=False),
-                     t.button("Descartar", discard, primary=False), t.button("Salvar", save)])
+        self.dialog(APP_TITLE, t.muted(tr("Há alterações não salvas no perfil \"%s\". Salvar antes de "
+                                          "continuar?") % pf.label(self.ctrl.name), 13),
+                    [t.button(tr("Cancelar"), self.close_dialog, primary=False),
+                     t.button(tr("Descartar"), discard, primary=False), t.button(tr("Salvar"), save)])
 
     def save(self, restart: bool = True) -> bool:
         try:
             self.ctrl.save(restart=restart)
         except OSError as e:
-            self.info("Falha ao salvar: %s" % e)
+            self.info(tr("Falha ao salvar: %s") % e)
             return False
         self.render()
         return True
@@ -205,7 +223,7 @@ class Shell:
     # ---- janela ----
     def _build_title_bar(self) -> None:
         """Barra de título própria (a nativa fica escondida): arrastar + minimizar/maximizar/fechar."""
-        self.max_icon = ft.Container(content=t.icon("square", 14))
+        self.max_icon = ft.Container(content=t.icon("copy" if self.page.window.maximized else "square", 14))
         self.title_bar = ft.Row([
             ft.WindowDragArea(ft.Container(height=36), expand=True),
             self._window_button(t.icon("minus", 16), self._minimize),
@@ -244,9 +262,9 @@ class Shell:
         if e.type != ft.WindowEventType.CLOSE:
             return
         if self.ctrl.flashing:
-            self.ask("A gravação do firmware está em andamento. Interromper agora pode deixar a placa "
-                     "sem firmware. Sair mesmo assim?", lambda: self.confirm_discard(self._quit),
-                     yes="Sair")
+            self.ask(tr("A gravação do firmware está em andamento. Interromper agora pode deixar a placa "
+                        "sem firmware. Sair mesmo assim?"), lambda: self.confirm_discard(self._quit),
+                     yes=tr("Sair"))
         else:
             self.confirm_discard(self._quit)
 
@@ -262,16 +280,16 @@ class Shell:
 
     def render(self, full: bool = False) -> None:
         c = self.ctrl
-        self.nav.controls = [t.nav_item(label, icon, key == self.current,
+        self.nav.controls = [t.nav_item(tr(label), icon, key == self.current,
                                         lambda e, k=key: self.navigate(k)) for key, label, icon in NAV]
         key, title, detail = c.status()
         self.status_box.content = t.status_card(key, title, detail)
-        self.run_btn.content = "Parar" if c.running else "Iniciar"
+        self.run_btn.content = tr("Parar") if c.running else tr("Iniciar")
         self.run_btn.icon = t.icon("pause" if c.running else "play", 16, "#FFFFFF")
         self.run_btn.disabled = c.flashing
         self.cap_btn.disabled = not c.running or c.typing_on
-        self.cap_btn.tooltip = ("Indisponível no modo digitação (F9 sai)" if c.typing_on
-                                else "Mesmo que apertar F12 (F12 também solta)")
+        self.cap_btn.tooltip = (tr("Indisponível no modo digitação (F9 sai)") if c.typing_on
+                                else tr("Mesmo que apertar F12 (F12 também solta)"))
         self.fw_box.visible = c.firmware_old
         self.update_bar.visible = (c.update_state in ("available", "downloading") and c.update_release is not None
                                    and updater.can_apply())
@@ -361,10 +379,10 @@ class Shell:
 
     def _flash_finished(self, ok: bool, resume_error) -> None:
         if ok:
-            self.info("Placa pronta.")
+            self.info(tr("Placa pronta."))
             self.report(resume_error)
         else:
-            self.info("Falha ao gravar — veja o Log.")
+            self.info(tr("Falha ao gravar — veja o Log."))
 
 
 def run() -> None:
@@ -372,6 +390,7 @@ def run() -> None:
     if getattr(sys, "frozen", False):
         updater.cleanup(Path(sys.executable))       # apaga o SwitchKBM.exe.old de uma atualizacao anterior
     ctrl = Controller()
+    i18n.set_language(ctrl.store.load_settings().get("language") or i18n.default_language())
 
     def main(page: ft.Page) -> None:
         t.apply_page(page)

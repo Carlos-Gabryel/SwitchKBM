@@ -10,27 +10,29 @@ from pathlib import Path
 
 import bindings as bd
 import profiles as pf
+import i18n
 import updater
+from i18n import N_, tr, tr_line
 from flasher import FIRMWARE_VERSION
 from mapping import display_name
 from typing_engine import PRESETS, migrate_prefs
 from runners import BridgeRunner, FlashRunner, list_ports, pick_default_port
 
 APP_TITLE = "Switch KBM"
-APP_VERSION = "1.1.0"
+APP_VERSION = "1.1.1"
 REPO_URL = "https://github.com/Carlos-Gabryel/SwitchKBM"
-AIM_LABELS = {"gyro": "Giroscópio", "stick": "Analógico direito"}
+AIM_LABELS = {"gyro": N_("Giroscópio"), "stick": N_("Analógico direito")}    # valor interno: guarda o pt
 STATUS_PREFIXES = ("CAPTURADO", "LIBERADO", "Modo de mira",
                    "Sensibilidade")
 TYPING_ON, TYPING_OFF, TYPING_STATE = "DIGITACAO ON", "DIGITACAO OFF", "DIGITACAO_ESTADO "
-TYPING_STATUS = "Modo digitação (F9 sai)"
-TYPING_NEEDS_BRIDGE = "Inicie o bridge para usar o modo digitação."
-CAPTURE_HINT = "Pressione a tecla (ou clique/roda do mouse). Esc cancela."
-NO_PORT_MSG = ("Selecione a porta serial da placa ESP32." if sys.platform.startswith("linux")
-               else "Selecione a porta COM da placa ESP32.")
+TYPING_STATUS = N_("Modo digitação (F9 sai)")
+TYPING_NEEDS_BRIDGE = N_("Inicie o bridge para usar o modo digitação.")
+CAPTURE_HINT = N_("Pressione a tecla (ou clique/roda do mouse). Esc cancela.")
+NO_PORT_MSG = (N_("Selecione a porta serial da placa ESP32.") if sys.platform.startswith("linux")
+               else N_("Selecione a porta COM da placa ESP32."))
 LOG_LINES = 500
 FIRMWARE_RE = re.compile(r"^FIRMWARE v(\d+)\s*$")
-FIRMWARE_OLD_MSG = "Firmware da placa desatualizado — vá em Placa › Preparar placa"
+FIRMWARE_OLD_MSG = N_("Firmware da placa desatualizado — vá em Placa › Preparar placa")
 
 
 class Controller:
@@ -144,18 +146,18 @@ class Controller:
         if self.waiting:
             return
         self.waiting = (rid, slot)
-        self.msg = CAPTURE_HINT
+        self.msg = tr(CAPTURE_HINT)
 
-    def cancel_capture(self, msg="Cancelado."):
+    def cancel_capture(self, msg=None):
         self.waiting = None
-        self.msg = msg
+        self.msg = msg or tr("Cancelado.")
 
     def on_capture(self, kind, value=None):
         """Resultado da captura: kind = 'name' | 'cancel' | 'error'."""
         if not self.waiting:
             return
         if kind == "cancel":
-            self.cancel_capture(value or "Cancelado.")
+            self.cancel_capture(value)
         elif kind == "error":
             self.msg = value or ""      # tecla nao suportada: continua esperando
         else:
@@ -167,12 +169,12 @@ class Controller:
         try:
             new, moved = bd.assign_key(self.rows, rid, slot, name)
         except ValueError as e:
-            self.msg = "Aviso: %s" % e
+            self.msg = tr("Aviso: %s") % e
             return
         if new != self.rows:
             self.rows = new
             self.set_dirty()
-        self.msg = "%s saiu de %s" % (display_name(name), bd.ROW_LABELS[moved]) if moved else ""
+        self.msg = tr("%s saiu de %s") % (display_name(name), tr(bd.ROW_LABELS[moved])) if moved else ""
 
     def clear_slot(self, rid, slot):
         self.waiting = None
@@ -219,7 +221,7 @@ class Controller:
         self.store.save(self.name, data)
         self.base = data
         self.dirty = False
-        self.msg = "Perfil salvo."
+        self.msg = tr("Perfil salvo.")
         if restart and self.runner.running:
             self.restart()
         return True
@@ -233,6 +235,11 @@ class Controller:
         self.set_dirty()
 
     # ---------------- portas ----------------
+    def set_language(self, code):
+        """Troca o idioma da interface e guarda a escolha (o __init__ nao mexe no idioma)."""
+        i18n.set_language(code)
+        self.store.save_settings(language=i18n.get_language())
+
     def refresh_ports(self, preferred=None):
         if not isinstance(preferred, str):
             preferred = None
@@ -256,18 +263,18 @@ class Controller:
     def start(self):
         """Inicia o bridge. Retorna None ou (tipo, mensagem) com tipo 'warn' | 'error'."""
         if self.flasher.running:
-            return "warn", "Aguarde o fim da gravação do firmware."
+            return "warn", tr("Aguarde o fim da gravação do firmware.")
         if not self.port:
-            return "warn", NO_PORT_MSG
+            return "warn", tr(NO_PORT_MSG)
         if self.dirty:
             try:
                 self.save(restart=False)
             except OSError as e:
-                return "error", "Falha ao salvar: %s" % e
+                return "error", tr("Falha ao salvar: %s") % e
         try:
             self.runner.start(self.port, self.store.path(self.name))
         except OSError as e:
-            return "error", "Não foi possível iniciar o bridge: %s" % e
+            return "error", tr("Não foi possível iniciar o bridge: %s") % e
         self.stat_extra = ""
         self.fw_version = None
         self.bridge_errors = []
@@ -293,7 +300,7 @@ class Controller:
         'on' sem bridge rodando tenta iniciar (como o botao Iniciar)."""
         if not self.runner.running:
             if op != "on":
-                return "warn", TYPING_NEEDS_BRIDGE
+                return "warn", tr(TYPING_NEEDS_BRIDGE)
             problem = self.start()
             if problem:
                 return problem
@@ -332,7 +339,7 @@ class Controller:
     def _typing_set(self, on):
         self.typing_on = on
         self.typing_state = {}
-        self.stat_extra = TYPING_STATUS if on else ""
+        self.stat_extra = tr(TYPING_STATUS) if on else ""
         if on:
             self._typing_push_prefs()
 
@@ -355,12 +362,12 @@ class Controller:
                 self.typing_state = st
                 self.typing_seq += 1
             return
-        self.add_log(line)
+        self.add_log(tr_line(line))     # so a exibicao e traduzida; o parsing usa a linha crua
         if line in (TYPING_ON, TYPING_OFF):
             self._typing_set(line == TYPING_ON)
             return
         if line.startswith("ERRO:"):
-            self.bridge_errors.append(line[5:].strip())
+            self.bridge_errors.append(tr_line(line).partition(":")[2].strip())
             return
         m = FIRMWARE_RE.match(line)
         if m:
@@ -375,7 +382,7 @@ class Controller:
             self.set_setting("ssens", round(ss, 3))
             return
         if line.startswith(STATUS_PREFIXES):
-            self.stat_extra = line
+            self.stat_extra = tr_line(line)
 
     # ---------------- gravacao do firmware ----------------
     def prepare_check(self):
@@ -383,7 +390,7 @@ class Controller:
         if self.flasher.running:
             return "busy", ""
         if not self.port:
-            return "warn", NO_PORT_MSG
+            return "warn", tr(NO_PORT_MSG)
         return None
 
     def flash(self):
@@ -394,10 +401,10 @@ class Controller:
         try:
             self.flasher.start(self.port)
         except OSError as e:
-            return "error", "Não foi possível iniciar a gravação: %s" % e
+            return "error", tr("Não foi possível iniciar a gravação: %s") % e
         self.flash_pct = -1
         self.flash_progress = 0.0
-        self.msg = "Gravando firmware..."
+        self.msg = tr("Gravando firmware...")
         return None
 
     def on_flash_line(self, line):
@@ -408,7 +415,7 @@ class Controller:
             if pct == self.flash_pct:
                 return
             self.flash_pct = pct
-        self.add_log(line)
+        self.add_log(tr_line(line))
 
     def flash_done(self):
         """Fim da gravacao. Retorna (ok, resume_error): resume_error = (tipo, msg) do restart."""
@@ -416,10 +423,10 @@ class Controller:
         self.flasher.proc = None
         self.flash_progress = None
         if code == 0:
-            self.msg = "Placa pronta."
+            self.msg = tr("Placa pronta.")
             self.fw_version = None      # a placa informa de novo quando o bridge reconectar
             return True, (self.start() if self.flash_resume else None)
-        self.msg = "Falha ao gravar o firmware."
+        self.msg = tr("Falha ao gravar o firmware.")
         return False, None
 
     def poll(self):
@@ -443,8 +450,8 @@ class Controller:
             code = self.runner.proc.returncode
             self.runner.proc = None
             self.typing_on, self.typing_state = False, {}
-            self.msg = ("Bridge encerrou: " + " ".join(self.bridge_errors) if self.bridge_errors
-                        else "Bridge encerrou (código %s)." % code)
+            self.msg = (tr("Bridge encerrou: %s") % " ".join(self.bridge_errors) if self.bridge_errors
+                        else tr("Bridge encerrou (código %s).") % code)
             events.append(("bridge_exit", code))
         return events
 
@@ -460,7 +467,7 @@ class Controller:
                 self.update_release, self.update_state = None, "uptodate"
         except Exception as e:      # UpdateError ou qualquer outra: nunca derruba a UI
             self.update_state, self.update_error = "error", str(e)
-            self.add_log("Atualização: %s" % e)
+            self.add_log(tr("Atualização: %s") % e)
         return self.update_state
 
     def start_check(self):
@@ -473,11 +480,11 @@ class Controller:
     def update_blocker(self):
         """None se pode atualizar agora, senao o motivo."""
         if self.flasher.running:
-            return "Aguarde o fim da gravação do firmware."
+            return tr("Aguarde o fim da gravação do firmware.")
         if not updater.can_apply():
             return updater.not_frozen_msg()
         if self.update_state != "available" or self.update_release is None:
-            return "Nenhuma atualização disponível."
+            return tr("Nenhuma atualização disponível.")
         return None
 
     def install_update(self, exe=None, opener=None, launch=None, wait=False):
@@ -502,22 +509,22 @@ class Controller:
             new = updater.download(self.update_release, folder,
                                    progress=lambda f: setattr(self, "update_progress", f), **kw)
             if self.flasher.running:        # nunca troca o programa no meio da gravacao
-                raise updater.UpdateError("a gravação do firmware começou; tente de novo depois")
+                raise updater.UpdateError(tr("a gravação do firmware começou; tente de novo depois"))
             updater.apply_update(new, exe, **({"launch": launch} if launch else {}))
             self.update_ready = True
         except (updater.UpdateError, OSError) as e:
             self.update_state, self.update_error = "error", str(e)
-            self.add_log("Atualização: %s" % e)
+            self.add_log(tr("Atualização: %s") % e)
 
     # ---------------- status e encerramento ----------------
     def status(self):
         """(chave, titulo, detalhe): chave = 'stopped' | 'running' | 'flashing'."""
         if self.flasher.running:
-            return "flashing", "Gravando firmware", self.port or "—"
+            return "flashing", tr("Gravando firmware"), self.port or "—"
         if self.runner.running:
-            return "running", "Rodando", " · ".join(x for x in (self.port, self.stat_extra or
-                                                              "F12 captura o mouse") if x)
-        return "stopped", "Parado", " · ".join(x for x in (self.port, "F12 captura o mouse") if x)
+            return "running", tr("Rodando"), " · ".join(x for x in (self.port, self.stat_extra or
+                                                                   tr("F12 captura o mouse")) if x)
+        return "stopped", tr("Parado"), " · ".join(x for x in (self.port, tr("F12 captura o mouse")) if x)
 
     def shutdown(self):
         self.flasher.kill()

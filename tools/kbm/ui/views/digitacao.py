@@ -3,16 +3,19 @@ from __future__ import annotations
 
 import flet as ft
 
+from i18n import N_, tr
 from kb_layout import LAYOUT
 from typing_engine import MAX_MS, MIN_MS, PRESETS, text_diff
 from ui import theme as t
 
-WARNING = ("O app não vê a TV: confira se o teclado está aberto antes de digitar. Se o teclado estiver "
+WARNING = N_("O app não vê a TV: confira se o teclado está aberto antes de digitar. Se o teclado estiver "
            "fechado, os comandos vão para o que estiver na tela.")
-CLICK_HINT = "Clique onde o cursor está na TV se errar letras"
-HELP = ("Enter envia · Esc limpa a fila e o campo · "
-        "Setas (campo vazio) movem o cursor · Home (campo vazio) = teclado reaberto na TV")
-PRESET_LABELS = {"seguro": "Seguro", "normal": "Normal", "rapido": "Rápido"}
+CLICK_HINT = N_("Clique onde o cursor está na TV se errar letras")
+LAYOUT_NOTE = N_("O layout foi medido no teclado em português do Switch 2; outros idiomas ou o Switch 1 "
+                 "podem ter disposição diferente.")
+HELP = N_("Enter envia · Esc limpa a fila e o campo · "
+          "Setas (campo vazio) movem o cursor · Home (campo vazio) = teclado reaberto na TV")
+PRESET_LABELS = {"seguro": N_("Seguro"), "normal": N_("Normal"), "rapido": N_("Rápido")}
 CELL_W, CELL_H, GAP = 46, 38, 4
 KEY_ALIASES = {"escape": "esc", "esc": "esc", "arrowup": "up", "up": "up", "arrowdown": "down", "down": "down",
                "arrowleft": "left", "left": "left", "arrowright": "right", "right": "right", "home": "home"}
@@ -38,43 +41,44 @@ class DigitacaoView:
         self._shown = None          # (pagina, cursor, ligado) desenhado no teclado
         # Sem shift_enter: com ele o focus() do Flet 1.0.2 nao pega; o Enter e tratado em _changed
         self.field = ft.TextField(multiline=True, min_lines=3, max_lines=6, disabled=True,
-                                  hint_text="Ligue o modo digitação (F9) e escreva aqui…",
+                                  hint_text=tr("Ligue o modo digitação (F9) e escreva aqui…"),
                                   on_change=self._changed,
                                   on_focus=self._focused, on_blur=self._blurred, **t.field_style())
-        self.toggle = t.button("Ligar (F9)", self._toggle, icon_name="keyboard")
+        self.toggle = t.button(tr("Ligar (F9)"), self._toggle, icon_name="keyboard")
         self.msg = t.muted("", 12)
         self.c_pending, self.c_cps, self.c_skipped = t.text("0", 18, bold=True), t.text("0", 18, bold=True), t.text("0", 18, bold=True)
         self.cells: dict[str, tuple[ft.Container, ft.Text]] = {}      # id do no -> (caixa, texto)
         self.grid_ids: list[list[str]] = []
         self.keyboard = self._build_keyboard()
-        self.presets = {k: t.button(v, lambda e, k=k: self._preset(k), primary=False)
+        self.presets = {k: t.button(tr(v), lambda e, k=k: self._preset(k), primary=False)
                         for k, v in PRESET_LABELS.items()}
         self.ms_label = t.muted("", 12)
         self.slider = ft.Slider(mouse_cursor=t.CLICK, min=MIN_MS, max=MAX_MS, divisions=MAX_MS - MIN_MS, expand=True,
                                 active_color=t.ACCENT, inactive_color=t.FIELD, thumb_color=t.ACCENT,
                                 on_change=lambda e: self._custom(int(round(e.control.value))))
-        self.strip = ft.Checkbox(label="Sem acentos (mais rápido)", active_color=t.ACCENT,
+        self.strip = ft.Checkbox(label=tr("Sem acentos (mais rápido)"), active_color=t.ACCENT,
                                  on_change=lambda e: self.ctrl.set_typing_strip(e.control.value))
-        self.test_btn = t.button("Testar velocidade", self._test, primary=False, icon_name="zap")
-        self.reopen_btn = t.button("Teclado reaberto", self._reopen, primary=False, icon_name="rotate-ccw")
+        self.test_btn = t.button(tr("Testar velocidade"), self._test, primary=False, icon_name="zap")
+        self.reopen_btn = t.button(tr("Teclado reaberto"), self._reopen, primary=False, icon_name="rotate-ccw")
         stat = lambda label, value: ft.Column([value, t.muted(label, 11)], spacing=0)    # noqa: E731
         self.control = ft.Column([
-            ft.Row([t.text("Digitação", 22, bold=True), ft.Container(expand=True), self.msg, self.toggle],
+            ft.Row([t.text(tr("Digitação"), 22, bold=True), ft.Container(expand=True), self.msg, self.toggle],
                    spacing=12, vertical_alignment=ft.CrossAxisAlignment.CENTER),
-            t.notice(WARNING, 12),
-            t.card(ft.Column([self.field, t.muted(HELP, 11)], spacing=8,
+            t.notice(tr(WARNING), 12),
+            t.card(ft.Column([self.field, t.muted(tr(HELP), 11)], spacing=8,
                              horizontal_alignment=ft.CrossAxisAlignment.STRETCH)),
             t.card(ft.Column([
-                ft.Row([t.text("Teclado do Switch 2", 14, bold=True), ft.Container(expand=True),
-                        stat("pendentes", self.c_pending), stat("letras/s", self.c_cps),
-                        stat("ignorados", self.c_skipped)], spacing=24,
+                ft.Row([t.text(tr(LAYOUT["name"]), 14, bold=True), ft.Container(expand=True),
+                        stat(tr("pendentes"), self.c_pending), stat(tr("letras/s"), self.c_cps),
+                        stat(tr("ignorados"), self.c_skipped)], spacing=24,
                        vertical_alignment=ft.CrossAxisAlignment.END),
-                self.keyboard, t.muted(CLICK_HINT, 11)], spacing=10)),
+                self.keyboard, t.muted(tr(CLICK_HINT), 11),
+                t.muted(tr(LAYOUT_NOTE), 11)], spacing=10)),
             t.card(ft.Column([
-                t.text("Velocidade", 14, bold=True),
+                t.text(tr("Velocidade"), 14, bold=True),
                 ft.Row([*self.presets.values(), self.slider, self.ms_label], spacing=10,
                        vertical_alignment=ft.CrossAxisAlignment.CENTER),
-                t.muted("Mais rápido pode perder apertos no console; se errar letras, use Seguro.", 11),
+                t.muted(tr("Mais rápido pode perder apertos no console; se errar letras, use Seguro."), 11),
                 ft.Row([self.strip, ft.Container(expand=True), self.test_btn, self.reopen_btn], spacing=10,
                        vertical_alignment=ft.CrossAxisAlignment.CENTER),
             ], spacing=10)),
@@ -106,7 +110,7 @@ class DigitacaoView:
             tabs.append(self._cell(tid, on_click=lambda e, n=tid: self._click(n)))
             self.cells[tid][1].value = tab["label"]
             self.cells[tid][1].size = 12
-        space = ft.Container(content=t.muted("Espaço", 12), height=CELL_H, width=(CELL_W + GAP) * 8 - GAP,
+        space = ft.Container(content=t.muted(tr("Espaço"), 12), height=CELL_H, width=(CELL_W + GAP) * 8 - GAP,
                              alignment=ft.Alignment.CENTER, border_radius=t.RADIUS_SMALL, bgcolor=t.FIELD,
                              border=t.border())
         rows.append(ft.Row(tabs, spacing=GAP))
@@ -226,10 +230,10 @@ class DigitacaoView:
         on = c.typing_on
         p = c.typing_prefs
         self.msg.value = ""
-        self.toggle.content = "Desligar (F9)" if on else "Ligar (F9)"
+        self.toggle.content = tr("Desligar (F9)") if on else tr("Ligar (F9)")
         self.toggle.disabled = c.flashing
         self.field.disabled = not on
-        self.field.hint_text = "Digite ou cole aqui" if on else "Ligue o modo digitação (F9) e escreva aqui…"
+        self.field.hint_text = tr("Digite ou cole aqui") if on else tr("Ligue o modo digitação (F9) e escreva aqui…")
         for key, b in self.presets.items():
             b.style.bgcolor = {ft.ControlState.DEFAULT: t.ACCENT if p["preset"] == key else t.HOVER}
         self.slider.value = p["ms"]

@@ -6,8 +6,10 @@ from dataclasses import dataclass, field
 
 try:
     from proto import BTN, FLAG_CONNECTED
+    from i18n import N_, tr
 except ImportError:  # pragma: no cover
     from .proto import BTN, FLAG_CONNECTED
+    from .i18n import N_, tr
 
 VK_F7, VK_F8, VK_F9, VK_F11, VK_F12 = 0x76, 0x77, 0x78, 0x7A, 0x7B
 VK_ALT = 0x12
@@ -49,19 +51,19 @@ VK_TO_NAME = {v: k for k, v in KEY_NAMES.items()}
 RESERVED_NAMES = ("f7", "f8", "f9", "f11", "f12")
 
 _DISPLAY = {
-    "space": "Espaço", "tab": "Tab", "esc": "Esc", "enter": "Enter", "backspace": "Backspace",
-    "capslock": "Caps Lock", "lshift": "Shift Esq.", "rshift": "Shift Dir.",
-    "lctrl": "Ctrl Esq.", "rctrl": "Ctrl Dir.", "alt": "Alt", "home": "Home", "end": "End",
+    "space": N_("Espaço"), "tab": "Tab", "esc": "Esc", "enter": "Enter", "backspace": "Backspace",
+    "capslock": "Caps Lock", "lshift": N_("Shift Esq."), "rshift": N_("Shift Dir."),
+    "lctrl": N_("Ctrl Esq."), "rctrl": N_("Ctrl Dir."), "alt": "Alt", "home": "Home", "end": "End",
     "insert": "Insert", "delete": "Delete", "pgup": "Page Up", "pgdn": "Page Down",
-    "up": "Seta ↑", "down": "Seta ↓", "left": "Seta ←", "right": "Seta →",
+    "up": N_("Seta ↑"), "down": N_("Seta ↓"), "left": N_("Seta ←"), "right": N_("Seta →"),
     "num_mul": "Num *", "num_add": "Num +", "num_sub": "Num −", "num_dec": "Num .",
     "num_div": "Num /",
     "minus": "-", "equals": "=", "lbracket": "[", "rbracket": "]", "backslash": "\\",
     "semicolon": ";", "quote": "'", "comma": ",", "period": ".", "slash": "/",
-    "backquote": "`", "abnt_backslash": "\ (ABNT)", "abnt_slash": "/ (ABNT)",
-    "lmb": "Botão Esq. Mouse", "rmb": "Botão Dir. Mouse", "mmb": "Botão Meio Mouse",
-    "x1": "Botão Lateral 1 Mouse", "x2": "Botão Lateral 2 Mouse",
-    "wheel_up": "Roda ↑", "wheel_down": "Roda ↓",
+    "backquote": "`", "abnt_backslash": N_("\\ (ABNT)"), "abnt_slash": N_("/ (ABNT)"),
+    "lmb": N_("Botão Esq. Mouse"), "rmb": N_("Botão Dir. Mouse"), "mmb": N_("Botão Meio Mouse"),
+    "x1": N_("Botão Lateral 1 Mouse"), "x2": N_("Botão Lateral 2 Mouse"),
+    "wheel_up": N_("Roda ↑"), "wheel_down": N_("Roda ↓"),
 }
 
 
@@ -74,7 +76,7 @@ def display_name(name):
     if not name:
         return ""
     if name in _DISPLAY:
-        return _DISPLAY[name]
+        return tr(_DISPLAY[name])
     if name.startswith("num") and name[3:].isdigit():
         return "Num " + name[3:]
     return name.upper()
@@ -165,22 +167,22 @@ class Mapper:
                 self._move_vk[d] = -1       # sem tecla
                 continue
             if n not in KEY_NAMES:
-                self.warnings.append("tecla de movimento desconhecida: %s" % n)
+                self.warnings.append(N_("tecla de movimento desconhecida: %s") % n)
                 n = dflt
             self._move_vk[d] = KEY_NAMES[n]
         for name, btn in self.cfg.binds.items():
             n = name.lower()
             if btn not in BTN and btn not in ("L2", "R2"):
-                self.warnings.append("botao desconhecido: %s" % btn)
+                self.warnings.append(N_("botao desconhecido: %s") % btn)
                 continue
             if n in RESERVED_NAMES:
-                self.warnings.append("tecla reservada (hotkey), associação ignorada: %s" % name)
+                self.warnings.append(N_("tecla reservada (hotkey), associação ignorada: %s") % name)
             elif n in MOUSE_NAMES:
                 self._mouse_binds[n] = btn
             elif n in KEY_NAMES:
                 self._key_binds[KEY_NAMES[n]] = btn
             else:
-                self.warnings.append("tecla desconhecida: %s" % name)
+                self.warnings.append(N_("tecla desconhecida: %s") % name)
         # setas so miram se nao forem usadas como botao nem como movimento
         self._aim_vk = {d: vk for d, vk in ARROW_VKS.items()
                         if vk not in self._key_binds and vk not in self._move_vk.values()}
@@ -205,20 +207,20 @@ class Mapper:
             if vk == VK_F11:
                 self.aim_mode = "stick" if self.aim_mode == "gyro" else "gyro"
                 self._stick_reset()
-                self.notify("Modo de mira: %s" % self.aim_mode)
+                self.notify(N_("Modo de mira: %s") % self.aim_mode)
                 return "toggle_aim"
             if self.aim_mode == "stick":
                 self.stick_sens = self.stick_sens * 1.1 if vk == VK_F8 else self.stick_sens / 1.1
-                self.notify("Sensibilidade analogico: %.3f" % self.stick_sens)
+                self.notify(N_("Sensibilidade analogico: %.3f") % self.stick_sens)
                 self.notify("STICKSENS stick_sens=%.3f" % self.stick_sens)
                 return "sens_up" if vk == VK_F8 else "sens_down"
             if vk == VK_F8:
                 self.sens *= 1.1
-                self.notify("Sensibilidade giro: %.3f" % self.sens)
+                self.notify(N_("Sensibilidade giro: %.3f") % self.sens)
                 self.notify("SENS deg_per_count=%.4f" % (self.cfg.deg_per_count * self.sens))
                 return "sens_up"
             self.sens /= 1.1
-            self.notify("Sensibilidade giro: %.3f" % self.sens)
+            self.notify(N_("Sensibilidade giro: %.3f") % self.sens)
             self.notify("SENS deg_per_count=%.4f" % (self.cfg.deg_per_count * self.sens))
             return "sens_down"
         self.pressed.add(vk)

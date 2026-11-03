@@ -7,9 +7,13 @@ Tudo roda na thread principal (GetMessageW). Os callbacks do usuario devem ser r
 """
 import collections
 import ctypes
+import os
 import threading
 import time
 from ctypes import wintypes
+
+from i18n import N_
+from i18n_en import EN
 
 user32 = ctypes.WinDLL("user32", use_last_error=True)
 kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
@@ -255,7 +259,7 @@ class InputHook:
             try:
                 self.on_key(vk, down)
             except Exception as e:
-                self.log("erro no tratamento de tecla: %r" % (e,))
+                self.log(N_("erro no tratamento de tecla: %r") % (e,))
 
     # ---- janela de captura / raw input ----
     def _wnd_proc(self, hwnd, msg, wParam, lParam):
@@ -287,7 +291,7 @@ class InputHook:
                     self._take_focus()
                     self._clip_center()
         except Exception as e:
-            self.log("erro na janela de captura: %r" % (e,))
+            self.log(N_("erro na janela de captura: %r") % (e,))
         return user32.DefWindowProcW(hwnd, msg, wParam, lParam)
 
     def _paint(self, hwnd):
@@ -298,13 +302,16 @@ class InputHook:
         user32.FillRect(hdc, ctypes.byref(rc), self._brush)
         gdi32.SetBkMode(hdc, TRANSPARENT)
         gdi32.SetTextColor(hdc, 0xC8C8C8)
-        user32.DrawTextW(hdc, "CAPTURADO — F12 libera", -1, ctypes.byref(rc),
+        text = N_("CAPTURADO — F12 libera")      # desenhado aqui, nao passa pelo tr_line da UI
+        if os.environ.get("SWITCHKBM_LANG") == "en":
+            text = EN[text]
+        user32.DrawTextW(hdc, text, -1, ctypes.byref(rc),
                          DT_CENTER | DT_VCENTER | DT_SINGLELINE)
         user32.EndPaint(hwnd, ctypes.byref(ps))
 
     def _focus_lost(self):
         self.end_capture()
-        self.log("LIBERADO (janela perdeu o foco)")
+        self.log(N_("LIBERADO (janela perdeu o foco)"))
         if self.on_capture_lost:
             self.on_capture_lost()
 
@@ -388,7 +395,7 @@ class InputHook:
         if attached:
             user32.AttachThreadInput(self._tid, fg_tid, False)
         if user32.GetForegroundWindow() != hwnd:
-            self.log("aviso: janela de captura nao obteve o foco")
+            self.log(N_("aviso: janela de captura nao obteve o foco"))
 
     def _clip_center(self):
         cx = user32.GetSystemMetrics(SM_CXSCREEN) // 2
@@ -428,7 +435,7 @@ class InputHook:
             try:
                 fn()
             except Exception as e:
-                self.log("erro no comando: %r" % (e,))
+                self.log(N_("erro no comando: %r") % (e,))
 
     def _install(self):
         self._tid = kernel32.GetCurrentThreadId()

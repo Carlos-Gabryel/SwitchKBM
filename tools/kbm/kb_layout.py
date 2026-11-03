@@ -2,13 +2,18 @@
 Porte fiel de web/js/kb-layout.js. "·" = celula sem caractere (navegavel, mas A nao faz nada)."""
 import re
 
+try:
+    from i18n import N_
+except ImportError:  # pragma: no cover
+    from .i18n import N_
+
 
 def _grid(*rows):
     return [[None if t == "·" else t for t in r.split(" ")] for r in rows]
 
 
 LAYOUT = {
-    "name": "Teclado do Switch 2",
+    "name": N_("Teclado do Switch 2"),
     "verified": True,
     "rows": 4,
     "cols": 11,

@@ -24,6 +24,11 @@ def selftest():
     import tempfile
     import traceback
     try:
+        import certs
+        certs.ensure_ca_bundle()
+        if os.environ.get("SSL_CERT_FILE"):
+            import ssl
+            assert ssl.create_default_context().cert_store_stats()["x509_ca"] > 0, "SSL_CERT_FILE sem CAs"
         import capture
         import profiles as pf
         from controller import Controller
@@ -73,6 +78,8 @@ def main(argv=None):
         return flasher.run(argv[1])
     if "--selftest" in argv:
         return selftest()
+    import certs
+    certs.ensure_ca_bundle()        # antes do Flet baixar o cliente (ver certs.py)
     from ui.app import run
     run()
     return 0
