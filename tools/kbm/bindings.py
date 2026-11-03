@@ -1,10 +1,13 @@
 """Logica pura de edicao de teclas (sem UI): linhas do menu, conversao perfil<->linhas, conflitos."""
 import copy
 
+
 try:
     from mapping import (KEY_NAMES, MOUSE_NAMES, DEFAULT_BINDS, DEFAULT_MOVE, RESERVED_NAMES,
                          is_reserved)
+    from i18n import N_, tr
 except ImportError:  # pragma: no cover
+    from .i18n import N_, tr
     from .mapping import (KEY_NAMES, MOUSE_NAMES, DEFAULT_BINDS, DEFAULT_MOVE, RESERVED_NAMES,
                           is_reserved)
 
@@ -12,14 +15,14 @@ except ImportError:  # pragma: no cover
 BUTTON_ROWS = [
     ("B", "A"), ("A", "B"), ("Y", "X"), ("X", "Y"),
     ("L1", "L"), ("R1", "R"), ("L2", "ZL"), ("R2", "ZR"),
-    ("L3", "Clique analógico esq."), ("R3", "Clique analógico dir."),
-    ("SELECT", "−"), ("START", "+"), ("SYSTEM", "Home"), ("CAPTURE", "Captura"),
-    ("DPAD_UP", "Direcional ↑"), ("DPAD_DOWN", "Direcional ↓"),
-    ("DPAD_LEFT", "Direcional ←"), ("DPAD_RIGHT", "Direcional →"),
+    ("L3", N_("Clique analógico esq.")), ("R3", N_("Clique analógico dir.")),
+    ("SELECT", "−"), ("START", "+"), ("SYSTEM", "Home"), ("CAPTURE", N_("Captura")),
+    ("DPAD_UP", N_("Direcional ↑")), ("DPAD_DOWN", N_("Direcional ↓")),
+    ("DPAD_LEFT", N_("Direcional ←")), ("DPAD_RIGHT", N_("Direcional →")),
 ]
 MOVE_ROWS = [
-    ("move:up", "Frente"), ("move:down", "Trás"), ("move:left", "Esquerda"),
-    ("move:right", "Direita"), ("move:walk", "Andar devagar"),
+    ("move:up", N_("Frente")), ("move:down", N_("Trás")), ("move:left", N_("Esquerda")),
+    ("move:right", N_("Direita")), ("move:walk", N_("Andar devagar")),
 ]
 ROW_LABELS = dict(BUTTON_ROWS + MOVE_ROWS)
 BUTTON_IDS = [r for r, _ in BUTTON_ROWS]
@@ -40,9 +43,9 @@ def valid_key(name):
 def check_key(name):
     """Retorna None se a tecla pode ser atribuida, senao mensagem de erro."""
     if is_reserved(name):
-        return "%s é reservada (hotkey do programa)" % name.upper()
+        return tr("%s é reservada (hotkey do programa)") % name.upper()
     if not valid_key(name):
-        return "tecla desconhecida: %s" % name
+        return tr("tecla desconhecida: %s") % name
     return None
 
 

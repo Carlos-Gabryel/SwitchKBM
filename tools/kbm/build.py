@@ -18,7 +18,7 @@ from pathlib import Path
 KBM = Path(__file__).resolve().parent
 REPO = KBM.parent.parent
 LINUX = sys.platform.startswith("linux")
-VERSION = "1.1.0"
+VERSION = "1.1.1"
 
 APPIMAGETOOL_TAG = "1.9.1"
 APPIMAGETOOL_URL = ("https://github.com/AppImage/appimagetool/releases/download/%s/appimagetool-x86_64.AppImage"
@@ -42,7 +42,8 @@ exec "$HERE/usr/bin/SwitchKBM" "$@"
 """
 
 HIDDEN = ["kbm_bridge", "proto", "mapping", "flasher", "runners", "controller", "capture", "bindings",
-          "updater", "profiles", "kb_layout", "typing_engine", "winfocus", "serial", "serial.tools.list_ports", "esptool"]
+          "updater", "profiles", "kb_layout", "typing_engine", "winfocus", "serial", "serial.tools.list_ports", "esptool",
+          "certs", "i18n", "i18n_en", "certifi"]
 
 
 def run(cmd, **kw):
@@ -103,7 +104,7 @@ def pack(fw):
     cmd += ["--add-data", "%s%sfirmware" % (fw, os.pathsep),
             "%s%s%s" % (KBM / "ui" / "assets", os.pathsep, os.path.join("ui", "assets"))]
     for a in ["--paths=%s" % KBM] + ["--hidden-import=%s" % h for h in hidden] + [
-            "--collect-data=esptool", "--collect-submodules=esptool", "--collect-submodules=ui"]:
+            "--collect-data=esptool", "--collect-data=certifi", "--collect-submodules=esptool", "--collect-submodules=ui"]:
         cmd.append("--pyinstaller-build-args=%s" % a)
     if (work / "dist").exists():
         shutil.rmtree(work / "dist")

@@ -8,6 +8,7 @@ import time
 from ctypes import wintypes
 
 import bindings as bd
+from i18n import tr
 from mapping import vk_to_name
 
 WH_MOUSE_LL = 14
@@ -23,10 +24,10 @@ def key_result(vk):
         return "cancel", None
     name = vk_to_name(vk)
     if name is None:
-        return "error", "Tecla não suportada (código %s)." % vk
+        return "error", tr("Tecla não suportada (código %s).") % vk
     err = bd.check_key(name)
     if err:
-        return "error", "Aviso: %s" % err
+        return "error", tr("Aviso: %s") % err
     return "name", name
 
 
@@ -129,14 +130,14 @@ class Capture:
         msg = wintypes.MSG()
         u32.PeekMessageW(ctypes.byref(msg), None, 0, 0, 0)     # cria a fila de mensagens da thread
         self._tid = k32.GetCurrentThreadId()
-        timer = threading.Timer(timeout, self._finish, (callback, "cancel", "Tempo esgotado."))
+        timer = threading.Timer(timeout, self._finish, (callback, "cancel", tr("Tempo esgotado.")))
         timer.daemon = True
         try:
             hooks.append(u32.SetWindowsHookExW(winput.WH_KEYBOARD_LL, kb_cb, None, 0))
             hooks.append(u32.SetWindowsHookExW(WH_MOUSE_LL, ms_cb, None, 0))
             ready.set()
             if not all(hooks):
-                self._finish(callback, "cancel", "Não foi possível capturar a tecla.")
+                self._finish(callback, "cancel", tr("Não foi possível capturar a tecla."))
                 return
             timer.start()
             while not self._done:
@@ -165,7 +166,7 @@ def evdev_result(etype, code, value, hires=False):
         if code in MOUSE_BUTTONS:
             return "name", MOUSE_BUTTONS[code]
         vk = code_to_vk(code)
-        return key_result(vk) if vk is not None else ("error", "Tecla não suportada (código evdev %s)." % code)
+        return key_result(vk) if vk is not None else ("error", tr("Tecla não suportada (código evdev %s).") % code)
     if etype == li.EV_REL and value:
         if code == (li.REL_WHEEL_HI_RES if hires else li.REL_WHEEL):
             return "name", "wheel_up" if value > 0 else "wheel_down"
@@ -187,9 +188,9 @@ class LinuxCapture(Capture):
             devs = sc.scan(set())
             ready.set()
             if not devs:
-                self._finish(callback, "cancel", "Sem permissão para ler o teclado/mouse "
-                             "(grupo input) — veja o Log após Iniciar." if sc.denied else
-                             "Nenhum teclado ou mouse encontrado.")
+                self._finish(callback, "cancel", tr("Sem permissão para ler o teclado/mouse "
+                             "(grupo input) — veja o Log após Iniciar.") if sc.denied else
+                             tr("Nenhum teclado ou mouse encontrado."))
                 return
             sel = selectors.DefaultSelector()
             for d in devs:
@@ -201,7 +202,7 @@ class LinuxCapture(Capture):
             end = time.monotonic() + timeout
             while not self._done:
                 if time.monotonic() >= end:
-                    self._finish(callback, "cancel", "Tempo esgotado.")
+                    self._finish(callback, "cancel", tr("Tempo esgotado."))
                     break
                 for key, _ in sel.select(0.05):
                     d = key.data

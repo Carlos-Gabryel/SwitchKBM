@@ -15,6 +15,7 @@ import signal
 import threading
 import time
 
+from i18n import N_
 from keymap_linux import MOUSE_BUTTONS, code_to_vk
 
 EV_SYN, EV_KEY, EV_REL = 0, 1, 2
@@ -27,11 +28,11 @@ WATCHDOG_S = 2.0                 # loop sem andar por mais que isso com grab ati
 PENDING_GRAB_S = 2.0             # tecla "presa" (fantasma) por mais que isso: captura mesmo assim
 
 ACCESS_HELP = (
-    "ERRO: sem permissão para ler o teclado/mouse (/dev/input/event*).",
-    "ERRO: rode: sudo usermod -aG input $USER   (depois saia e entre na sessão)",
-    "ERRO: no Fedora Atomic/Bazzite rode antes: grep -E '^input:' /usr/lib/group | sudo tee -a /etc/group",
+    N_("ERRO: sem permissão para ler o teclado/mouse (/dev/input/event*)."),
+    N_("ERRO: rode: sudo usermod -aG input $USER   (depois saia e entre na sessão)"),
+    N_("ERRO: no Fedora Atomic/Bazzite rode antes: grep -E '^input:' /usr/lib/group | sudo tee -a /etc/group"),
 )
-NO_DEVICE = ("ERRO: nenhum teclado ou mouse encontrado em /dev/input.",)
+NO_DEVICE = (N_("ERRO: nenhum teclado ou mouse encontrado em /dev/input."),)
 
 
 class InputAccessError(Exception):
@@ -186,7 +187,7 @@ class InputHook:
                 try:
                     self.on_key(vk, value != 0)      # 2 = auto-repeat (o Windows tambem manda "down")
                 except Exception as e:
-                    self.log("erro no tratamento de tecla: %r" % (e,))
+                    self.log(N_("erro no tratamento de tecla: %r") % (e,))
             if value == 0:
                 self._grab_pending()
         elif t == EV_REL:
@@ -265,7 +266,7 @@ class InputHook:
         except OSError:
             held = ()
         if held and force:
-            self.log("aviso: %s com tecla presa há mais de %.0fs; capturando mesmo assim"
+            self.log(N_("aviso: %s com tecla presa há mais de %.0fs; capturando mesmo assim")
                      % (d.name, self.pending_grab_s))
         elif held:
             # grab com tecla/botao pressionado deixaria o "solta" so para nos e a tecla presa no
@@ -280,7 +281,7 @@ class InputHook:
         except OSError as e:
             if d.path not in self._warned:
                 self._warned.add(d.path)
-                self.log("aviso: não foi possível capturar %s (%s)" % (d.name, e))
+                self.log(N_("aviso: não foi possível capturar %s (%s)") % (d.name, e))
 
     def _grab_pending(self):
         with self._glock:
@@ -322,7 +323,7 @@ class InputHook:
                 for d in list(self._devs.values()):
                     d.pending = False
                     d.ungrab()
-            self.log("aviso: captura liberada (loop travado há %.1fs)" % age)
+            self.log(N_("aviso: captura liberada (loop travado há %.1fs)") % age)
             if self.on_capture_lost:
                 # em outra thread: o callback pode esperar o mesmo lock que travou o loop
                 threading.Thread(target=self.on_capture_lost, daemon=True).start()
@@ -360,7 +361,7 @@ class InputHook:
             try:
                 fn()
             except Exception as e:
-                self.log("erro no comando: %r" % (e,))
+                self.log(N_("erro no comando: %r") % (e,))
 
     def run(self):
         """Abre os dispositivos e roda o loop ate quit() / Ctrl+C / SIGTERM. Levanta InputAccessError

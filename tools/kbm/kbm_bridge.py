@@ -12,23 +12,25 @@ import time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import proto  # noqa: E402
+from i18n import N_  # noqa: E402
 from mapping import Config, Mapper, HOTKEY_VKS, VK_F9, VK_F12  # noqa: E402
 from typing_engine import MAX_PENDING, TypingEngine  # noqa: E402
 
 RATE_HZ = 200
 STATE_MIN_S = 0.1                   # DIGITACAO_ESTADO no maximo 10x/s
 MAX_TEXT = 2000                     # caracteres por comando "text"
-TYPING_BUSY_MSG = "Saia do modo digitação com F9"
+TYPING_BUSY_MSG = N_("Saia do modo digitação com F9")
 TYPING_DIRS = ("up", "down", "left", "right")
 QUEUE_OPS = ("text", "backspace", "submit", "nav", "clear", "reset")
 
-BANNER = """Teclado e mouse -> Switch (bridge)
-Hotkeys:
-  F12  captura / libera (liberar sempre funciona)
-  F9   modo digitacao (teclado do Switch 2); F9 de novo volta
-  F11  alterna mira: giroscopio <-> analogico
-  F8 / F7  sensibilidade do giro +10% / -10%
-Ctrl+C ou fechar o console tambem libera tudo."""
+BANNER = "\n".join((
+    N_("Teclado e mouse -> Switch (bridge)"),
+    N_("Hotkeys:"),
+    N_("  F12  captura / libera (liberar sempre funciona)"),
+    N_("  F9   modo digitacao (teclado do Switch 2); F9 de novo volta"),
+    N_("  F11  alterna mira: giroscopio <-> analogico"),
+    N_("  F8 / F7  sensibilidade do giro +10% / -10%"),
+    N_("Ctrl+C ou fechar o console tambem libera tudo.")))
 
 
 def _set_priorities(thread=False):
@@ -124,7 +126,7 @@ class Bridge:
             if resume and self.captured:
                 self._toggle_capture()
             self._allow_parent_foreground()
-            self.say("DIGITACAO ON")
+            self.say(N_("DIGITACAO ON"))
         else:
             with self.lock:
                 if not self.typing:
@@ -134,7 +136,7 @@ class Bridge:
                 self.engine.reset_keyboard()
                 if VK_F9 in self._hot:          # F9 ainda apertada: o auto-repeat nao pode religar
                     self.mapper.pressed.add(VK_F9)
-            self.say("DIGITACAO OFF")
+            self.say(N_("DIGITACAO OFF"))
             if resume and not self.captured:
                 self._toggle_capture()
 
@@ -171,19 +173,19 @@ class Bridge:
         with self.lock:
             e = self.engine
             if op in QUEUE_OPS and not self.typing:
-                return "type: modo digitação desligado (ignorado: %s)" % op
+                return N_("type: modo digitação desligado (ignorado: %s)") % op
             if op == "text":
                 s = obj.get("s")
                 if not isinstance(s, str):
-                    return "type: text exige 's' texto"
+                    return N_("type: text exige 's' texto")
                 room = max(0, MAX_PENDING - e.pending_count)
                 e.enqueue(s[:min(MAX_TEXT, room)])
                 if len(s) > room:
-                    return "type: fila cheia, texto cortado"
+                    return N_("type: fila cheia, texto cortado")
             elif op == "backspace":
                 n = obj.get("n", 1)
                 if isinstance(n, bool) or not isinstance(n, int) or not 1 <= n <= MAX_PENDING:
-                    return "type: backspace exige 'n' inteiro de 1 a %d" % MAX_PENDING
+                    return N_("type: backspace exige 'n' inteiro de 1 a %d") % MAX_PENDING
                 for _ in range(n):
                     e.backspace_requested()
             elif op == "submit":
@@ -192,29 +194,29 @@ class Bridge:
                 e.clear_pending()
             elif op == "nav":
                 if obj.get("d") not in TYPING_DIRS:
-                    return "type: nav exige 'd' up|down|left|right"
+                    return N_("type: nav exige 'd' up|down|left|right")
                 e.press_manual(obj["d"])
             elif op == "reset":
                 e.reset_keyboard()
             elif op == "cursor":
                 if not isinstance(obj.get("id"), str) or obj["id"] not in e._nodes:
-                    return "type: cursor desconhecido"
+                    return N_("type: cursor desconhecido")
                 e.sync_cursor(obj["id"])
             elif op == "page":
                 if not isinstance(obj.get("id"), str) or obj["id"] not in e.layout["pages"]:
-                    return "type: página desconhecida"
+                    return N_("type: página desconhecida")
                 e.sync_page(obj["id"])
             elif op == "speed":
                 hold, gap = obj.get("hold"), obj.get("gap", obj.get("hold"))
                 if any(isinstance(v, bool) or not isinstance(v, (int, float)) for v in (hold, gap)):
-                    return "type: speed exige 'hold' e 'gap' numéricos (ms)"
+                    return N_("type: speed exige 'hold' e 'gap' numéricos (ms)")
                 e.set_timing(hold, gap)
             elif op == "strip":
                 if not isinstance(obj.get("v"), bool):
-                    return "type: strip exige 'v' booleano"
+                    return N_("type: strip exige 'v' booleano")
                 e.strip_accents = obj["v"]
             else:
-                return "type: operação desconhecida: %s" % op[:20]
+                return N_("type: operação desconhecida: %s") % op[:20]
         return None
 
     def _typing_state_line(self, now):
@@ -243,7 +245,7 @@ class Bridge:
             try:
                 self.hook.begin_capture()
             except Exception as e:
-                self.say("erro ao capturar: %r" % (e,))
+                self.say(N_("erro ao capturar: %r") % (e,))
                 self.hook.end_capture()
                 return
         elif self.hook:
@@ -257,7 +259,7 @@ class Bridge:
             # "repeat" e e preciso apertar duas vezes para soltar.
             if f12_held:
                 self.mapper.pressed.add(VK_F12)
-        self.say("CAPTURADO (F12 libera)" if self.captured else "LIBERADO")
+        self.say(N_("CAPTURADO (F12 libera)") if self.captured else N_("LIBERADO"))
 
     def _capture_command(self):
         if self.typing:
@@ -380,7 +382,7 @@ class Bridge:
                 elif delay < -0.1:
                     nxt = time.perf_counter()
         except Exception as e:
-            self.say("erro no envio: %r" % (e,))
+            self.say(N_("erro no envio: %r") % (e,))
             self.stop.set()
             if self.hook:
                 self.hook.quit()
@@ -473,11 +475,11 @@ def main(argv=None):
                 print(line, flush=True)
             sys.exit(1)
     for w in br.mapper.warnings:
-        print("aviso config: " + w, flush=True)
+        print(N_("aviso config: %s") % w, flush=True)
     print(BANNER, flush=True)
     if not args.dry_run:
         br.open_serial()
-        print("Serial aberta em %s" % args.port, flush=True)
+        print(N_("Serial aberta em %s") % args.port, flush=True)
 
     if sys.platform.startswith("linux"):
         inputmod = linput
@@ -497,7 +499,7 @@ def main(argv=None):
     th.start()
     if args.stdin_control:
         threading.Thread(target=_stdin_watch, args=(br,), daemon=True).start()
-    print("Pronto. F12 captura; F9 modo digitacao.", flush=True)
+    print(N_("Pronto. F12 captura; F9 modo digitacao."), flush=True)
     code = 0
     try:
         br.hook.run()
@@ -510,7 +512,7 @@ def main(argv=None):
         th.join(timeout=1.0)
         br.shutdown()
         br.hook.done.set()
-        print("Encerrado.", flush=True)
+        print(N_("Encerrado."), flush=True)
     if code:
         sys.exit(code)
 

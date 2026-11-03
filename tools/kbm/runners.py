@@ -5,6 +5,8 @@ import subprocess
 import sys
 import threading
 
+import i18n
+
 CREATE_NO_WINDOW = 0x08000000 if os.name == "nt" else 0     # creationflags so existe no Windows
 # placas ESP32 comuns: CP210x, CH9102, CH340 e a USB nativa da Espressif
 KNOWN_USB_IDS = {(0x10C4, 0xEA60), (0x1A86, 0x55D4), (0x1A86, 0x7523)}
@@ -59,7 +61,8 @@ class BridgeRunner:
         return [sys.executable, "-u", script] + args
 
     def start(self, port, config_path):
-        env = dict(os.environ, PYTHONIOENCODING="utf-8", PYTHONUNBUFFERED="1")
+        env = dict(os.environ, PYTHONIOENCODING="utf-8", PYTHONUNBUFFERED="1",
+                   SWITCHKBM_LANG=i18n.get_language())     # so para o texto da janela de captura (winput)
         self.proc = subprocess.Popen(
             self.command(port, config_path), stdin=subprocess.PIPE, stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT, creationflags=CREATE_NO_WINDOW, env=env)

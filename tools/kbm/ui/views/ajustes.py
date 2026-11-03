@@ -3,12 +3,14 @@ from __future__ import annotations
 
 import flet as ft
 
+import i18n
 import updater
 from controller import APP_VERSION
+from i18n import N_, tr
 from ui import theme as t
 
-UPDATE_TEXT = {"idle": "", "checking": "Procurando…", "uptodate": "Você está na versão mais recente.",
-               "downloading": "Baixando…"}
+UPDATE_TEXT = {"idle": "", "checking": N_("Procurando…"), "uptodate": N_("Você está na versão mais recente."),
+               "downloading": N_("Baixando…")}
 
 
 def _fmt(value, digits: int) -> str:
@@ -26,19 +28,24 @@ class AjustesView:
         self.invv = self._switch("invv")
         self.wheel = ft.TextField(width=90, text_align=ft.TextAlign.RIGHT,
                                   on_change=lambda e: self._set("wheel", e.control.value), **t.field_style())
+        self.lang = ft.Dropdown(width=220, value=i18n.get_language(), on_select=self._pick_language,
+                                options=[ft.DropdownOption(key=k, text=v) for k, v in i18n.LANGUAGES.items()],
+                                **t.field_style())
         self.up_status = t.muted("", 12)
-        self.up_check = t.button("Procurar atualização", self._check, primary=False, icon_name="refresh-cw")
-        self.up_apply = t.button("Atualizar agora", self.shell.update_now, icon_name="download")
+        self.up_check = t.button(tr("Procurar atualização"), self._check, primary=False, icon_name="refresh-cw")
+        self.up_apply = t.button(tr("Atualizar agora"), self.shell.update_now, icon_name="download")
         self.up_bar = ft.ProgressBar(value=0, color=t.ACCENT, bgcolor=t.FIELD, visible=False)
         self.control = ft.Column([
-            t.text("Ajustes", 22, bold=True),
-            self._card("Inverter horizontal", "", self.invh),
-            self._card("Inverter vertical", "", self.invv),
-            self._card("Andar devagar", "Escala do analógico esquerdo enquanto a tecla está pressionada.",
+            t.text(tr("Ajustes"), 22, bold=True),
+            t.card(ft.Row([t.text("Idioma / Language", 14, bold=True), ft.Container(expand=True), self.lang],
+                          spacing=12, vertical_alignment=ft.CrossAxisAlignment.CENTER)),
+            self._card(tr("Inverter horizontal"), "", self.invh),
+            self._card(tr("Inverter vertical"), "", self.invv),
+            self._card(tr("Andar devagar"), tr("Escala do analógico esquerdo enquanto a tecla está pressionada."),
                        ft.Row([self.walk, self.walk_field], spacing=10, expand=True), wide=True),
-            self._card("Roda: pulso (ms)", "Quanto tempo o botão fica apertado a cada giro da roda.", self.wheel),
+            self._card(tr("Roda: pulso (ms)"), tr("Quanto tempo o botão fica apertado a cada giro da roda."), self.wheel),
             t.card(ft.Column([
-                ft.Row([t.text("Atualizações", 14, bold=True), t.muted(f"Versão atual {APP_VERSION}", 12)],
+                ft.Row([t.text(tr("Atualizações"), 14, bold=True), t.muted(tr("Versão atual %s") % APP_VERSION, 12)],
                        spacing=10),
                 ft.Row([self.up_check, self.up_apply], spacing=10),
                 self.up_status, self.up_bar,
@@ -61,6 +68,11 @@ class AjustesView:
                           spacing=2, expand=not wide, width=230 if wide else None)
         return t.card(ft.Row([label, control], spacing=12, vertical_alignment=ft.CrossAxisAlignment.CENTER))
 
+    def _pick_language(self, e) -> None:
+        code = e.control.value
+        if code and code != i18n.get_language():
+            self.shell.set_language(code)
+
     def _set(self, key: str, value) -> None:
         self.ctrl.set_setting(key, value)
         self.shell.render()
@@ -77,13 +89,13 @@ class AjustesView:
         c = self.ctrl
         st = c.update_state
         if st == "available":
-            text = f"Nova versão {c.update_release.tag.lstrip('v')} disponível."
+            text = tr("Nova versão %s disponível.") % c.update_release.tag.lstrip("v")
             if not updater.can_apply():
                 text += " " + updater.not_frozen_msg() + "."
         elif st == "error":
-            text = "Não foi possível verificar/atualizar: %s" % c.update_error
+            text = tr("Não foi possível verificar/atualizar: %s") % c.update_error
         else:
-            text = UPDATE_TEXT.get(st, "")
+            text = tr(UPDATE_TEXT.get(st, ""))
         if st != "available" and not updater.can_apply():
             text = (text + " " if text else "") + updater.not_frozen_msg() + "."
         self.up_status.value = text

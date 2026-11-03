@@ -11,10 +11,12 @@ import sys
 
 try:
     from mapping import DEFAULT_BINDS, DEFAULT_MOVE
+    from i18n import N_, tr
 except ImportError:  # pragma: no cover
     from .mapping import DEFAULT_BINDS, DEFAULT_MOVE
+    from .i18n import N_, tr
 
-DEFAULT_NAME = "Padrão"
+DEFAULT_NAME = N_("Padrão")      # e o nome do arquivo; so a exibicao e traduzida (label)
 _BAD = re.compile(r'[<>:"/\|?*\x00-\x1f]')
 
 
@@ -63,6 +65,11 @@ def default_profile():
         "stick_deadzone_comp": 60, "walk_scale": 0.5, "wheel_pulse_ms": 80,
         "move": dict(DEFAULT_MOVE), "binds": dict(DEFAULT_BINDS),
     }
+
+
+def label(name):
+    """Nome do perfil para exibir (so o perfil padrao e traduzido; o arquivo nao muda)."""
+    return tr(name) if name == DEFAULT_NAME else name
 
 
 def clean_name(name):
@@ -124,9 +131,9 @@ class ProfileStore:
     def create(self, name, data=None):
         name = clean_name(name)
         if not name:
-            raise ValueError("nome inválido")
+            raise ValueError(tr("nome inválido"))
         if self.exists(name):
-            raise ValueError("já existe um perfil com esse nome")
+            raise ValueError(tr("já existe um perfil com esse nome"))
         self.save(name, data if data is not None else default_profile())
         return name
 
@@ -136,16 +143,16 @@ class ProfileStore:
     def rename(self, old, new):
         new = clean_name(new)
         if not new:
-            raise ValueError("nome inválido")
+            raise ValueError(tr("nome inválido"))
         if new != old and self.exists(new):
-            raise ValueError("já existe um perfil com esse nome")
+            raise ValueError(tr("já existe um perfil com esse nome"))
         if new != old:
             os.replace(self.path(old), self.path(new))
         return new
 
     def delete(self, name):
         if len(self.names()) <= 1:
-            raise ValueError("não é possível excluir o último perfil")
+            raise ValueError(tr("não é possível excluir o último perfil"))
         os.remove(self.path(name))
 
     # ---- settings.json ----

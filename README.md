@@ -23,7 +23,7 @@
 
 O Switch KBM transforma uma placa **ESP32** num Pro Controller. O console enxerga a placa como
 um controle de verdade, e o programa no PC lê o seu teclado e o seu mouse e manda tudo para ela
-pelo cabo USB. Versão atual: **1.1.0**.
+pelo cabo USB. Versão atual: **1.1.1**.
 
 ## 🔍 Como funciona
 
@@ -52,6 +52,7 @@ Enquanto a captura está ligada, o teclado e o mouse ficam só para o jogo. **F1
 - **Captura com F12 ou com um botão:** enquanto capturado, o teclado e o mouse ficam só para o jogo. O F12 sempre solta.
 - **Modo digitação (novo na 1.1.0):** escreve texto no teclado da tela do Switch, sem teclado USB. Veja [Modo digitação](#-modo-digitação).
 - **Página web (novo na 1.1.0):** a mesma ideia rodando no navegador, sem instalar nada. Veja [Duas formas de usar](#-duas-formas-de-usar).
+- **Português ou inglês (novo na 1.1.1):** escolha o idioma em **Ajustes**.
 - **Prepara a placa com um clique:** o firmware vai dentro do programa, sem instalar mais nada.
 - **Atualiza sozinho:** avisa quando sai versão nova.
 - **Perfis por jogo:** crie, duplique e troque de perfil sem mexer em arquivos.
