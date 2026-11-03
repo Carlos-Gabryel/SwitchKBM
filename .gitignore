@@ -15,3 +15,5 @@ recuperado/
 tools/kbm/.venv/
 .appimagetool/
 *.AppImage
+web/firmware/
+web/node_modules/

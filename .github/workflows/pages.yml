@@ -1,0 +1,69 @@
+name: pages
+
+# Pelo main, e nao por tag: o ambiente github-pages so aceita o branch padrao
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'web/**'
+      - 'switch-side/**'
+      - 'common/**'
+      - 'tools/kbm/gen_web_vectors.py'
+      - 'tools/kbm/mapping.py'
+      - 'tools/kbm/proto.py'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  firmware:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compilar o firmware (ESP-IDF 5.4.4)
+        uses: espressif/esp-idf-ci-action@9d38657f3d789ca759b2b37aaf5ceffbc42c4f0d  # branch v1 em 2026-10-27
+        with:
+          esp_idf_version: v5.4.4
+          target: esp32
+          path: switch-side
+      - name: Preparar build/firmware
+        run: python3 tools/kbm/build.py --stage-firmware-only
+      - uses: actions/upload-artifact@v4
+        with:
+          name: firmware
+          path: build/firmware
+          if-no-files-found: error
+
+  deploy:
+    needs: firmware
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Testes do site
+        run: python3 tools/kbm/gen_web_vectors.py && node --test "web/test/*.test.mjs"
+      - uses: actions/download-artifact@v4
+        with:
+          name: firmware
+          path: build/firmware
+      - name: Copiar o firmware para o site
+        run: mkdir -p web/firmware && cp -r build/firmware/. web/firmware/
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web
+      - id: deployment
+        uses: actions/deploy-pages@v4

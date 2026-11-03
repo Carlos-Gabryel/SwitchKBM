@@ -40,8 +40,19 @@ def selftest():
         c.on_bridge_line("SENS deg_per_count=0.0550")
         assert abs(c.settings["sens"] - 0.055) < 1e-9
         assert c.save() and not c.dirty
+        c.on_bridge_line("DIGITACAO ON")
+        assert c.typing_on
+        c.on_bridge_line('DIGITACAO_ESTADO {"cursor": "r1c0", "page": "abc", "pending": 1}')
+        assert c.typing_state["cursor"] == "r1c0" and not any("ESTADO" in x for x in c.log)
+        c.on_bridge_line("DIGITACAO OFF")
+        assert not c.typing_on
+        from typing_engine import TypingEngine
+        eng = TypingEngine()
+        eng.enqueue("Oi")
+        assert any(eng.tick(t) for t in range(1000))
         import flet  # noqa: F401
         import ui.app  # noqa: F401
+        import ui.views.digitacao  # noqa: F401
     except Exception:
         traceback.print_exc()
         return 1

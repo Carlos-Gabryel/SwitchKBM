@@ -3,6 +3,7 @@
 Uso: python tools/kbm/kbm_bridge.py --port COM4 [--config caminho] [--dry-run] [--verbose]
 """
 import argparse
+import json
 import os
 import sys
 import threading
@@ -11,13 +12,20 @@ import time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import proto  # noqa: E402
-from mapping import Config, Mapper, HOTKEY_VKS, VK_F12  # noqa: E402
+from mapping import Config, Mapper, HOTKEY_VKS, VK_F9, VK_F12  # noqa: E402
+from typing_engine import MAX_PENDING, TypingEngine  # noqa: E402
 
 RATE_HZ = 200
+STATE_MIN_S = 0.1                   # DIGITACAO_ESTADO no maximo 10x/s
+MAX_TEXT = 2000                     # caracteres por comando "text"
+TYPING_BUSY_MSG = "Saia do modo digitação com F9"
+TYPING_DIRS = ("up", "down", "left", "right")
+QUEUE_OPS = ("text", "backspace", "submit", "nav", "clear", "reset")
 
 BANNER = """Teclado e mouse -> Switch (bridge)
 Hotkeys:
   F12  captura / libera (liberar sempre funciona)
+  F9   modo digitacao (teclado do Switch 2); F9 de novo volta
   F11  alterna mira: giroscopio <-> analogico
   F8 / F7  sensibilidade do giro +10% / -10%
 Ctrl+C ou fechar o console tambem libera tudo."""
@@ -59,6 +67,15 @@ class Bridge:
         self.seq = 0
         self.parser = proto.StreamParser()
         self.fw_version = None
+        # modo digitacao: o motor so e tocado com self.lock
+        self.typing = False
+        self.resume_capture = False
+        self.engine = TypingEngine()
+        self._hot = set()               # F9/F12 fisicamente apertadas
+        self._typing_edge = {}          # vk -> apertada (borda no modo digitacao)
+        self._t0 = time.perf_counter()
+        self._state_sent = None
+        self._state_at = 0.0
         # instrumentacao (so contadores)
         self.st_write_max = 0.0
 
@@ -69,12 +86,155 @@ class Bridge:
     def on_key(self, vk, down):
         act = None
         with self.lock:
-            if not down:
+            if vk in (VK_F9, VK_F12):       # borda propria: vale com o Mapper desligado
+                (self._hot.add if down else self._hot.discard)(vk)
+            if self.typing:
+                # Mapper nunca recebe teclas no modo digitacao; so F9 (sai) e F12 (avisa) contam
+                if down and vk in (VK_F9, VK_F12):
+                    if self._typing_edge.get(vk):
+                        act = "repeat"
+                    else:
+                        act = "toggle_typing" if vk == VK_F9 else "typing_f12"
+                if vk in (VK_F9, VK_F12):
+                    self._typing_edge[vk] = down
+            elif not down:
                 self.mapper.key_up(vk)
             else:
                 act = self.mapper.key_down(vk, time.perf_counter())
         if act == "toggle_capture":
             self._toggle_capture()
+        elif act == "toggle_typing":
+            self._set_typing(not self.typing)
+        elif act == "typing_f12":
+            self.say(TYPING_BUSY_MSG)
+
+    # ---- modo digitacao (chamar na thread do hook, sem o lock) ----
+    def _set_typing(self, want):
+        if want:
+            with self.lock:
+                if self.typing:
+                    return
+                resume = self.captured
+                self.typing = True              # antes de soltar a captura: nada de jogo vaza
+                self.resume_capture = resume
+                self.mapper.release_all()
+                self.engine.reset_keyboard()    # cada sessao comeca com o teclado recem-aberto
+                self._typing_edge = {vk: True for vk in self._hot}   # tecla ja apertada nao repete
+                self._state_sent = None
+            if resume and self.captured:
+                self._toggle_capture()
+            self._allow_parent_foreground()
+            self.say("DIGITACAO ON")
+        else:
+            with self.lock:
+                if not self.typing:
+                    return
+                self.typing = False
+                resume, self.resume_capture = self.resume_capture, False
+                self.engine.reset_keyboard()
+                if VK_F9 in self._hot:          # F9 ainda apertada: o auto-repeat nao pode religar
+                    self.mapper.pressed.add(VK_F9)
+            self.say("DIGITACAO OFF")
+            if resume and not self.captured:
+                self._toggle_capture()
+
+    @staticmethod
+    def _allow_parent_foreground():
+        """Windows: o bridge recebe a tecla F9; deixa o app (processo pai) trazer a janela para frente."""
+        if os.name != "nt":
+            return
+        try:
+            import ctypes
+            ctypes.windll.user32.AllowSetForegroundWindow(os.getppid())
+        except Exception:
+            pass
+
+    def typing_command(self, obj):
+        """Aplica um comando 'type' (dict ja decodificado). Devolve texto de erro ou None."""
+        if not isinstance(obj, dict) or not isinstance(obj.get("op"), str):
+            return "type: comando invalido"
+        op = obj["op"]
+        if op in ("on", "off"):
+            done = threading.Event()
+
+            def fn():
+                try:
+                    self._set_typing(op == "on")
+                finally:
+                    done.set()
+            if self.hook:
+                self.hook.call_soon(fn)         # captura/janela so na thread do hook
+                done.wait(2.0)                  # os comandos seguintes ja veem o novo estado
+            else:
+                fn()
+            return None
+        with self.lock:
+            e = self.engine
+            if op in QUEUE_OPS and not self.typing:
+                return "type: modo digitação desligado (ignorado: %s)" % op
+            if op == "text":
+                s = obj.get("s")
+                if not isinstance(s, str):
+                    return "type: text exige 's' texto"
+                room = max(0, MAX_PENDING - e.pending_count)
+                e.enqueue(s[:min(MAX_TEXT, room)])
+                if len(s) > room:
+                    return "type: fila cheia, texto cortado"
+            elif op == "backspace":
+                n = obj.get("n", 1)
+                if isinstance(n, bool) or not isinstance(n, int) or not 1 <= n <= MAX_PENDING:
+                    return "type: backspace exige 'n' inteiro de 1 a %d" % MAX_PENDING
+                for _ in range(n):
+                    e.backspace_requested()
+            elif op == "submit":
+                e.enqueue_submit()
+            elif op == "clear":
+                e.clear_pending()
+            elif op == "nav":
+                if obj.get("d") not in TYPING_DIRS:
+                    return "type: nav exige 'd' up|down|left|right"
+                e.press_manual(obj["d"])
+            elif op == "reset":
+                e.reset_keyboard()
+            elif op == "cursor":
+                if not isinstance(obj.get("id"), str) or obj["id"] not in e._nodes:
+                    return "type: cursor desconhecido"
+                e.sync_cursor(obj["id"])
+            elif op == "page":
+                if not isinstance(obj.get("id"), str) or obj["id"] not in e.layout["pages"]:
+                    return "type: página desconhecida"
+                e.sync_page(obj["id"])
+            elif op == "speed":
+                hold, gap = obj.get("hold"), obj.get("gap", obj.get("hold"))
+                if any(isinstance(v, bool) or not isinstance(v, (int, float)) for v in (hold, gap)):
+                    return "type: speed exige 'hold' e 'gap' numéricos (ms)"
+                e.set_timing(hold, gap)
+            elif op == "strip":
+                if not isinstance(obj.get("v"), bool):
+                    return "type: strip exige 'v' booleano"
+                e.strip_accents = obj["v"]
+            else:
+                return "type: operação desconhecida: %s" % op[:20]
+        return None
+
+    def _typing_state_line(self, now):
+        """Linha DIGITACAO_ESTADO se mudou (no maximo 10x/s), senao None. Chamar sem o lock."""
+        if now - self._state_at < STATE_MIN_S:
+            return None
+        with self.lock:
+            st = self.engine.state()
+        key = json.dumps(st, sort_keys=True)
+        if key == self._state_sent:
+            return None
+        self._state_sent, self._state_at = key, now
+        return "DIGITACAO_ESTADO " + json.dumps(st)
+
+    def _typing_buttons_state(self, now):
+        """Estado neutro conectado + botoes do motor de digitacao (chamar com o lock)."""
+        return {"flags": proto.FLAG_CONNECTED, "battery": 200,
+                "buttons": self.engine.tick((now - self._t0) * 1000.0),
+                "lx": 0, "ly": 0, "rx": 0, "ry": 0, "l2": 0, "r2": 0,
+                "gyro": (0, 0, 0), "accel": (0, 8192, 0)}
 
     def _toggle_capture(self):
         # janela/cursor fora do lock (SetForegroundWindow pode reentrar no wnd_proc)
@@ -99,6 +259,12 @@ class Bridge:
                 self.mapper.pressed.add(VK_F12)
         self.say("CAPTURADO (F12 libera)" if self.captured else "LIBERADO")
 
+    def _capture_command(self):
+        if self.typing:
+            self.say(TYPING_BUSY_MSG)
+        else:
+            self._toggle_capture()
+
     def on_capture_lost(self):
         # a janela ja foi escondida pelo hook; so zera o estado (mensagem ja impressa)
         with self.lock:
@@ -107,15 +273,17 @@ class Bridge:
 
     def on_mouse_button(self, name, down):
         with self.lock:
-            self.mapper.mouse_button(name, down)
+            if not self.typing:
+                self.mapper.mouse_button(name, down)
 
     def on_wheel(self, d):
         with self.lock:
-            self.mapper.wheel(d, time.perf_counter())
+            if not self.typing:
+                self.mapper.wheel(d, time.perf_counter())
 
     def on_move(self, dx, dy):
         with self.lock:
-            if self.captured:
+            if self.captured and not self.typing:
                 self.mapper.mouse_move(dx, dy)
 
     def is_captured(self):
@@ -173,7 +341,15 @@ class Bridge:
                 dt = now - last
                 last = now
                 with self.lock:
-                    st = self.mapper.build_state(now, dt, self.captured)
+                    if self.typing:
+                        st = self._typing_buttons_state(now)    # nada do Mapper: nenhum comando de jogo vaza
+                    else:
+                        st = self.mapper.build_state(now, dt, self.captured)
+                    typing = self.typing
+                if typing:
+                    line = self._typing_state_line(now)
+                    if line:
+                        self.say(line)
                 if st_tx and dt > st_gap:
                     st_gap = dt
                 self._send(st)
@@ -181,7 +357,7 @@ class Bridge:
                 if self.ser:
                     self._poll_serial()
                 if now - st_t >= 1.0:
-                    if self.captured and self.hook:
+                    if self.captured and self.hook and not typing:
                         mev = self.hook.mouse_ev
                         kbm = self.hook.kb_hook_max
                         self.hook.kb_hook_max = 0.0
@@ -219,6 +395,7 @@ class Bridge:
         self.stop.set()
         with self.lock:
             self.captured = False
+            self.typing = False
         try:
             for _ in range(5):
                 with self.lock:
@@ -232,20 +409,37 @@ class Bridge:
 
 
 def parse_control(line):
-    """Comando do app pai: 'quit' | 'capture' | None (linha desconhecida)."""
-    cmd = line.strip().lower()
-    return cmd if cmd in ("quit", "capture") else None
+    """Comando do app pai: 'quit' | 'capture' | ('type', dict) | ('type_error', motivo) |
+    None (linha desconhecida)."""
+    text = line.strip()
+    cmd = text.lower()
+    if cmd in ("quit", "capture"):
+        return cmd
+    if cmd == "type" or cmd.startswith("type "):
+        try:
+            obj = json.loads(text[4:])
+        except ValueError:
+            return ("type_error", "type: JSON invalido")
+        if not isinstance(obj, dict):
+            return ("type_error", "type: esperado um objeto JSON")
+        return ("type", obj)
+    return None
 
 
 def _stdin_watch(br):
-    """Le comandos do app pai: 'quit' (ou EOF) encerra como Ctrl+C; 'capture' alterna a captura (como F12)."""
+    """Le comandos do app pai: 'quit' (ou EOF) encerra como Ctrl+C; 'capture' alterna a captura (como F12);
+    'type {json}' controla o modo digitacao."""
     try:
         for line in sys.stdin:
             cmd = parse_control(line)
             if cmd == "quit":
                 break
             if cmd == "capture" and br.hook:
-                br.hook.call_soon(br._toggle_capture)     # janela/cursor so na thread do hook
+                br.hook.call_soon(br._capture_command)    # janela/cursor so na thread do hook
+            elif isinstance(cmd, tuple):
+                err = cmd[1] if cmd[0] == "type_error" else br.typing_command(cmd[1])
+                if err:
+                    br.say(err)
     except Exception:
         pass
     br.stop.set()
@@ -261,7 +455,7 @@ def main(argv=None):
     ap.add_argument("--dry-run", action="store_true", help="sem serial; imprime o estado a 5 Hz")
     ap.add_argument("--verbose", action="store_true", help="mostra linhas de log do ESP")
     ap.add_argument("--stdin-control", action="store_true",
-                    help="le comandos no stdin: 'quit' (ou EOF) encerra; 'capture' alterna a captura")
+                    help="le comandos no stdin: 'quit' (ou EOF) encerra; 'capture' alterna a captura; 'type {json}' modo digitacao")
     args = ap.parse_args(argv)
     if not args.port and not args.dry_run:
         ap.error("--port e obrigatorio (ou use --dry-run)")
@@ -291,7 +485,7 @@ def main(argv=None):
         import winput as inputmod
     _set_priorities()
     br.hook = inputmod.InputHook(br.on_key, br.on_mouse_button, br.on_wheel, br.on_move,
-                               br.is_captured, always_block_vks={VK_F12}, log=br.say,
+                               br.is_captured, always_block_vks={VK_F9, VK_F12}, log=br.say,
                                on_capture_lost=br.on_capture_lost)
     if os.name == "nt":
         try:
@@ -303,7 +497,7 @@ def main(argv=None):
     th.start()
     if args.stdin_control:
         threading.Thread(target=_stdin_watch, args=(br,), daemon=True).start()
-    print("Pronto. Pressione F12 para capturar.", flush=True)
+    print("Pronto. F12 captura; F9 modo digitacao.", flush=True)
     code = 0
     try:
         br.hook.run()

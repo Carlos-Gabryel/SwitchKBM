@@ -11,11 +11,12 @@ import flet as ft
 
 from capture import Capture
 import updater
+import winfocus
 from controller import APP_TITLE, APP_VERSION, FIRMWARE_OLD_MSG, REPO_URL, Controller
 from ui import theme as t
 
-NAV = (("controles", "Controles", "gamepad-2"), ("ajustes", "Ajustes", "settings"),
-       ("placa", "Placa", "cpu"))
+NAV = (("controles", "Controles", "gamepad-2"), ("digitacao", "Digitação", "keyboard"),
+       ("ajustes", "Ajustes", "settings"), ("placa", "Placa", "cpu"))
 
 
 def assets_dir() -> Path:
@@ -31,9 +32,15 @@ class Shell:
         self.current = tab if tab in [k for k, _, _ in NAV] else "controles"
         from ui.views.ajustes import AjustesView
         from ui.views.controles import ControlesView
+        from ui.views.digitacao import DigitacaoView
         from ui.views.placa import PlacaView
-        self.views = {"controles": ControlesView(self), "ajustes": AjustesView(self),
-                      "placa": PlacaView(self)}
+        self.views = {"controles": ControlesView(self), "digitacao": DigitacaoView(self),
+                      "ajustes": AjustesView(self), "placa": PlacaView(self)}
+        self._typing_seen = False       # ultimo estado do modo digitacao tratado (F9 liga/desliga)
+        self._typing_back = "controles" # view para voltar ao sair do modo digitacao
+        self._tsig = None
+        self._prev_key_handler = page.on_keyboard_event
+        page.on_keyboard_event = self._on_keyboard
         self.nav = ft.Column(spacing=4)
         self.status_box = ft.Container()
         self.fw_box = ft.Container(visible=False, padding=ft.Padding(0, 0, 0, 8),
@@ -262,7 +269,9 @@ class Shell:
         self.run_btn.content = "Parar" if c.running else "Iniciar"
         self.run_btn.icon = t.icon("pause" if c.running else "play", 16, "#FFFFFF")
         self.run_btn.disabled = c.flashing
-        self.cap_btn.disabled = not c.running
+        self.cap_btn.disabled = not c.running or c.typing_on
+        self.cap_btn.tooltip = ("Indisponível no modo digitação (F9 sai)" if c.typing_on
+                                else "Mesmo que apertar F12 (F12 também solta)")
         self.fw_box.visible = c.firmware_old
         self.update_bar.visible = (c.update_state in ("available", "downloading") and c.update_release is not None
                                    and updater.can_apply())
@@ -276,9 +285,48 @@ class Shell:
         view.refresh()
         self.page.update()
 
+    # ---- modo digitacao ----
+    def _on_keyboard(self, e) -> None:
+        """Teclado da pagina: atalhos da view Digitacao quando ativa; o resto vai ao tratador anterior."""
+        if self.current == "digitacao" and self.views["digitacao"].on_key(e):
+            return
+        if self._prev_key_handler:
+            self._prev_key_handler(e)
+
+    def _typing_changed(self) -> None:
+        """F9 (ou o botao) ligou/desligou o modo digitacao: vai para a view, foca o campo e traz a janela."""
+        on = self.ctrl.typing_on
+        self.views["digitacao"].clear_field()   # entrar ou sair sempre comeca com a caixa vazia
+        if on:
+            if self.current != "digitacao":
+                self._typing_back = self.current
+            self.current = "digitacao"
+            self.page.run_task(self._bring_front)
+        elif self.current == "digitacao":
+            self.current = self._typing_back if self._typing_back != "digitacao" else "controles"
+
+    async def _bring_front(self) -> None:
+        view = self.views["digitacao"]
+        try:
+            await self.page.window.to_front()
+            await asyncio.to_thread(winfocus.activate, APP_TITLE)
+            # A caixa acabou de ser montada e habilitada: repete ate o foco pegar
+            view.has_focus = False
+            for _ in range(10):
+                await asyncio.sleep(0.1)
+                if not self.ctrl.typing_on:
+                    return
+                await view.field.focus()
+                await asyncio.sleep(0.05)
+                if view.has_focus:
+                    return
+        except Exception:
+            traceback.print_exc()
+
     def _signature(self):
         c = self.ctrl
-        return (c.status(), c.port, c.msg, c.log_seq, c.flash_progress, c.dirty, c.waiting, c.running,
+        return (c.status(), c.port, c.msg, c.log_seq, c.flash_progress, c.dirty, c.waiting, c.running, c.typing_on,
+                c.typing_prefs,
                 c.settings.get("sens"), c.name, c.flashing, c.firmware_old, c.update_state,
                 round(c.update_progress, 2), c.update_error)
 
@@ -292,10 +340,21 @@ class Shell:
                 for ev in self.ctrl.poll():
                     if ev[0] == "flash_done":
                         self._flash_finished(ev[1], ev[2])
+                if self.ctrl.typing_on != self._typing_seen:
+                    self._typing_seen = self.ctrl.typing_on
+                    self._typing_changed()
+                    self._sig = None
                 sig = self._signature()
                 if sig != self._sig:
                     self._sig = sig
                     self.render()
+                elif self.current == "digitacao":
+                    tsig = self.ctrl.typing_seq     # estado do teclado: no maximo 10 Hz (vem do bridge)
+                    if tsig != self._tsig:
+                        self._tsig = tsig
+                        view = self.views["digitacao"]
+                        view.refresh_state()
+                        view.control.update()
             except Exception:
                 traceback.print_exc()
             await asyncio.sleep(0.1)

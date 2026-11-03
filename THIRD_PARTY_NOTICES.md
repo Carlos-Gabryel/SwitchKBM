@@ -28,6 +28,7 @@ Consequência: o firmware e o `SwitchKBM.exe` podem ser compartilhados livrement
 | [pyserial](https://github.com/pyserial/pyserial) 3.5 | BSD-3-Clause | Comunicação serial |
 | [PyInstaller](https://pyinstaller.org) 6.x (bootloader) | GPL-2.0-ou-posterior com exceção que permite distribuir programas não-GPL | Empacotamento do exe |
 | Python | PSF License | Interpretador embutido no exe |
-| [Lucide](https://lucide.dev) (ícones) | ISC | `tools/kbm/ui/assets/icons/` (licença em `LICENSE` na mesma pasta) |
+| [Lucide](https://lucide.dev) (ícones) | ISC | `tools/kbm/ui/assets/icons/` e `web/assets/icons/` (licença em `LICENSE` na mesma pasta) |
+| [esptool-js](https://github.com/espressif/esptool-js) 0.7.0 | Apache-2.0 | `web/vendor/esptool-js/` (licença em `LICENSE` na mesma pasta); grava a placa pela página web |
 
 As licenças originais completas acompanham cada componente no respectivo diretório ou pacote.
