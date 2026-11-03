@@ -338,8 +338,8 @@ python3 -m http.server -d web 8000     # abra http://localhost:8000
 
 Para testar a gravação, copie `build/firmware` para `web/firmware`.
 
-**Lançamento.** Criar uma tag `v*` dispara os workflows `release.yml` (gera os executáveis e a release)
-e `pages.yml` (publica a página no GitHub Pages).
+**Lançamento.** Criar uma tag `v*` dispara o `release.yml` (gera os executáveis e a release). Um push no
+`main` que mexa em `web/` ou no firmware dispara o `pages.yml` (publica a página no GitHub Pages).
 </details>
 
 ## 📜 Licença e créditos
