@@ -6,7 +6,7 @@ Interface gráfica para remapear teclado/mouse -> botões do Switch (como o menu
 
 - Linux: AppImage (`dist/SwitchKBM-x86_64.AppImage`, gerado por `python tools/kbm/build.py`). Captura teclado/mouse via evdev com grab exclusivo e exige o usuário no grupo `input` (`sudo usermod -aG input $USER`; no Bazzite/Fedora Atomic antes: `grep -E '^input:' /usr/lib/group | sudo tee -a /etc/group`); a porta é `/dev/ttyUSB*`/`/dev/ttyACM*` (grupo `dialout` ou a regra `packaging/linux/60-switchkbm-serial.rules`). Perfis em `~/.local/share/SwitchKBM`. Auto-atualização só quando roda como AppImage.
 - Gerar o exe: `powershell -ExecutionPolicy Bypass -File tools\kbm\build_exe.ps1` (cria `dist\SwitchKBM.exe`; precisa de Python + pip). Sem exe: `python tools\kbm\kbm_app.py`.
-- Uso: escolha o Perfil (um por jogo) e a Porta (a CH9102 vem pré-selecionada). Clique numa célula "Tecla 1/2", pressione a tecla (ou clique/roda do mouse); Esc cancela. Clique direito na célula: botões laterais do mouse, roda, Esc, Limpar. F7/F8/F11/F12 são reservadas. Se a tecla já estava em outro botão, ela é movida. Movimento (WASD/Andar devagar) também é configurável.
+- Uso: escolha o Perfil (um por jogo) e a Porta (a CH9102 vem pré-selecionada). Clique numa célula "Tecla 1/2", pressione a tecla (ou clique/roda do mouse); Esc cancela. Clique direito na célula: botões laterais do mouse, roda, Esc, Limpar. F7/F8/F9/F11/F12 são reservadas. Se a tecla já estava em outro botão, ela é movida. Movimento (WASD/Andar devagar) também é configurável.
 - Ajuste a mira/sensibilidade na aba Controles (Modo de mira e Sensibilidade) e em Ajustes (guardados no perfil). Clique em **Salvar** (título com `*` = alterações pendentes), depois **Iniciar**. Com o bridge rodando, o botão **Capturar mouse e teclado** (abaixo de Iniciar/Parar) ou **F12** captura; só **F12** libera. Salvar com o bridge rodando reinicia-o. F7/F8 durante o jogo mudam a sensibilidade na tela (marca como não salvo; clique Salvar para manter naquele perfil).
 - Perfis ficam em `%LOCALAPPDATA%\SwitchKBM\profiles\` (Linux: `~/.local/share/SwitchKBM/profiles/`; a partir do código: `tools\kbm\profiles\`); `settings.json` na pasta acima guarda o último perfil e a porta. Na primeira execução o exe copia os perfis de versões antigas (`profiles\` ao lado do exe) ou cria "Padrão".
 - Selftest sem interação: `SwitchKBM.exe --selftest`.
@@ -31,8 +31,23 @@ A serial e aberta com DTR/RTS desligados para nao resetar o ESP32. Envio a 200 H
 | Tecla | Acao |
 |-------|------|
 | F12 | captura / libera teclado e mouse |
+| F9 | liga / desliga o modo digitacao (teclado do Switch 2) |
 | F11 | alterna mira giroscopio <-> analogico (stick direito) |
 | F8 / F7 | sensibilidade do giro x1.1 / /1.1 (imprime o novo valor) |
+
+## Modo digitacao
+
+Aba **Digitação** do app (ou **F9**, em qualquer situação): escreve texto no teclado da tela do Switch 2, igual ao do navegador. Com o modo ligado o bridge manda só os botões do teclado (direcionais, A, B, Y, +, L3; nunca X, L, R) e nenhum comando de jogo; se a captura estava ligada, ela é encerrada e volta ao sair (F9 de novo). F12 é ignorado enquanto o modo está ligado ("Saia do modo digitação com F9").
+
+- **Confira na TV se o teclado está aberto antes de digitar:** o app não vê a TV. Com o teclado fechado, os comandos vão para o que estiver na tela.
+- Enter envia (+), Esc limpa a fila e o campo, setas (campo vazio) movem o cursor, Home (campo vazio) = "teclado reaberto" (cursor volta ao 1).
+- Velocidade: Seguro 50/50 ms, Normal 42/42 (padrão), Rápido 34/34, ou personalizado de 25 a 100 ms. "Sem acentos" digita só a letra base (mais rápido). Valores salvos em `settings.json`.
+- A prévia do teclado mostra a página e o cursor que o app acredita estarem na TV; clique na célula onde o cursor está de verdade se errar letras.
+- Protocolo no stdin do bridge (`--stdin-control`): `type {json}` com `op` = on, off, text, backspace, submit, clear, nav, reset, cursor, page, speed, strip; o bridge responde `DIGITACAO ON/OFF` e `DIGITACAO_ESTADO {json}` (até 10x/s).
+
+- Na prática: a macro anda pelo teclado da tela (cerca de 2 a 3 letras por segundo no padrão; acentos trocam de página e custam mais). Ao entrar e sair do modo, a caixa é limpa, a fila é descartada e o cursor volta ao `1`, então abra o teclado antes do F9. Layout medido no teclado em português do Switch 2; outros idiomas e o Switch 1 não foram testados. Testado no console no Linux; no Windows não foi testado no console.
+- No KDE com Wayland, o app pede ao KWin para vir para a frente ao apertar F9 (`winfocus.py`).
+- Arquivos: `typing_engine.py` (motor da macro, com paridade em JS na pasta `web/` via `web/test/typing-vectors.json`), `kb_layout.py` (layout do teclado do Switch 2), `winfocus.py` (traz a janela para a frente). Testes: `test_typing.py`, `test_typing_bridge.py`, `test_digitacao.py`. A versão web do programa (pasta `web/`) é uma alternativa; o programa é o recomendado.
 
 Hotkeys nunca viram botao do gamepad. Enquanto capturado, todo teclado e mouse ficam bloqueados para o Windows (o cursor nao se mexe).
 

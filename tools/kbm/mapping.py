@@ -9,9 +9,9 @@ try:
 except ImportError:  # pragma: no cover
     from .proto import BTN, FLAG_CONNECTED
 
-VK_F7, VK_F8, VK_F11, VK_F12 = 0x76, 0x77, 0x7A, 0x7B
+VK_F7, VK_F8, VK_F9, VK_F11, VK_F12 = 0x76, 0x77, 0x78, 0x7A, 0x7B
 VK_ALT = 0x12
-HOTKEY_VKS = {VK_F7, VK_F8, VK_F11, VK_F12}
+HOTKEY_VKS = {VK_F7, VK_F8, VK_F9, VK_F11, VK_F12}
 VK_W, VK_A, VK_S, VK_D = 0x57, 0x41, 0x53, 0x44
 ARROW_VKS = {"left": 0x25, "up": 0x26, "right": 0x27, "down": 0x28}
 
@@ -46,7 +46,7 @@ def _build_key_names():
 
 KEY_NAMES = _build_key_names()
 VK_TO_NAME = {v: k for k, v in KEY_NAMES.items()}
-RESERVED_NAMES = ("f7", "f8", "f11", "f12")
+RESERVED_NAMES = ("f7", "f8", "f9", "f11", "f12")
 
 _DISPLAY = {
     "space": "Espaço", "tab": "Tab", "esc": "Esc", "enter": "Enter", "backspace": "Backspace",
@@ -173,7 +173,9 @@ class Mapper:
             if btn not in BTN and btn not in ("L2", "R2"):
                 self.warnings.append("botao desconhecido: %s" % btn)
                 continue
-            if n in MOUSE_NAMES:
+            if n in RESERVED_NAMES:
+                self.warnings.append("tecla reservada (hotkey), associação ignorada: %s" % name)
+            elif n in MOUSE_NAMES:
                 self._mouse_binds[n] = btn
             elif n in KEY_NAMES:
                 self._key_binds[KEY_NAMES[n]] = btn
@@ -198,6 +200,8 @@ class Mapper:
             self.pressed.add(vk)
             if vk == VK_F12:
                 return "toggle_capture"
+            if vk == VK_F9:
+                return "toggle_typing"
             if vk == VK_F11:
                 self.aim_mode = "stick" if self.aim_mode == "gyro" else "gyro"
                 self._stick_reset()

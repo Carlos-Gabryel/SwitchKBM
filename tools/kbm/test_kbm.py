@@ -411,7 +411,7 @@ class BindingTests(unittest.TestCase):
         return bd.profile_to_rows({"binds": {"g": "R1", "space": "A"}})
 
     def test_reserved_rejected(self):
-        for k in ("f7", "f8", "f11", "f12"):
+        for k in ("f7", "f8", "f9", "f11", "f12"):
             with self.assertRaises(ValueError):
                 bd.assign_key(self.rows(), "B", 0, k)
 

@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Switch KBM</title>
+<meta name="description" content="Teclado e mouse no Nintendo Switch, direto do navegador.">
+<meta name="color-scheme" content="dark">
+<link rel="icon" type="image/png" href="assets/icon.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="shell">
+<aside class="sidebar">
+  <div class="brand"><img src="assets/icon.png" width="28" height="28" alt=""><span>Switch KBM</span></div>
+
+  <nav class="nav" role="tablist" id="tabs" aria-label="Seções">
+    <button role="tab" data-tab="controls" data-icon="gamepad-2" aria-selected="true">Controles</button>
+    <button role="tab" data-tab="typing" data-icon="keyboard" aria-selected="false">Digitação</button>
+    <button role="tab" data-tab="settings" data-icon="settings" aria-selected="false">Ajustes</button>
+    <button role="tab" data-tab="board" data-icon="cpu" aria-selected="false">Placa</button>
+  </nav>
+
+  <div class="grow"></div>
+
+  <div id="fw-old" class="notice warn" hidden></div>
+
+  <div id="pill" class="status bad" role="status">
+    <div class="status-title"><span class="dot"></span><span id="pill-title">Desconectada</span></div>
+    <div class="status-detail" id="pill-detail">Conecte a placa para jogar</div>
+  </div>
+
+  <div class="side-actions">
+    <button id="btn-connect" class="btn primary" data-icon="play">Conectar placa</button>
+    <button id="btn-capture" class="btn secondary" data-icon="mouse-pointer-2" disabled>Capturar mouse e teclado</button>
+  </div>
+
+  <a class="credit" href="https://github.com/Carlos-Gabryel/SwitchKBM" target="_blank" rel="noopener" title="https://github.com/Carlos-Gabryel/SwitchKBM">
+    <span>By Carlos Gabryel</span><i data-icon="external-link" aria-hidden="true"></i><small id="credit-ver"></small>
+  </a>
+</aside>
+
+<main>
+  <div id="banners">
+    <div id="no-serial" class="notice warn" hidden>
+      Este navegador não tem Web Serial. Use o Chrome ou o Edge no computador, em HTTPS ou em localhost.
+    </div>
+    <div id="err" class="notice bad" hidden></div>
+    <div id="cap-esc" class="notice warn" hidden>
+      <span class="msg">Neste navegador o Esc solta a captura em vez de chegar ao Switch, e o perfil atual usa Esc.</span>
+      <button id="cap-esc-fix" class="btn secondary sm" type="button">Mover para outra tecla</button>
+    </div>
+    <div id="cap-accel" class="notice warn" hidden>
+      <span class="msg">O navegador não recebe o movimento bruto do mouse aqui, então a aceleração do sistema entra na mira. Desative a aceleração do mouse nas configurações do sistema (perfil plano) para o movimento ficar 1:1.</span>
+      <button id="cap-accel-ok" class="btn secondary sm" type="button">Já desativei</button>
+    </div>
+  </div>
+
+  <section id="tab-controls" class="panel">
+    <h1 class="page-title">Controles</h1>
+    <div class="profile-row">
+      <label class="muted" for="profile-select">Perfil</label>
+      <select id="profile-select" aria-label="Perfil"></select>
+      <button id="p-new" class="icon-btn" type="button" data-icon="plus" title="Novo" aria-label="Novo perfil"></button>
+      <button id="p-dup" class="icon-btn" type="button" data-icon="copy" title="Duplicar" aria-label="Duplicar perfil"></button>
+      <button id="p-rename" class="icon-btn" type="button" data-icon="pencil" title="Renomear" aria-label="Renomear perfil"></button>
+      <button id="p-delete" class="icon-btn" type="button" data-icon="trash-2" title="Excluir" aria-label="Excluir perfil"></button>
+    </div>
+    <div class="actions-row">
+      <button id="p-restore" class="btn secondary" type="button" data-icon="rotate-ccw">Restaurar padrão</button>
+      <button id="p-import" class="btn secondary sm" type="button">Importar</button>
+      <button id="p-export" class="btn secondary sm" type="button">Exportar</button>
+      <input id="p-file" type="file" accept=".json,application/json" hidden>
+      <span class="muted autosave">Salvo automaticamente</span>
+    </div>
+    <p class="muted msg-line" id="p-note"></p>
+
+    <div class="cards2">
+      <div class="card">
+        <h3>Modo de mira</h3>
+        <p class="muted">Quem controla o giroscópio e o analógico direito.</p>
+        <select id="aim-mode" aria-label="Modo de mira">
+          <option value="gyro">Giroscópio</option>
+          <option value="stick">Analógico direito</option>
+        </select>
+      </div>
+      <div class="card" id="card-gyro">
+        <h3>Sensibilidade do giroscópio</h3>
+        <p class="muted">Graus por contagem do mouse (F7/F8 ajustam).</p>
+        <div class="slider-row">
+          <input id="sens-range" type="range" min="0.005" max="0.3" step="0.0005" aria-label="Sensibilidade do giroscópio">
+          <input id="sens-num" type="number" min="0.001" step="0.0005" aria-label="Sensibilidade do giroscópio (valor)">
+        </div>
+      </div>
+      <div class="card" id="card-stick" hidden>
+        <h3>Sensibilidade do analógico</h3>
+        <p class="muted">Maior = mais rápido; F7/F8 ajustam.</p>
+        <div class="slider-row">
+          <input id="ssens-range" type="range" min="0.1" max="3" step="0.001" aria-label="Sensibilidade do analógico">
+          <input id="ssens-num" type="number" min="0.1" max="3" step="0.01" aria-label="Sensibilidade do analógico (valor)">
+        </div>
+        <p class="muted">Zona morta do jogo (0–200). Ajuste até o menor movimento do mouse mexer a mira.</p>
+        <div class="slider-row">
+          <input id="sdz-range" type="range" min="0" max="200" step="1" aria-label="Zona morta do jogo">
+          <input id="sdz-num" type="number" min="0" max="200" step="1" aria-label="Zona morta do jogo (valor)">
+        </div>
+      </div>
+    </div>
+    <p class="muted msg-line" id="bind-msg"></p>
+
+    <div class="card table">
+      <div class="thead"><span>Botão do Switch</span><span>Tecla 1</span><span>Tecla 2</span><span></span></div>
+      <div id="bind-list" class="list"></div>
+      <h3 class="sub">Movimento (analógico esquerdo)</h3>
+      <div id="move-list" class="list"></div>
+      <p class="muted">Mira: mouse + setas (o modo de mira define quem controla o giroscópio e quem controla o analógico direito).</p>
+    </div>
+  </section>
+
+  <section id="tab-settings" class="panel" hidden>
+    <h1 class="page-title">Ajustes</h1>
+    <div id="settings-form" class="settings"></div>
+  </section>
+
+  <section id="tab-board" class="panel" hidden>
+    <h1 class="page-title">Placa</h1>
+
+    <div class="card">
+      <h3>Estado</h3>
+      <dl class="kv">
+        <dt>Placa</dt><dd id="st-board">desconectada</dd>
+        <dt>Firmware</dt><dd id="st-fw">—</dd>
+        <dt>Captura</dt><dd id="st-capture">liberada</dd>
+        <dt>Perfil</dt><dd id="st-profile">—</dd>
+      </dl>
+    </div>
+
+    <div class="card">
+      <h3>Gravar firmware</h3>
+      <p class="muted">Grava o firmware na ESP32 pelo navegador (460800 bps, com verificação). A conexão atual será fechada e a placa pedirá a porta de novo.</p>
+      <p class="muted">Versão do firmware deste site: <span id="fw-site"></span></p>
+      <div class="row"><button id="btn-flash" class="btn primary" type="button" data-icon="zap">Gravar firmware</button></div>
+      <p id="flash-step" class="muted msg-line"></p>
+      <div id="flash-progress"></div>
+      <pre id="flash-log" class="log" hidden></pre>
+    </div>
+
+    <div class="card">
+      <h3>Texto da placa</h3>
+      <pre id="board-log" class="log">—</pre>
+    </div>
+
+    <div class="card">
+      <h3>Estatísticas</h3>
+      <dl class="kv">
+        <dt>Envio</dt><dd id="stat-tx">—</dd>
+        <dt>Maior intervalo</dt><dd id="stat-gap">—</dd>
+        <dt>Descartados</dt><dd id="stat-drop">—</dd>
+      </dl>
+    </div>
+
+    <div class="card">
+      <h3>Atalhos</h3>
+      <ul class="keys">
+        <li><kbd>F12</kbd> captura ou libera o teclado e o mouse</li>
+        <li><kbd>F11</kbd> alterna giro e analógico</li>
+        <li><kbd>F8</kbd> / <kbd>F7</kbd> aumenta e diminui a sensibilidade (salva no perfil)</li>
+        <li><kbd>F9</kbd> liga e desliga o modo digitação (escreve no teclado da tela do Switch)</li>
+      </ul>
+      <p class="muted">Se a captura se perder (tela cheia, foco ou aba), tudo é liberado e o controle volta ao neutro.</p>
+    </div>
+
+    <div class="card">
+      <details id="diag">
+        <summary>Diagnóstico da captura</summary>
+        <p class="muted" id="diag-stats"></p>
+        <pre id="diag-log" class="log">—</pre>
+        <div class="row"><button id="diag-copy" class="btn secondary sm" type="button" data-icon="copy">Copiar</button></div>
+      </details>
+    </div>
+  </section>
+
+  <section id="tab-typing" class="panel" hidden>
+    <div class="page-head">
+      <h1 class="page-title">Digitação</h1>
+      <span class="grow"></span>
+      <button id="ty-toggle" class="btn primary" type="button" data-icon="keyboard">Ligar (F9)</button>
+    </div>
+    <div class="notice warn" id="ty-tv-warn"><span class="msg"><strong>O app não vê a TV: confira se o teclado está aberto antes de digitar.</strong> Se o teclado estiver fechado, os comandos vão para o que estiver na tela.</span></div>
+    <p id="ty-msg" class="muted msg-line"></p>
+
+    <div class="card">
+      <textarea id="ty-input" rows="4" aria-label="Texto a digitar no Switch" placeholder="Digite ou cole aqui" autocomplete="off" autocapitalize="off" spellcheck="false"></textarea>
+      <p class="muted">Escreve no teclado da tela do Switch: o texto vira direcional e A.</p>
+      <div class="row wrap">
+        <label class="check"><input type="checkbox" id="ty-strip"> Sem acentos (mais rápido)</label>
+        <button id="ty-reopen" class="btn secondary sm" type="button" data-icon="rotate-ccw">Teclado reaberto</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Teclado do Switch</h3>
+      <div id="ty-kb" class="kb" aria-label="Prévia do teclado da TV"></div>
+      <p class="muted">Clique onde o cursor está na TV se errar letras. Nas abas ABC, #+=, ÀÁÂ e ÑŃŅ, clique na aba da página aberta.</p>
+      <div class="stats">
+        <div class="stat"><b id="ty-pend">0</b><span>Pendentes</span></div>
+        <div class="stat"><b id="ty-cps">0.0</b><span>Letras/s</span></div>
+        <div class="stat"><b id="ty-skip">0</b><span>Ignorados</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Velocidade</h3>
+      <div id="ty-presets" class="row wrap"></div>
+      <div class="row speed">
+        <input id="ty-range" type="range" step="1" aria-label="Velocidade em ms">
+        <input id="ty-ms" type="number" step="1" aria-label="Velocidade (ms)"> <span class="muted">ms</span>
+      </div>
+      <div class="row"><button id="ty-test" class="btn secondary sm" type="button" data-icon="zap">Testar velocidade</button></div>
+    </div>
+
+    <div class="card">
+      <h3>Atalhos</h3>
+      <ul class="keys">
+        <li><kbd>F9</kbd> sai do modo digitação</li>
+        <li><kbd>Enter</kbd> envia (botão +) e limpa o campo</li>
+        <li><kbd>Esc</kbd> limpa a fila e o campo</li>
+        <li>Setas movem o cursor da TV com o campo vazio</li>
+        <li><kbd>Home</kbd> com o campo vazio: teclado reaberto na TV (cursor no 1, página ABC)</li>
+      </ul>
+    </div>
+  </section>
+</main>
+</div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

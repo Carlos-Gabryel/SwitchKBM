@@ -1,0 +1,12534 @@
+{
+ "crc8": [
+  {
+   "hex": "",
+   "crc": 0
+  },
+  {
+   "hex": "00",
+   "crc": 0
+  },
+  {
+   "hex": "010203",
+   "crc": 72
+  },
+  {
+   "hex": "313233343536373839",
+   "crc": 244
+  },
+  {
+   "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f",
+   "crc": 192
+  },
+  {
+   "hex": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+   "crc": 204
+  }
+ ],
+ "packState": [
+  {
+   "args": {},
+   "frame": "aa5501210000000000000000000000000000000000000000000000000000000020000000002d"
+  },
+  {
+   "args": {
+    "seq": 7,
+    "flags": 1,
+    "buttons": 1,
+    "timestamp_ms": 70000
+   },
+   "frame": "aa55012107010001000000000000000000000000000000000000000000000000200000701165"
+  },
+  {
+   "args": {
+    "seq": 300,
+    "flags": 1,
+    "battery": 200,
+    "buttons": 262143,
+    "lx": -512,
+    "ly": 511,
+    "rx": 300,
+    "ry": -300,
+    "l2": 1023,
+    "r2": 1023,
+    "gyro": [
+     32000,
+     -32000,
+     5
+    ],
+    "accel": [
+     1,
+     8192,
+     -1
+    ],
+    "timestamp_ms": 65535
+   },
+   "frame": "aa5501212c01c8ffff030000feff012c01d4feff03ff03007d0083050001000020ffffffff6a"
+  },
+  {
+   "args": {
+    "lx": 9999,
+    "ly": -9999,
+    "rx": 512,
+    "ry": -513,
+    "l2": 5000,
+    "r2": -5,
+    "gyro": [
+     40000,
+     -40000,
+     0
+    ],
+    "accel": [
+     100000,
+     -100000,
+     0
+    ]
+   },
+   "frame": "aa55012100000000000000ff0100feff0100feff030000ff7f00800000ff7f0080000000004a"
+  },
+  {
+   "args": {
+    "lx": 3.9,
+    "ly": -3.9,
+    "gyro": [
+     1.9,
+     -1.9,
+     0.5
+    ],
+    "accel": [
+     0,
+     8192.7,
+     0
+    ],
+    "timestamp_ms": 123456
+   },
+   "frame": "aa550121000000000000000300fdff00000000000000000100ffff000000000020000040e2b5"
+  }
+ ],
+ "encodeFrame": [
+  {
+   "type": 3,
+   "payload": "0001",
+   "frame": "aa5503020001eb"
+  }
+ ],
+ "mapping": [
+  {
+   "name": "gyro: mouse variado",
+   "config": {
+    "accel_noise": 0
+   },
+   "events": [
+    {
+     "op": "mouse_move",
+     "dx": 3,
+     "dy": -2,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.005,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       320,
+       -480,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.01,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": 1,
+     "dy": 1,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.015,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       -160,
+       -160,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.02,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": 0,
+     "dy": 5,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.025,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       -800,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.030000000000000002,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": -7,
+     "dy": 0,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.035,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       1120,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.04,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": 12,
+     "dy": 9,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.045,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       -1440,
+       -1920,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.049999999999999996,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": -1,
+     "dy": -1,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.05499999999999999,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       160,
+       160,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.05999999999999999,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": 0,
+     "dy": 0,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.06499999999999999,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.06999999999999999,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": 25,
+     "dy": -30,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.075,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       4800,
+       -4000,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.08,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": 2,
+     "dy": 3,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.085,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       -480,
+       -320,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.09000000000000001,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.09500000000000001,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.10000000000000002,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.10500000000000002,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    }
+   ]
+  },
+  {
+   "name": "gyro: dt irregular, sens e inversao off",
+   "config": {
+    "invert_yaw": false,
+    "invert_pitch": false,
+    "gyro_sensitivity": 1.7,
+    "accel_noise": 0
+   },
+   "events": [
+    {
+     "op": "mouse_move",
+     "dx": -4,
+     "dy": 7,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.0042,
+     "dt": 0.0042,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       2267,
+       -1295,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": -1,
+     "dy": 5,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.0103,
+     "dt": 0.0061,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       1115,
+       -223,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": 2,
+     "dy": 3,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.015300000000000001,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       816,
+       544,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": 5,
+     "dy": 1,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.015600000000000001,
+     "dt": 0.0003,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       1360,
+       6800,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": 8,
+     "dy": -1,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.0266,
+     "dt": 0.011,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       -124,
+       989,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": 11,
+     "dy": -3,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.0315,
+     "dt": 0.0049,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       -833,
+       3053,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    }
+   ]
+  },
+  {
+   "name": "gyro: arredondamento metade-par",
+   "config": {
+    "deg_per_count": 0.03125,
+    "gyro_sensitivity": 1.0,
+    "accel_noise": 0
+   },
+   "events": [
+    {
+     "op": "mouse_move",
+     "dx": 1,
+     "dy": -1,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 1.0,
+     "dt": 1.0,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": 2,
+     "dy": -2,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 2.0,
+     "dt": 1.0,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       1,
+       -1,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": 3,
+     "dy": -3,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 3.0,
+     "dt": 1.0,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       2,
+       -2,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": 4,
+     "dy": -4,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 4.0,
+     "dt": 1.0,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       2,
+       -2,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": 5,
+     "dy": -5,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 5.0,
+     "dt": 1.0,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       2,
+       -2,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": 6,
+     "dy": -6,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 6.0,
+     "dt": 1.0,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       3,
+       -3,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": 7,
+     "dy": -7,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 7.0,
+     "dt": 1.0,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       4,
+       -4,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": 8,
+     "dy": -8,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 8.0,
+     "dt": 1.0,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       4,
+       -4,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": 9,
+     "dy": -9,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 9.0,
+     "dt": 1.0,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       4,
+       -4,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": 10,
+     "dy": -10,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 10.0,
+     "dt": 1.0,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       5,
+       -5,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": 11,
+     "dy": -11,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 11.0,
+     "dt": 1.0,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       6,
+       -6,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    }
+   ]
+  },
+  {
+   "name": "gyro: mouse grande satura e devolve residuo",
+   "config": {
+    "accel_noise": 0
+   },
+   "events": [
+    {
+     "op": "mouse_move",
+     "dx": 100000,
+     "dy": -80000,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.005,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       32000,
+       -32000,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.01,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       32000,
+       -32000,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.015,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       32000,
+       -32000,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.02,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       32000,
+       -32000,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.025,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       32000,
+       -32000,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.030000000000000002,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       32000,
+       -32000,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.035,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       32000,
+       -32000,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.04,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       32000,
+       -32000,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": -50000,
+     "dy": 0,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.045,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       32000,
+       -32000,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.049999999999999996,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       32000,
+       -32000,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.05499999999999999,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       32000,
+       -32000,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.05999999999999999,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       32000,
+       -32000,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.06499999999999999,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       32000,
+       -32000,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    }
+   ]
+  },
+  {
+   "name": "gyro: deadband, virtual_tilt e theta",
+   "config": {
+    "virtual_tilt": true,
+    "gyro_deadband_units": 40,
+    "accel_noise": 0
+   },
+   "events": [
+    {
+     "op": "mouse_move",
+     "dx": 0,
+     "dy": 20,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.005,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       -3200,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8191,
+       143
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.01,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8191,
+       143
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.015,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8191,
+       143
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": 1,
+     "dy": 0,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.02,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       -160,
+       -3
+      ],
+      "accel": [
+       0,
+       8191,
+       143
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.025,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8191,
+       143
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.030000000000000002,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8191,
+       143
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": 0,
+     "dy": 400,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.035,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       -32000,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8041,
+       1563
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.04,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       -32000,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       7648,
+       2936
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.045,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       7648,
+       2936
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": 5,
+     "dy": 600,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.049999999999999996,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       -32000,
+       -686,
+       -412
+      ],
+      "accel": [
+       0,
+       7022,
+       4219
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.05499999999999999,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       -32000,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       6183,
+       5374
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.05999999999999999,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       -32000,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       5155,
+       6366
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": 0,
+     "dy": -3000,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.06499999999999999,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       32000,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       6183,
+       5374
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.06999999999999999,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       32000,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       7022,
+       4219
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.075,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       32000,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       7648,
+       2936
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": 0,
+     "dy": 0,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.08,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       32000,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8041,
+       1563
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.085,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       32000,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8191,
+       143
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.09000000000000001,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       32000,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8091,
+       -1282
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "release_all",
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.09500000000000001,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.10000000000000002,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    }
+   ]
+  },
+  {
+   "name": "gyro: virtual_tilt limite de pitch",
+   "config": {
+    "virtual_tilt": true,
+    "max_pitch_deg": 30.0,
+    "accel_noise": 0
+   },
+   "events": [
+    {
+     "op": "mouse_move",
+     "dx": 0,
+     "dy": 4000,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.005,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       -32000,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8068,
+       1423
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.01,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       -32000,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       7698,
+       2802
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.015,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       -32000,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       7094,
+       4096
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.02,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       7094,
+       4096
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": 0,
+     "dy": 4000,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.025,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       7094,
+       4096
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.030000000000000002,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       7094,
+       4096
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.035,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       7094,
+       4096
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.04,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       7094,
+       4096
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": 0,
+     "dy": 4000,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.045,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       7094,
+       4096
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.049999999999999996,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       7094,
+       4096
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.05499999999999999,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       7094,
+       4096
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.05999999999999999,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       7094,
+       4096
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": 0,
+     "dy": 4000,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.06499999999999999,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       7094,
+       4096
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.06999999999999999,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       7094,
+       4096
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.075,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       7094,
+       4096
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.08,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       7094,
+       4096
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": 0,
+     "dy": 4000,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.085,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       7094,
+       4096
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.09000000000000001,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       7094,
+       4096
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.09500000000000001,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       7094,
+       4096
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.10000000000000002,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       7094,
+       4096
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": 0,
+     "dy": 4000,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.10500000000000002,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       7094,
+       4096
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.11000000000000003,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       7094,
+       4096
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.11500000000000003,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       7094,
+       4096
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.12000000000000004,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       7094,
+       4096
+      ]
+     },
+     "notes": []
+    }
+   ]
+  },
+  {
+   "name": "stick F11: mouse e drenagem",
+   "config": {
+    "accel_noise": 0
+   },
+   "events": [
+    {
+     "op": "key_down",
+     "key": "f11",
+     "notes": [
+      "Modo de mira: stick"
+     ],
+     "ret": "toggle_aim"
+    },
+    {
+     "op": "key_up",
+     "key": "f11",
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": 40,
+     "dy": 0,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.005,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 170,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.01,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 151,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.015,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 136,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.02,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 123,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.025,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 113,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.030000000000000002,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 104,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.035,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 97,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.04,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 91,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.045,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 85,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.049999999999999996,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 81,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.05499999999999999,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 78,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.05999999999999999,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 75,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": 0,
+     "dy": -60,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.06499999999999999,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 17,
+      "ry": -224,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.06999999999999999,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 15,
+      "ry": -197,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.075,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 13,
+      "ry": -174,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.08,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 12,
+      "ry": -155,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.085,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 10,
+      "ry": -139,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.09000000000000001,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 9,
+      "ry": -126,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.09500000000000001,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 9,
+      "ry": -115,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.10000000000000002,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 8,
+      "ry": -106,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.10500000000000002,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 7,
+      "ry": -98,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.11000000000000003,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 7,
+      "ry": -92,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.11500000000000003,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 6,
+      "ry": -86,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.12000000000000004,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 6,
+      "ry": -82,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": 10,
+     "dy": 10,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.12500000000000003,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 86,
+      "ry": 27,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.13000000000000003,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 81,
+      "ry": 25,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.13500000000000004,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 77,
+      "ry": 24,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.14000000000000004,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 74,
+      "ry": 23,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.14500000000000005,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 71,
+      "ry": 22,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.15000000000000005,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 69,
+      "ry": 21,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.15500000000000005,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 67,
+      "ry": 21,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.16000000000000006,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 65,
+      "ry": 20,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.16500000000000006,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 64,
+      "ry": 20,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.17000000000000007,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 63,
+      "ry": 20,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.17500000000000007,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 62,
+      "ry": 19,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.18000000000000008,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 61,
+      "ry": 19,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": 500,
+     "dy": 200,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.18500000000000008,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 437,
+      "ry": 175,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.19000000000000009,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 437,
+      "ry": 175,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.1950000000000001,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 437,
+      "ry": 175,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.2000000000000001,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 437,
+      "ry": 175,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.2050000000000001,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 437,
+      "ry": 175,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.2100000000000001,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 437,
+      "ry": 175,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.2150000000000001,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 437,
+      "ry": 175,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.2200000000000001,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 437,
+      "ry": 175,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.22500000000000012,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 437,
+      "ry": 175,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.23000000000000012,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 437,
+      "ry": 175,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.23500000000000013,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 437,
+      "ry": 175,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.24000000000000013,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 437,
+      "ry": 175,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": -3,
+     "dy": 1,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.24500000000000013,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 436,
+      "ry": 179,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.2500000000000001,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 436,
+      "ry": 179,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.2550000000000001,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 436,
+      "ry": 179,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.2600000000000001,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 436,
+      "ry": 179,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.2650000000000001,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 404,
+      "ry": 165,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.27000000000000013,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 346,
+      "ry": 142,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.27500000000000013,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 297,
+      "ry": 122,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.28000000000000014,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 257,
+      "ry": 105,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.28500000000000014,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 223,
+      "ry": 92,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.29000000000000015,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 195,
+      "ry": 80,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.29500000000000015,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 172,
+      "ry": 71,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.30000000000000016,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 153,
+      "ry": 63,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": 1000,
+     "dy": 0,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.30500000000000016,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 471,
+      "ry": 6,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.31000000000000016,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 471,
+      "ry": 6,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.31500000000000017,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 471,
+      "ry": 6,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.3200000000000002,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 471,
+      "ry": 6,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.3250000000000002,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 471,
+      "ry": 6,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.3300000000000002,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 471,
+      "ry": 6,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.3350000000000002,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 471,
+      "ry": 6,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.3400000000000002,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 471,
+      "ry": 6,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.3450000000000002,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 471,
+      "ry": 6,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.3500000000000002,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 471,
+      "ry": 6,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.3550000000000002,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 471,
+      "ry": 6,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.3600000000000002,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 471,
+      "ry": 6,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.3650000000000002,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 471,
+      "ry": 6,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.3700000000000002,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 471,
+      "ry": 6,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.3750000000000002,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 471,
+      "ry": 6,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.3800000000000002,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 471,
+      "ry": 6,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.38500000000000023,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 471,
+      "ry": 6,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.39000000000000024,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 471,
+      "ry": 6,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.39500000000000024,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 471,
+      "ry": 6,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.40000000000000024,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 471,
+      "ry": 6,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.40500000000000025,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 471,
+      "ry": 6,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.41000000000000025,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 471,
+      "ry": 6,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.41500000000000026,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 471,
+      "ry": 6,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.42000000000000026,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 471,
+      "ry": 6,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.42500000000000027,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 471,
+      "ry": 6,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.43000000000000027,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 471,
+      "ry": 6,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.4350000000000003,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 471,
+      "ry": 6,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.4400000000000003,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 471,
+      "ry": 6,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.4450000000000003,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 471,
+      "ry": 6,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.4500000000000003,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 471,
+      "ry": 6,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.4550000000000003,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 471,
+      "ry": 6,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.4600000000000003,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 471,
+      "ry": 6,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.4650000000000003,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 471,
+      "ry": 6,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.4700000000000003,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 471,
+      "ry": 6,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.4750000000000003,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 471,
+      "ry": 6,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.4800000000000003,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 471,
+      "ry": 6,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.4850000000000003,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 415,
+      "ry": 5,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.4900000000000003,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 356,
+      "ry": 4,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.49500000000000033,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 307,
+      "ry": 4,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.5000000000000003,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 266,
+      "ry": 3,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.5050000000000003,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 231,
+      "ry": 3,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.5100000000000003,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 203,
+      "ry": 2,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.5150000000000003,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 179,
+      "ry": 2,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.5200000000000004,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 159,
+      "ry": 2,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.5250000000000004,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 143,
+      "ry": 2,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.5300000000000004,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 129,
+      "ry": 2,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.5350000000000004,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 117,
+      "ry": 1,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.5400000000000004,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 108,
+      "ry": 1,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.5450000000000004,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 100,
+      "ry": 1,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.5500000000000004,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 93,
+      "ry": 1,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.5550000000000004,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 88,
+      "ry": 1,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.5600000000000004,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 83,
+      "ry": 1,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "key_down",
+     "key": "f11",
+     "notes": [
+      "Modo de mira: gyro"
+     ],
+     "ret": "toggle_aim"
+    },
+    {
+     "op": "key_up",
+     "key": "f11",
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": 5,
+     "dy": 5,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.5650000000000004,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       -800,
+       -800,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.5700000000000004,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    }
+   ]
+  },
+  {
+   "name": "stick: curva, sens e zona morta",
+   "config": {
+    "stick_curve": 0.6,
+    "stick_max": 0.8,
+    "stick_deadzone_comp": 100,
+    "stick_sens": 2.0,
+    "aim_mode": "stick",
+    "accel_noise": 0
+   },
+   "events": [
+    {
+     "op": "mouse_move",
+     "dx": 8,
+     "dy": 8,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.005,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 141,
+      "ry": 141,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.01,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 125,
+      "ry": 125,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.015,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 110,
+      "ry": 110,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.02,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 95,
+      "ry": 95,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.025,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 82,
+      "ry": 82,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.030000000000000002,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.035,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.04,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.045,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.049999999999999996,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.05499999999999999,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.05999999999999999,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.06499999999999999,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.06999999999999999,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.075,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": -300,
+     "dy": 40,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.08,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": -406,
+      "ry": 54,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.085,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": -406,
+      "ry": 54,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.09000000000000001,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": -406,
+      "ry": 54,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.09500000000000001,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": -406,
+      "ry": 54,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.10000000000000002,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": -406,
+      "ry": 54,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.10500000000000002,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": -406,
+      "ry": 54,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.11000000000000003,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": -406,
+      "ry": 54,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.11500000000000003,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": -406,
+      "ry": 54,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.12000000000000004,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": -406,
+      "ry": 54,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.12500000000000003,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": -406,
+      "ry": 54,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.13000000000000003,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": -406,
+      "ry": 54,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.13500000000000004,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": -406,
+      "ry": 54,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.14000000000000004,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": -406,
+      "ry": 54,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.14500000000000005,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": -406,
+      "ry": 54,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.15000000000000005,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": -406,
+      "ry": 54,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": 2,
+     "dy": -1,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.15500000000000005,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": -406,
+      "ry": 52,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.16000000000000006,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": -406,
+      "ry": 52,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.16500000000000006,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": -406,
+      "ry": 52,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.17000000000000007,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": -406,
+      "ry": 52,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.17500000000000007,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": -376,
+      "ry": 48,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.18000000000000008,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": -345,
+      "ry": 44,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.18500000000000008,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": -315,
+      "ry": 40,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.19000000000000009,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": -287,
+      "ry": 36,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.1950000000000001,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": -259,
+      "ry": 33,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.2000000000000001,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": -233,
+      "ry": 30,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.2050000000000001,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": -208,
+      "ry": 26,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.2100000000000001,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": -185,
+      "ry": 23,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.2150000000000001,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": -163,
+      "ry": 21,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.2200000000000001,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": -142,
+      "ry": 18,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.22500000000000012,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": -124,
+      "ry": 16,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": 0,
+     "dy": 700,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.23000000000000012,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 410,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.23500000000000013,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 410,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.24000000000000013,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 410,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.24500000000000013,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 410,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.2500000000000001,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 410,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.2550000000000001,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 410,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.2600000000000001,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 410,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.2650000000000001,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 410,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.27000000000000013,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 410,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.27500000000000013,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 410,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.28000000000000014,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 410,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.28500000000000014,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 410,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.29000000000000015,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 410,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.29500000000000015,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 410,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.30000000000000016,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 410,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    }
+   ]
+  },
+  {
+   "name": "F7/F8 modo giro",
+   "config": {
+    "accel_noise": 0
+   },
+   "events": [
+    {
+     "op": "key_down",
+     "key": "f8",
+     "notes": [
+      "Sensibilidade giro: 1.100",
+      "SENS deg_per_count=0.0550"
+     ],
+     "ret": "sens_up"
+    },
+    {
+     "op": "key_up",
+     "key": "f8",
+     "notes": []
+    },
+    {
+     "op": "key_down",
+     "key": "f8",
+     "notes": [
+      "Sensibilidade giro: 1.210",
+      "SENS deg_per_count=0.0605"
+     ],
+     "ret": "sens_up"
+    },
+    {
+     "op": "key_up",
+     "key": "f8",
+     "notes": []
+    },
+    {
+     "op": "key_down",
+     "key": "f7",
+     "notes": [
+      "Sensibilidade giro: 1.100",
+      "SENS deg_per_count=0.0550"
+     ],
+     "ret": "sens_down"
+    },
+    {
+     "op": "key_up",
+     "key": "f7",
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": 10,
+     "dy": 10,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.005,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       -1760,
+       -1760,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.01,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "key_down",
+     "key": "f8",
+     "notes": [
+      "Sensibilidade giro: 1.210",
+      "SENS deg_per_count=0.0605"
+     ],
+     "ret": "sens_up"
+    },
+    {
+     "op": "key_down",
+     "key": "f8",
+     "notes": [],
+     "ret": "repeat"
+    },
+    {
+     "op": "key_up",
+     "key": "f8",
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": 10,
+     "dy": 10,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.015,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       -1936,
+       -1936,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.02,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    }
+   ]
+  },
+  {
+   "name": "F7/F8 modo analogico",
+   "config": {
+    "aim_mode": "stick",
+    "accel_noise": 0
+   },
+   "events": [
+    {
+     "op": "key_down",
+     "key": "f8",
+     "notes": [
+      "Sensibilidade analogico: 1.100",
+      "STICKSENS stick_sens=1.100"
+     ],
+     "ret": "sens_up"
+    },
+    {
+     "op": "key_up",
+     "key": "f8",
+     "notes": []
+    },
+    {
+     "op": "key_down",
+     "key": "f7",
+     "notes": [
+      "Sensibilidade analogico: 1.000",
+      "STICKSENS stick_sens=1.000"
+     ],
+     "ret": "sens_down"
+    },
+    {
+     "op": "key_up",
+     "key": "f7",
+     "notes": []
+    },
+    {
+     "op": "key_down",
+     "key": "f7",
+     "notes": [
+      "Sensibilidade analogico: 0.909",
+      "STICKSENS stick_sens=0.909"
+     ],
+     "ret": "sens_down"
+    },
+    {
+     "op": "key_up",
+     "key": "f7",
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": 100,
+     "dy": 0,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.005,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 309,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.01,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 268,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.015,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 233,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.02,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 204,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.025,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 180,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.030000000000000002,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 160,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    }
+   ]
+  },
+  {
+   "name": "hotkeys nao viram botao; f12 toggle",
+   "config": {
+    "accel_noise": 0
+   },
+   "events": [
+    {
+     "op": "key_down",
+     "key": "f12",
+     "notes": [],
+     "ret": "toggle_capture"
+    },
+    {
+     "op": "build",
+     "now": 0.005,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.01,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "key_down",
+     "key": "f12",
+     "notes": [],
+     "ret": "repeat"
+    },
+    {
+     "op": "key_up",
+     "key": "f12",
+     "notes": []
+    },
+    {
+     "op": "key_down",
+     "key": "f11",
+     "notes": [
+      "Modo de mira: stick"
+     ],
+     "ret": "toggle_aim"
+    },
+    {
+     "op": "key_up",
+     "key": "f11",
+     "notes": []
+    },
+    {
+     "op": "key_down",
+     "key": "f11",
+     "notes": [
+      "Modo de mira: gyro"
+     ],
+     "ret": "toggle_aim"
+    },
+    {
+     "op": "key_up",
+     "key": "f11",
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.015,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.02,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    }
+   ]
+  },
+  {
+   "name": "setas modo giro",
+   "config": {
+    "accel_noise": 0
+   },
+   "events": [
+    {
+     "op": "key_down",
+     "key": "left",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "mouse_move",
+     "dx": 4,
+     "dy": 4,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.005,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": -512,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       -640,
+       -640,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.01,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": -512,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.015,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": -512,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "left",
+     "notes": []
+    },
+    {
+     "op": "key_down",
+     "key": "up",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "mouse_move",
+     "dx": 4,
+     "dy": 4,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.02,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": -512,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       -640,
+       -640,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.025,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": -512,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.030000000000000002,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": -512,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "up",
+     "notes": []
+    },
+    {
+     "op": "key_down",
+     "key": "right",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "key_down",
+     "key": "down",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "mouse_move",
+     "dx": 4,
+     "dy": 4,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.035,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 361,
+      "ry": 361,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       -640,
+       -640,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.04,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 361,
+      "ry": 361,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.045,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 361,
+      "ry": 361,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "right",
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "down",
+     "notes": []
+    },
+    {
+     "op": "key_down",
+     "key": "left",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "key_down",
+     "key": "up",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "mouse_move",
+     "dx": 4,
+     "dy": 4,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.049999999999999996,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": -362,
+      "ry": -362,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       -640,
+       -640,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.05499999999999999,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": -362,
+      "ry": -362,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.05999999999999999,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": -362,
+      "ry": -362,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "left",
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "up",
+     "notes": []
+    },
+    {
+     "op": "key_down",
+     "key": "down",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "mouse_move",
+     "dx": 4,
+     "dy": 4,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.06499999999999999,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 511,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       -640,
+       -640,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.06999999999999999,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 511,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.075,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 511,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "down",
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.08,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    }
+   ]
+  },
+  {
+   "name": "setas modo analogico",
+   "config": {
+    "aim_mode": "stick",
+    "arrow_gyro_dps": 120.0,
+    "accel_noise": 0
+   },
+   "events": [
+    {
+     "op": "key_down",
+     "key": "left",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "mouse_move",
+     "dx": 30,
+     "dy": -10,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.005,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 139,
+      "ry": -46,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       1920,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.01,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 125,
+      "ry": -42,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       1920,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.015,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 114,
+      "ry": -38,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       1920,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "left",
+     "notes": []
+    },
+    {
+     "op": "key_down",
+     "key": "up",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "mouse_move",
+     "dx": 30,
+     "dy": -10,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.02,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 187,
+      "ry": -62,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       1920,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.025,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 165,
+      "ry": -55,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       1920,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.030000000000000002,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 147,
+      "ry": -49,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       1920,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "up",
+     "notes": []
+    },
+    {
+     "op": "key_down",
+     "key": "right",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "key_down",
+     "key": "down",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "mouse_move",
+     "dx": 30,
+     "dy": -10,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.035,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 214,
+      "ry": -71,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       -1358,
+       -1358,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.04,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 188,
+      "ry": -63,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       -1358,
+       -1358,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.045,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 166,
+      "ry": -55,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       -1358,
+       -1358,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "right",
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "down",
+     "notes": []
+    },
+    {
+     "op": "key_down",
+     "key": "left",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "key_down",
+     "key": "up",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "mouse_move",
+     "dx": 30,
+     "dy": -10,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.049999999999999996,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 230,
+      "ry": -77,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       1358,
+       1358,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.05499999999999999,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 201,
+      "ry": -67,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       1358,
+       1358,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.05999999999999999,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 177,
+      "ry": -59,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       1358,
+       1358,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "left",
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "up",
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.06499999999999999,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 157,
+      "ry": -52,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.06999999999999999,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 140,
+      "ry": -47,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    }
+   ]
+  },
+  {
+   "name": "setas como botao/movimento nao miram",
+   "config": {
+    "move": {
+     "up": "up",
+     "down": "down",
+     "left": "left",
+     "right": "right",
+     "walk": "alt"
+    },
+    "arrow_stick_scale": 0.6,
+    "accel_noise": 0
+   },
+   "events": [
+    {
+     "op": "key_down",
+     "key": "left",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "key_down",
+     "key": "up",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "build",
+     "now": 0.005,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": -362,
+      "ly": -362,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.01,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": -362,
+      "ly": -362,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    }
+   ]
+  },
+  {
+   "name": "setas livres com escala",
+   "config": {
+    "arrow_stick_scale": 0.37,
+    "accel_noise": 0
+   },
+   "events": [
+    {
+     "op": "key_down",
+     "key": "right",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "key_down",
+     "key": "down",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "build",
+     "now": 0.005,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 134,
+      "ry": 134,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.01,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 134,
+      "ry": 134,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "down",
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.015,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 189,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.02,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 189,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    }
+   ]
+  },
+  {
+   "name": "walk e movimento",
+   "config": {
+    "accel_noise": 0
+   },
+   "events": [
+    {
+     "op": "key_down",
+     "key": "w",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "build",
+     "now": 0.005,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": -512,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "key_down",
+     "key": "alt",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "build",
+     "now": 0.01,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": -256,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "alt",
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "w",
+     "notes": []
+    },
+    {
+     "op": "key_down",
+     "key": "s",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "build",
+     "now": 0.015,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 511,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "key_down",
+     "key": "alt",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "build",
+     "now": 0.02,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 256,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "alt",
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "s",
+     "notes": []
+    },
+    {
+     "op": "key_down",
+     "key": "a",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "build",
+     "now": 0.025,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": -512,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "key_down",
+     "key": "alt",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "build",
+     "now": 0.030000000000000002,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": -256,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "alt",
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "a",
+     "notes": []
+    },
+    {
+     "op": "key_down",
+     "key": "d",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "build",
+     "now": 0.035,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 511,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "key_down",
+     "key": "alt",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "build",
+     "now": 0.04,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 256,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "alt",
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "d",
+     "notes": []
+    },
+    {
+     "op": "key_down",
+     "key": "w",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "key_down",
+     "key": "d",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "build",
+     "now": 0.045,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 361,
+      "ly": -362,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "key_down",
+     "key": "alt",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "build",
+     "now": 0.049999999999999996,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 181,
+      "ly": -181,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "alt",
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "w",
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "d",
+     "notes": []
+    },
+    {
+     "op": "key_down",
+     "key": "s",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "key_down",
+     "key": "a",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "build",
+     "now": 0.05499999999999999,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": -362,
+      "ly": 361,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "key_down",
+     "key": "alt",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "build",
+     "now": 0.05999999999999999,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": -181,
+      "ly": 181,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "alt",
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "s",
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "a",
+     "notes": []
+    },
+    {
+     "op": "key_down",
+     "key": "w",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "key_down",
+     "key": "s",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "build",
+     "now": 0.06499999999999999,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "key_down",
+     "key": "alt",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "build",
+     "now": 0.06999999999999999,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "alt",
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "w",
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "s",
+     "notes": []
+    },
+    {
+     "op": "key_down",
+     "key": "a",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "key_down",
+     "key": "d",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "build",
+     "now": 0.075,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "key_down",
+     "key": "alt",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "build",
+     "now": 0.08,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "alt",
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "a",
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "d",
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.085,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    }
+   ]
+  },
+  {
+   "name": "walk_scale personalizado e movimento remapeado",
+   "config": {
+    "walk_scale": 0.33,
+    "move": {
+     "up": "i",
+     "down": "k",
+     "left": "j",
+     "right": "l",
+     "walk": ""
+    },
+    "accel_noise": 0
+   },
+   "events": [
+    {
+     "op": "key_down",
+     "key": "i",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "build",
+     "now": 0.005,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": -512,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "i",
+     "notes": []
+    },
+    {
+     "op": "key_down",
+     "key": "l",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "build",
+     "now": 0.01,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 511,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "l",
+     "notes": []
+    },
+    {
+     "op": "key_down",
+     "key": "k",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "build",
+     "now": 0.015,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 511,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "k",
+     "notes": []
+    },
+    {
+     "op": "key_down",
+     "key": "j",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "build",
+     "now": 0.02,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": -512,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "j",
+     "notes": []
+    },
+    {
+     "op": "key_down",
+     "key": "alt",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "key_down",
+     "key": "i",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "key_down",
+     "key": "l",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "build",
+     "now": 0.025,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 361,
+      "ly": -362,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    }
+   ]
+  },
+  {
+   "name": "movimento com nome desconhecido gera aviso",
+   "config": {
+    "move": {
+     "up": "xyz",
+     "down": "s",
+     "left": "a",
+     "right": "d",
+     "walk": "alt"
+    },
+    "accel_noise": 0
+   },
+   "events": [
+    {
+     "op": "key_down",
+     "key": "w",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "key_down",
+     "key": "d",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "build",
+     "now": 0.005,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 361,
+      "ly": -362,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    }
+   ]
+  },
+  {
+   "name": "wheel pulso",
+   "config": {
+    "wheel_pulse_ms": 40.0,
+    "accel_noise": 0
+   },
+   "events": [
+    {
+     "op": "build",
+     "now": 0.005,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.01,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "wheel",
+     "dir": 1,
+     "now": 0.01,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.015,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 8,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.02,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 8,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.025,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 8,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.030000000000000002,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 8,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.035,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 8,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.04,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 8,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.045,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 8,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.049999999999999996,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 8,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.05499999999999999,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.05999999999999999,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "wheel",
+     "dir": -1,
+     "now": 0.05999999999999999,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.06499999999999999,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 8,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.06999999999999999,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 8,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.075,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 8,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.08,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 8,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.085,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 8,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.09000000000000001,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 8,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.09500000000000001,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 8,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.10000000000000002,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.10500000000000002,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.11000000000000003,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "wheel",
+     "dir": 1,
+     "now": 0.11000000000000003,
+     "notes": []
+    },
+    {
+     "op": "wheel",
+     "dir": -1,
+     "now": 0.11000000000000003,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.11500000000000003,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 8,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.12000000000000004,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 8,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.12500000000000003,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 8,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    }
+   ]
+  },
+  {
+   "name": "botoes L2/R2, mouse e teclas",
+   "config": {
+    "accel_noise": 0
+   },
+   "events": [
+    {
+     "op": "mouse_button",
+     "name": "lmb",
+     "down": true,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.005,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 128,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 1023,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_button",
+     "name": "rmb",
+     "down": true,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.01,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 192,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 1023,
+      "r2": 1023,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_button",
+     "name": "lmb",
+     "down": false,
+     "notes": []
+    },
+    {
+     "op": "mouse_button",
+     "name": "mmb",
+     "down": true,
+     "notes": []
+    },
+    {
+     "op": "mouse_button",
+     "name": "x1",
+     "down": true,
+     "notes": []
+    },
+    {
+     "op": "mouse_button",
+     "name": "x2",
+     "down": true,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.015,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 12864,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 1023,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "release_all",
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.02,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "key_down",
+     "key": "space",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "key_down",
+     "key": "lctrl",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "key_down",
+     "key": "c",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "key_down",
+     "key": "r",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "key_down",
+     "key": "q",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "key_down",
+     "key": "g",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "key_down",
+     "key": "lshift",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "key_down",
+     "key": "tab",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "key_down",
+     "key": "esc",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "key_down",
+     "key": "home",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "key_down",
+     "key": "p",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "key_down",
+     "key": "1",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "key_down",
+     "key": "2",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "key_down",
+     "key": "3",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "key_down",
+     "key": "4",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "build",
+     "now": 0.025,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 261431,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "space",
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "lctrl",
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "c",
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "r",
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "q",
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "g",
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "lshift",
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "tab",
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "esc",
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "home",
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "p",
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "1",
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "2",
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "3",
+     "notes": []
+    },
+    {
+     "op": "key_up",
+     "key": "4",
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.030000000000000002,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    }
+   ]
+  },
+  {
+   "name": "binds personalizados com L2/R2 por teclado",
+   "config": {
+    "binds": {
+     "z": "L2",
+     "x": "R2",
+     "lmb": "A",
+     "wheel_up": "R2",
+     "foo": "A",
+     "y": "NADA",
+     "n": "START"
+    },
+    "accel_noise": 0
+   },
+   "events": [
+    {
+     "op": "key_down",
+     "key": "z",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "key_down",
+     "key": "x",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "key_down",
+     "key": "n",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "mouse_button",
+     "name": "lmb",
+     "down": true,
+     "notes": []
+    },
+    {
+     "op": "wheel",
+     "dir": 1,
+     "now": 0.0,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.005,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 32961,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 1023,
+      "r2": 1023,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.01,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 32961,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 1023,
+      "r2": 1023,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    }
+   ]
+  },
+  {
+   "name": "nao capturado zera acumuladores",
+   "config": {
+    "accel_noise": 0
+   },
+   "events": [
+    {
+     "op": "mouse_move",
+     "dx": 50,
+     "dy": 50,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.005,
+     "dt": 0.005,
+     "captured": false,
+     "expect": {
+      "flags": 0,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.01,
+     "dt": 0.005,
+     "captured": false,
+     "expect": {
+      "flags": 0,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.015,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "key_down",
+     "key": "w",
+     "notes": [],
+     "ret": ""
+    },
+    {
+     "op": "build",
+     "now": 0.02,
+     "dt": 0.005,
+     "captured": false,
+     "expect": {
+      "flags": 0,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.025,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": -512,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    }
+   ]
+  },
+  {
+   "name": "accel e gyro com yaw/pitch combinados",
+   "config": {
+    "invert_yaw": true,
+    "invert_pitch": false,
+    "accel_noise": 0
+   },
+   "events": [
+    {
+     "op": "mouse_move",
+     "dx": 6,
+     "dy": 6,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.005,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       960,
+       -960,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.01,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": -6,
+     "dy": 6,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.015,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       960,
+       960,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.02,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": 6,
+     "dy": -6,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.025,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       -960,
+       -960,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.030000000000000002,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "mouse_move",
+     "dx": -6,
+     "dy": -6,
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.035,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       -960,
+       960,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    },
+    {
+     "op": "build",
+     "now": 0.04,
+     "dt": 0.005,
+     "captured": true,
+     "expect": {
+      "flags": 1,
+      "battery": 200,
+      "buttons": 0,
+      "lx": 0,
+      "ly": 0,
+      "rx": 0,
+      "ry": 0,
+      "l2": 0,
+      "r2": 0,
+      "gyro": [
+       0,
+       0,
+       0
+      ],
+      "accel": [
+       0,
+       8192,
+       0
+      ]
+     },
+     "notes": []
+    }
+   ]
+  }
+ ]
+}

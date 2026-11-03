@@ -1,6 +1,7 @@
 """Estado e logica do Switch KBM, sem UI: perfil atual, teclas, ajustes, bridge e gravacao."""
 import collections
 import queue
+import json
 import re
 import sys
 import tempfile
@@ -12,14 +13,18 @@ import profiles as pf
 import updater
 from flasher import FIRMWARE_VERSION
 from mapping import display_name
+from typing_engine import PRESETS, migrate_prefs
 from runners import BridgeRunner, FlashRunner, list_ports, pick_default_port
 
 APP_TITLE = "Switch KBM"
-APP_VERSION = "1.0.3"
+APP_VERSION = "1.1.0"
 REPO_URL = "https://github.com/Carlos-Gabryel/SwitchKBM"
 AIM_LABELS = {"gyro": "Giroscópio", "stick": "Analógico direito"}
 STATUS_PREFIXES = ("CAPTURADO", "LIBERADO", "Modo de mira",
                    "Sensibilidade")
+TYPING_ON, TYPING_OFF, TYPING_STATE = "DIGITACAO ON", "DIGITACAO OFF", "DIGITACAO_ESTADO "
+TYPING_STATUS = "Modo digitação (F9 sai)"
+TYPING_NEEDS_BRIDGE = "Inicie o bridge para usar o modo digitação."
 CAPTURE_HINT = "Pressione a tecla (ou clique/roda do mouse). Esc cancela."
 NO_PORT_MSG = ("Selecione a porta serial da placa ESP32." if sys.platform.startswith("linux")
                else "Selecione a porta COM da placa ESP32.")
@@ -56,7 +61,12 @@ class Controller:
         self.update_error = ""
         self.update_progress = 0.0
         self.update_ready = False   # o .exe novo ja foi trocado e relancado: a UI deve fechar
+        self.typing_on = False      # modo digitacao ligado no bridge
+        self.typing_state = {}      # ultimo DIGITACAO_ESTADO (cursor, page, pending, cps, skipped, busy)
+        self.typing_seq = 0         # cresce a cada DIGITACAO_ESTADO
         st = self.store.load_settings()
+        self.typing_prefs = migrate_prefs({"preset": st.get("typing_preset"), "ms": st.get("typing_ms"),
+                                           "stripAccents": st.get("typing_strip")})
         names = self.store.names()
         last = st.get("last_profile")
         self.load_profile(last if last in names else names[0])
@@ -265,16 +275,66 @@ class Controller:
 
     def stop(self):
         self.runner.stop()
+        self.typing_on, self.typing_state = False, {}
 
     def toggle_capture(self, before=None):
         """Alterna a captura de mouse/teclado no bridge (o mesmo que F12). before(pid) roda antes do envio.
         Devolve True se enviou."""
-        if not self.runner.running:
+        if not self.runner.running or self.typing_on:
             return False
         if before:
             before(self.runner.proc.pid)
         self.runner.send("capture")
         return True
+
+    # ---------------- modo digitacao ----------------
+    def typing_send(self, op, **kw):
+        """Envia uma operacao ao motor de digitacao do bridge. None ou (tipo, mensagem).
+        'on' sem bridge rodando tenta iniciar (como o botao Iniciar)."""
+        if not self.runner.running:
+            if op != "on":
+                return "warn", TYPING_NEEDS_BRIDGE
+            problem = self.start()
+            if problem:
+                return problem
+        self.runner.send("type " + json.dumps({"op": op, **kw}, ensure_ascii=True))
+        return None
+
+    def typing_toggle(self):
+        return self.typing_send("off" if self.typing_on else "on")
+
+    def _typing_push_prefs(self):
+        p = self.typing_prefs
+        self.runner.send("type " + json.dumps({"op": "speed", "hold": p["ms"], "gap": p["ms"]}))
+        self.runner.send("type " + json.dumps({"op": "strip", "v": p["stripAccents"]}))
+
+    def set_typing_speed(self, preset=None, ms=None):
+        """preset 'seguro'|'normal'|'rapido', ou ms (25-100 = personalizado). Salva e aplica."""
+        if preset in PRESETS:
+            self.typing_prefs = migrate_prefs({"preset": preset, "stripAccents": self.typing_prefs["stripAccents"]})
+        else:
+            self.typing_prefs = migrate_prefs({"preset": "custom", "ms": ms,
+                                               "stripAccents": self.typing_prefs["stripAccents"]})
+        self._typing_save()
+        if self.runner.running:
+            self._typing_push_prefs()
+
+    def set_typing_strip(self, value):
+        self.typing_prefs = dict(self.typing_prefs, stripAccents=bool(value))
+        self._typing_save()
+        if self.runner.running:
+            self._typing_push_prefs()
+
+    def _typing_save(self):
+        p = self.typing_prefs
+        self.store.save_settings(typing_preset=p["preset"], typing_ms=p["ms"], typing_strip=p["stripAccents"])
+
+    def _typing_set(self, on):
+        self.typing_on = on
+        self.typing_state = {}
+        self.stat_extra = TYPING_STATUS if on else ""
+        if on:
+            self._typing_push_prefs()
 
     def restart(self):
         self.runner.stop()
@@ -286,7 +346,19 @@ class Controller:
         return self.fw_version is not None and self.fw_version < FIRMWARE_VERSION
 
     def on_bridge_line(self, line):
+        if line.startswith(TYPING_STATE):       # estado frequente: nao entra no log
+            try:
+                st = json.loads(line[len(TYPING_STATE):])
+            except ValueError:
+                return
+            if isinstance(st, dict):
+                self.typing_state = st
+                self.typing_seq += 1
+            return
         self.add_log(line)
+        if line in (TYPING_ON, TYPING_OFF):
+            self._typing_set(line == TYPING_ON)
+            return
         if line.startswith("ERRO:"):
             self.bridge_errors.append(line[5:].strip())
             return
@@ -370,6 +442,7 @@ class Controller:
         if self.runner.proc is not None and not self.runner.running:
             code = self.runner.proc.returncode
             self.runner.proc = None
+            self.typing_on, self.typing_state = False, {}
             self.msg = ("Bridge encerrou: " + " ".join(self.bridge_errors) if self.bridge_errors
                         else "Bridge encerrou (código %s)." % code)
             events.append(("bridge_exit", code))
